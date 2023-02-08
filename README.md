@@ -1,11 +1,11 @@
 
-# protpy - Used for generating protein physiochemical, biochemical and structural descriptors using their constituent amino acids #
+# protpy - Used for generating protein physiochemical, biochemical and structural descriptors using their constituent amino acids. #
 [![PyPI](https://img.shields.io/pypi/v/protpy)](https://pypi.org/project/protpy/)
 [![pytest](https://github.com/amckenna41/protpy/workflows/Building%20and%20Testing/badge.svg)](https://github.com/amckenna41/protpy/actions?query=workflowBuilding%20and%20Testing)
 [![Platforms](https://img.shields.io/badge/platforms-linux%2C%20macOS%2C%20Windows-green)](https://pypi.org/project/protpy/)
 [![PythonV](https://img.shields.io/pypi/pyversions/protpy?logo=2)](https://pypi.org/project/protpy/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-red.svg)](https://opensource.org/licenses/MIT)
-[![Build](https://img.shields.io/github/workflow/status/amckenna41/protpy/Deploy%20to%20PyPI%20%F0%9F%93%A6)](https://github.com/amckenna41/protpy/actions)
+<!-- [![Build](https://img.shields.io/github/workflow/status/amckenna41/protpy/Deploy%20to%20PyPI%20%F0%9F%93%A6)](https://github.com/amckenna41/protpy/actions) -->
 <!-- [![CircleCI](https://circleci.com/gh/amckenna41/pySAR.svg?style=svg&circle-token=d860bb64668be19d44f106841b80eb47a8b7e7e8)](https://app.circleci.com/pipelines/github/amckenna41/pySAR) -->
 <!-- [![DOI](https://zenodo.org/badge/344290370.svg)](https://zenodo.org/badge/latestdoi/344290370) -->
 <!-- [![codecov](https://codecov.io/gh/amckenna41/DCBLSTM_PSP/branch/master/graph/badge.svg?token=4PQDVGKGYN)](https://codecov.io/gh/amckenna41/DCBLSTM_PSP) -->
@@ -170,31 +170,31 @@ If you have any questions or comments, please contact amckenna41@qub.ac.uk or ra
 
 References
 ----------
-[1]: Mckenna, A., & Dubey, S. (2022). Machine learning based predictive model for the analysis of sequence activity relationships using protein spectra and protein descriptors. Journal of Biomedical Informatics, 128(104016), 104016. https://doi.org/10.1016/j.jbi.2022.104016 <br>
-[2]: Shuichi Kawashima, Minoru Kanehisa, AAindex: Amino Acid index database, Nucleic Acids Research, Volume 28, Issue 1, 1 January 2000, Page 374, https://doi.org/10.1093/nar/28.1.374 <br>
-[3]: Dong, J., Yao, ZJ., Zhang, L. et al. PyBioMed: a python library for various molecular representations of chemicals, proteins and DNAs and their interactions. J Cheminform 10, 16 (2018). https://doi.org/10.1186/s13321-018-0270-2 <br>
-[4]: Reczko, M. and Bohr, H. (1994) The DEF data base of sequence based protein
+\[1\]: Mckenna, A., & Dubey, S. (2022). Machine learning based predictive model for the analysis of sequence activity relationships using protein spectra and protein descriptors. Journal of Biomedical Informatics, 128(104016), 104016. https://doi.org/10.1016/j.jbi.2022.104016 <br>
+\[2\]: Shuichi Kawashima, Minoru Kanehisa, AAindex: Amino Acid index database, Nucleic Acids Research, Volume 28, Issue 1, 1 January 2000, Page 374, https://doi.org/10.1093/nar/28.1.374 <br>
+\[3\]: Dong, J., Yao, ZJ., Zhang, L. et al. PyBioMed: a python library for various molecular representations of chemicals, proteins and DNAs and their interactions. J Cheminform 10, 16 (2018). https://doi.org/10.1186/s13321-018-0270-2 <br>
+\[4\]: Reczko, M. and Bohr, H. (1994) The DEF data base of sequence based protein
 fold class predictions. Nucleic Acids Res, 22, 3616-3619. <br>
-[5]: Hua, S. and Sun, Z. (2001) Support vector machine approach for protein
+\[5\]: Hua, S. and Sun, Z. (2001) Support vector machine approach for protein
 subcellular localization prediction. Bioinformatics, 17, 721-728. <br>
-[6]: Broto P, Moreau G, Vandicke C: Molecular structures: perception,
+\[6\]: Broto P, Moreau G, Vandicke C: Molecular structures: perception,
 autocorrelation descriptor and SAR studies. Eur J Med Chem 1984, 19: 71–78. <br>
-[7]: Ong, S.A., Lin, H.H., Chen, Y.Z. et al. Efficacy of different protein
+\[7\]: Ong, S.A., Lin, H.H., Chen, Y.Z. et al. Efficacy of different protein
 descriptors in predicting protein functional families. BMC Bioinformatics
 8, 300 (2007). https://doi.org/10.1186/1471-2105-8-300 <br>
-[8]: Inna Dubchak, Ilya Muchink, Stephen R.Holbrook and Sung-Hou Kim. Prediction
+\[8\]: Inna Dubchak, Ilya Muchink, Stephen R.Holbrook and Sung-Hou Kim. Prediction
 of protein folding class using global description of amino acid sequence.
 Proc.Natl. Acad.Sci.USA, 1995, 92, 8700-8704. <br>
-[9]: Juwen Shen, Jian Zhang, Xiaomin Luo, Weiliang Zhu, Kunqian Yu, Kaixian Chen,
+\[9\]: Juwen Shen, Jian Zhang, Xiaomin Luo, Weiliang Zhu, Kunqian Yu, Kaixian Chen,
 Yixue Li, Huanliang Jiang. Predicting proten-protein interactions based only
 on sequences inforamtion. PNAS. 2007 (104) 4337-4341. <br>
-[19]: Kuo-Chen Chou. Prediction of Protein Subcellar Locations by Incorporating
+\[10\]: Kuo-Chen Chou. Prediction of Protein Subcellar Locations by Incorporating
 Quasi-Sequence-Order Effect. Biochemical and Biophysical Research
 Communications 2000, 278, 477-483. <br>
-[11]: Kuo-Chen Chou. Prediction of Protein Cellular Attributes Using
+\[11\]: Kuo-Chen Chou. Prediction of Protein Cellular Attributes Using
 Pseudo-Amino Acid Composition. PROTEINS: Structure, Function, and
 Genetics, 2001, 43: 246-255. <br>
-[12]: Kuo-Chen Chou. Using amphiphilic pseudo amino acid composition to predict enzyme
+\[12\]: Kuo-Chen Chou. Using amphiphilic pseudo amino acid composition to predict enzyme
 subfamily classes. Bioinformatics, 2005,21,10-19.
 
 <!-- Links -->
