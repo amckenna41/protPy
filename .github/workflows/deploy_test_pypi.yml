@@ -43,7 +43,7 @@ jobs:
       # python3 setup.py sdist bdist_wheel
       env:
         TWINE_USERNAME: __token__
-        TWINE_PASSWORD: ${{ secrets.PY_PI_TEST }}
+        TWINE_PASSWORD: ${{ secrets.PYPI_TEST }}
         TWINE_REPOSITORY: testpypi
 
      # sleep for 30 seconds to ensure that distribution package has successfully been uploaded to Test PyPI
