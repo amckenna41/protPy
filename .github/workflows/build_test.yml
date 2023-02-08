@@ -92,8 +92,7 @@ jobs:
         
     #generate coverage report, output to file 
     - name: Generate Report
-      run: python3 -m pytest-cov --cov tests/ > artifacts/coverage.txt
-      # pytest --cov tests/ > coverage.txt
+      run: pytest --cov=protpy tests/ > artifacts/coverage.txt
 
     #upload to Code Coverage
     - name: Upload Coverage Report to Codecov
