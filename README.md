@@ -46,6 +46,8 @@ Introduction
 
 This software is aimed at any researcher using protein sequence/structural data and was mainly created to use in my own project [`pySAR`](https://github.com/amckenna41/pySAR) which uses protein sequence data to identify Sequence Activity Relationships (SAR) using Machine Learning [[1]](#references). `protpy` is built solely in Python3 and specifically developed in Python 3.10.
 
+<strong>A demo of the software is available [here](https://github.com/amckenna41/protpy). </strong>
+
 Requirements
 ------------
 * [Python][python] >= 3.6
