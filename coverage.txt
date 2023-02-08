@@ -1,0 +1,72 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.10.5, pytest-7.1.3, pluggy-1.0.0
+rootdir: /Users/adammckenna/github-repos/pyPro, configfile: setup.cfg
+plugins: cov-4.0.0
+collected 19 items / 6 errors
+
+==================================== ERRORS ====================================
+________________ ERROR collecting tests/test_autocorrelation.py ________________
+import file mismatch:
+imported module 'tests.test_autocorrelation' has this __file__ attribute:
+  /Users/adammckenna/github-repos/pyPro/build/lib/tests/test_autocorrelation.py
+which is not the same as the test file we want to collect:
+  /Users/adammckenna/github-repos/pyPro/tests/test_autocorrelation.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+__________________ ERROR collecting tests/test_composition.py __________________
+import file mismatch:
+imported module 'tests.test_composition' has this __file__ attribute:
+  /Users/adammckenna/github-repos/pyPro/build/lib/tests/test_composition.py
+which is not the same as the test file we want to collect:
+  /Users/adammckenna/github-repos/pyPro/tests/test_composition.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+________________ ERROR collecting tests/test_conjoint_triad.py _________________
+import file mismatch:
+imported module 'tests.test_conjoint_triad' has this __file__ attribute:
+  /Users/adammckenna/github-repos/pyPro/build/lib/tests/test_conjoint_triad.py
+which is not the same as the test file we want to collect:
+  /Users/adammckenna/github-repos/pyPro/tests/test_conjoint_triad.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+______________________ ERROR collecting tests/test_ctd.py ______________________
+import file mismatch:
+imported module 'tests.test_ctd' has this __file__ attribute:
+  /Users/adammckenna/github-repos/pyPro/build/lib/tests/test_ctd.py
+which is not the same as the test file we want to collect:
+  /Users/adammckenna/github-repos/pyPro/tests/test_ctd.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+____________________ ERROR collecting tests/test_protpy.py _____________________
+import file mismatch:
+imported module 'tests.test_protpy' has this __file__ attribute:
+  /Users/adammckenna/github-repos/pyPro/build/lib/tests/test_protpy.py
+which is not the same as the test file we want to collect:
+  /Users/adammckenna/github-repos/pyPro/tests/test_protpy.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+________________ ERROR collecting tests/test_sequence_order.py _________________
+import file mismatch:
+imported module 'tests.test_sequence_order' has this __file__ attribute:
+  /Users/adammckenna/github-repos/pyPro/build/lib/tests/test_sequence_order.py
+which is not the same as the test file we want to collect:
+  /Users/adammckenna/github-repos/pyPro/tests/test_sequence_order.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+
+---------- coverage: platform darwin, python 3.10.5-final-0 ----------
+Name                            Stmts   Miss  Cover
+---------------------------------------------------
+tests/__init__.py                   0      0   100%
+tests/test_autocorrelation.py     151    151     0%
+tests/test_composition.py         242    242     0%
+tests/test_conjoint_triad.py       60     60     0%
+tests/test_ctd.py                  74     74     0%
+tests/test_protpy.py               44     44     0%
+tests/test_sequence_order.py       54     54     0%
+---------------------------------------------------
+TOTAL                             625    625     0%
+
+=========================== short test summary info ============================
+ERROR tests/test_autocorrelation.py
+ERROR tests/test_composition.py
+ERROR tests/test_conjoint_triad.py
+ERROR tests/test_ctd.py
+ERROR tests/test_protpy.py
+ERROR tests/test_sequence_order.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 6 errors during collection !!!!!!!!!!!!!!!!!!!!
+============================== 6 errors in 1.86s ===============================

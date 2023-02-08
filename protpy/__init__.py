@@ -7,7 +7,7 @@ from .sequence_order import *
 
 #protPy package metadata
 __name__ = 'protpy'
-__version__ = "1.0.1"
+__version__ = "1.0.2"
 __description__ = "Python package for generating various biochemical, physiochemical and structural descriptors/features of protein sequences."
 __author__ = 'AJ McKenna, https://github.com/amckenna41'
 __authorEmail__ = 'amckenna41@qub.ac.uk'
