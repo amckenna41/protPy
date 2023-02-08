@@ -32,17 +32,17 @@ Introduction
 `protpy` is a Python software package for generating a variety of physiochemical, biochemical and structural descriptors for proteins. All of these descriptors are calculated using sequence-derived or physiochemical features of the amino acids that make up the proteins. These descriptors have been highly studied and used in a series of Bioinformatic applications including protein engineering, SAR (sequence-activity-relationships), predicting protein structure & function, subcellular localization, protein-protein interactions, drug-target interactions etc. The descriptors that are available in `protpy` include:
 
 * **Moreaubroto Autocorrelation (MBAuto)**
-* Moran Autocorrelation (MAuto)
-* Geary Autocorrelation (GAuto)
-* Amino Acid Composition (AAComp)
-* Dipeptide Composition (DPComp)
-* Tripeptide Composition (TPComp)
-* Pseudo Amino Acid Composition (PAAComp)
-* Amphiphilic Amino Acid Composition (AAAComp)
-* Conjoint Triad (CTriad)
-* CTD (Composition, Transition, Distribution) (CTD)
-* Sequence Order Coupling Number (SOCN)
-* Quasi Sequence Order (QSO)
+* **Moran Autocorrelation (MAuto)**
+* **Geary Autocorrelation (GAuto)**
+* **Amino Acid Composition (AAComp)**
+* **Dipeptide Composition (DPComp)**
+* **Tripeptide Composition (TPComp)**
+* **Pseudo Amino Acid Composition (PAAComp)**
+* **Amphiphilic Amino Acid Composition (AAAComp)**
+* **Conjoint Triad (CTriad)**
+* **CTD (Composition, Transition, Distribution) (CTD)**
+* **Sequence Order Coupling Number (SOCN)**
+* **Quasi Sequence Order (QSO)**
 
 This software is aimed at any researcher using protein sequence/structural data and was mainly created to use in my own project [`pySAR`](https://github.com/amckenna41/pySAR) which uses protein sequence data to identify Sequence Activity Relationships (SAR) using Machine Learning [[1]](#references). `protpy` is built solely in Python3 and specifically developed in Python 3.10.
 
@@ -83,70 +83,70 @@ with open("test_fasta.fasta") as pro:
     protein_seq = str(next(SeqIO.parse(pro,'fasta')).seq)
 ```
 ## Composition Descriptors
-Calculate Amino Acid Composition:
+Calculate Amino Acid Composition (AAComp):
 ```python
 amino_acid_comp = protpy.amino_acid_composition(protein_seq)
 #
 ```
-Calculate Dipeptide Composition:
+Calculate Dipeptide Composition (DPComp):
 ```python
 dipeptide_comp = protpy.dipeptide_composition(protein_seq)
 #
 ```
-Calculate Tripeptide Composition:
+Calculate Tripeptide Composition (TPComp):
 ```python
 tripeptide_comp = protpy.tripeptide_composition(protein_seq)
 #
 ```
-Calculate Pseudo Amino Acid Composition:
+Calculate Pseudo Amino Acid Composition (PAAComp):
 ```python
 pseudo_comp = protpy.pseudo_amino_acid_composition(protein_seq, lamda=30, weight=0.05)
 #
 ```
-Calculate Amphiphilic Amino Acid Composition:
+Calculate Amphiphilic Amino Acid Composition (AAAComp):
 ```python
 amphiphilic_comp = protpy.amphiphilic_amino_acid_composition(protein_seq, lamda=30, weight=0.5)
 #
 ```
 
 ## Autocorrelation Descriptors
-Calculate MoreauBroto Autocorrelation:
+Calculate MoreauBroto Autocorrelation (MBAuto):
 ```python
 moreaubroto_autocorrelation = protpy.moreaubroto_autocorrelation(protein_seq, lag=30, normalize=True)
 #
 ```
-Calculate Moran Autocorrelation:
+Calculate Moran Autocorrelation (MAuto):
 ```python
 moran_autocorrelation = protpy.moran_autocorrelation(protein_seq, lag=30, normalize=True)
 #
 ```
 
-Calculate Geary Autocorrelation:
+Calculate Geary Autocorrelation (GAuto):
 ```python
 geary_autocorrelation = protpy.geary_autocorrelation(protein_seq, lag=30, normalize=True)
 #
 ```
 
 ## Conjoint Triad Descriptors
-Calculate Conjoint Triad:
+Calculate Conjoint Triad (CTriad):
 ```python
 conj_triad = protpy.conjoint_triad(protein_seq)
 #
 ```
 
 ## CTD
-Calculate Composition from CTD:
+Calculate Composition from CTD (CTD):
 ```python
 ctd_composition = protpy.ctd_composition(protein_seq)
 #
 ```
 ## Sequence Order Descriptors
-Calculate SOCN:
+Calculate Sequence Order Coupling Number (SOCN):
 ```python
 socn = protpy.sequence_order_coupling_number(protein_seq, lag=30, distance_matrix="schneider-wrede-physiochemical-distance-matrix.json")
 #
 ```
-Calculate Quasi Sequence Order:
+Calculate Quasi Sequence Order (QSO):
 ```python
 socn = protpy.quasi_sequence_order(protein_seq, lag=30, distance_matrix="schneider-wrede-physiochemical-distance-matrix.json")
 #

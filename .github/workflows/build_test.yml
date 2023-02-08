@@ -38,7 +38,6 @@ jobs:
         python -m pip install --upgrade pip
         python3 -m pip install setuptools wheel twine
         pip install flake8 pytest
-        pip3 install biopython
         pip3 install codecov
         pip3 install coverage
         pip3 install pytest
@@ -46,6 +45,7 @@ jobs:
         pip3 install bandit
         pip3 install safety
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        pip3 install biopython
         python3 setup.py install
 
     #create artifacts dir
