@@ -41,7 +41,7 @@ class ProtPyTests(unittest.TestCase):
 
     def test_protpy_metadata(self):
         """ Testing correct protpy version and metadata. """
-        self.assertEqual(protpy.__version__, "1.0.0", 
+        self.assertEqual(protpy.__version__, "1.0.1", 
             "protpy version is not correct, got: {}".format(protpy.__version__))
         self.assertEqual(protpy.__name__, "protpy", 
             "protpy software name is not correct, got: {}".format(protpy.__name__))

@@ -31,3 +31,5 @@
 - [X] Change max_lag to lag 
 - [ ] Create demo on Notebook.
 - [ ] Add descriptor abbreviations to each functiosn comments, change abbreviations of Pseudo AAComp -> PAAComp.
+- [ ] Add references to readme text.
+- [ ] In readme, add output of each function below its usage.

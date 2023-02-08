@@ -49,9 +49,9 @@ jobs:
       with:
         time: '30s'
 
-    # download package of pySAR from PYPI server to ensure it uploaded correctly
-    - name: Install pySAR from PyPI
+    # download package of protpy from PYPI server to ensure it uploaded correctly
+    - name: Install protpy from PyPI
       run: |
-        pip install pySAR --upgrade
-        echo -e "import pySAR as pysar\nprint(pysar.__version__)" | python3
-        echo "pySAR successfully installed"
+        pip install protpy --upgrade
+        echo -e "import protpy as protpy\nprint(protpy.__version__)" | python3
+        echo "protpy successfully installed"

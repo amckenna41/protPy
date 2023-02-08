@@ -15,12 +15,12 @@ on:
   # allow for workflow to be manually initiated from the Actions tab
   workflow_dispatch:
 
-#build and test pySAR
+#build and test protpy
 jobs:
   #build job
   test:
     timeout-minutes: 15
-    name: Build pySAR
+    name: Build protpy
     runs-on: ubuntu-latest         # platform: [ubuntu-latest, macos-latest, windows-latest]
     strategy:
       matrix:
@@ -38,6 +38,7 @@ jobs:
         python -m pip install --upgrade pip
         python3 -m pip install setuptools wheel twine
         pip install flake8 pytest
+        pip3 install biopython
         pip3 install codecov
         pip3 install coverage
         pip3 install pytest
@@ -63,7 +64,7 @@ jobs:
     - name: Bandit
       run: |
        echo "Running Bandit"
-       python3 -m bandit -r pySAR > artifacts/bandit_output.txt
+       python3 -m bandit -r protpy > artifacts/bandit_output.txt
        cat artifacts/bandit_output.txt
       continue-on-error: true
 
