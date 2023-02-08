@@ -1,0 +1,4 @@
+aaindex>=1.0.4
+numpy>=1.16.6
+pandas==1.1.0
+varname
