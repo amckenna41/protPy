@@ -1,4 +1,4 @@
-# protPy Unit Tests
+# protpy Unit Tests
 
 All tests in the project were ran using Python's unittest testing framework (https://docs.python.org/3/library/unittest.html).
 
@@ -11,7 +11,7 @@ You can add the flag *-b* to suppress some of the verbose output when running th
 
 Unit tests
 ----------
-* `test_protpy.py` - unit tests for overall protpy package.
+* `test_protpy.py` - unit tests for overall `protpy` package.
 * `test_autocorrellation.py` - unit tests for autocorrelation module and functionality.
 * `test_composition.py` - unit tests for composition module and functionality, including pseudo composition and amphiphillic composition.
 * `test_conjoint_triad.py` - unit tests for conjoint triad module and functionality.
@@ -20,7 +20,7 @@ Unit tests
 
 Test Files
 ----------
-* test_fasta1.fasta - Spike glycoprotein (P59594 · SPIKE_SARS).
-* test_fasta2.fasta - Nucleoprotein (P59595 · NCAP_SARS).
-* test_fasta3.fasta - Envelope small membrane protein (P59637 · VEMP_SARS).
-* test_fasta4.fasta - Nucleoprotein (P0DTC9 · NCAP_SARS2).
+* `test_fasta1.fasta` - Spike glycoprotein (P59594 · SPIKE_SARS).
+* `test_fasta2.fasta` - Nucleoprotein (P59595 · NCAP_SARS).
+* `test_fasta3.fasta` - Envelope small membrane protein (P59637 · VEMP_SARS).
+* `test_fasta4.fasta` - Nucleoprotein (P0DTC9 · NCAP_SARS2).

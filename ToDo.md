@@ -1,7 +1,7 @@
 - [ ] Remove all camel casing function names/vars, change to underscores and lowercase.
 - [X] Reorder amino acids alphabetically.
 - [X] Add normalize to moran and geary auto
-- [ ] For quasi seq order you should be able to pass in name of distance matrix file with or without .json
+- [X] For quasi seq order you should be able to pass in name of distance matrix file with or without .json
 - [X] For each descriptor, check valid amino acids in seq, if not then raise custom error.
 - [ ] Add dimensions of each descriptor to readme and docs.
 - [ ] Round SOCN to 3 d.p
@@ -13,8 +13,8 @@
 - [X] Test dtypes of output dataframe -> test_autocorrelation 
 - [X] Add shape to comment on testing shape unittests.
 - [X] Mention lag is similar to gap between 2 amino acids.
-- [ ] Go through test_quasi file, double checking correct values.
-- [ ] Append distance matrix to SOCN & Quasi columns, SW or G.
+- [X] Go through test_quasi file, double checking correct values.
+- [X] Append distance matrix to SOCN & Quasi columns, SW or G.
 - [X] Change quasi sequence order -> sequence_order.
 - [X] Calculate all SOCN, for both matrices, append to single output df.
 - [X] SOCN done, quasi done.
@@ -27,17 +27,17 @@
 - [ ] Add the equations to comments in some of the descriptors? (https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-015-0554-8#Sec10)
 - [X] Input property in CTD funcs can be used with closeness function.
 - [X] Double check functions that use aa_composition values, aa_comp func returns series rather than dict.
-- [ ] Rather than iterate over range of lags, use different lag in each sequence test.
+- [X] Rather than iterate over range of lags, use different lag in each sequence test.
 - [X] Change max_lag to lag 
 - [ ] Create demo on Notebook.
-- [ ] Add descriptor abbreviations to each functiosn comments, change abbreviations of Pseudo AAComp -> PAAComp.
-- [ ] Add references to readme text.
-- [ ] In readme, add output of each function below its usage.
+- [X] Add descriptor abbreviations to each functiosn comments, change abbreviations of Pseudo AAComp -> PAAComp.
+- [X] Add references to readme text.
+- [X] In readme, add output of each function below its usage.
 - [ ] Add reference numbers to comments in descriptor functions - double check existing ones are correct.
 - [X] Add lag and weight param validation to sequence order module.
-- [ ] Change QSOrder to QSO.
+- [X] Change QSOrder to QSO.
 - [ ] Rewrite APAAComp descriptor comments to mention its dimensions change with lamda. 
-- [ ] For all functions that have lag in them:
+- [X] For all functions that have lag in them:
         #raise value error if int cant be parsed from input lag
         try:
             lag = int(lag)

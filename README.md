@@ -1,5 +1,5 @@
 
-# protpy - Used for generating protein physiochemical, biochemical and structural descriptors using their constituent amino acids. #
+# protpy - Package for generating protein physiochemical, biochemical and structural descriptors using their constituent amino acids. #
 [![PyPI](https://img.shields.io/pypi/v/protpy)](https://pypi.org/project/protpy/)
 [![pytest](https://github.com/amckenna41/protpy/workflows/Building%20and%20Testing/badge.svg)](https://github.com/amckenna41/protpy/actions?query=workflowBuilding%20and%20Testing)
 [![Platforms](https://img.shields.io/badge/platforms-linux%2C%20macOS%2C%20Windows-green)](https://pypi.org/project/protpy/)
@@ -29,7 +29,7 @@ Table of Contents
 
 Introduction
 ------------
-`protpy` is a Python software package for generating a variety of physiochemical, biochemical and structural descriptors for proteins. All of these descriptors are calculated using sequence-derived or physiochemical features of the amino acids that make up the proteins. These descriptors have been highly studied and used in a series of Bioinformatic applications including protein engineering, SAR (sequence-activity-relationships), predicting protein structure & function, subcellular localization, protein-protein interactions, drug-target interactions etc. The descriptors that are available in `protpy` include:
+`protpy` is a Python software package for generating a variety of physiochemical, biochemical and structural descriptors for proteins. All of these descriptors are calculated using sequence-derived or physiochemical features of the amino acids that make up the proteins. These descriptors have been highly studied and used in a series of Bioinformatic applications including protein engineering, SAR (sequence-activity-relationships), predicting protein structure & function, subcellular localization, protein-protein interactions, drug-target interactions etc. The descriptors available in `protpy` include:
 
 * **Moreaubroto Autocorrelation (MBAuto)**
 * **Moran Autocorrelation (MAuto)**
@@ -38,19 +38,20 @@ Introduction
 * **Dipeptide Composition (DPComp)**
 * **Tripeptide Composition (TPComp)**
 * **Pseudo Amino Acid Composition (PAAComp)**
-* **Amphiphilic Amino Acid Composition (AAAComp)**
+* **Amphiphilic Amino Acid Composition (APAAComp)**
 * **Conjoint Triad (CTriad)**
 * **CTD (Composition, Transition, Distribution) (CTD)**
 * **Sequence Order Coupling Number (SOCN)**
 * **Quasi Sequence Order (QSO)**
 
-This software is aimed at any researcher using protein sequence/structural data and was mainly created to use in my own project [`pySAR`](https://github.com/amckenna41/pySAR) which uses protein sequence data to identify Sequence Activity Relationships (SAR) using Machine Learning [[1]](#references). `protpy` is built solely in Python3 and specifically developed in Python 3.10.
+This software is aimed at any researcher using protein sequence/structural data, and was mainly created to use in my own project [`pySAR`](https://github.com/amckenna41/pySAR) which uses protein sequence data to identify Sequence Activity Relationships (SAR) using Machine Learning [[1]](#references). `protpy` is built solely in Python3 and specifically developed in Python 3.10.
 
 <strong>A demo of the software is available [here](https://github.com/amckenna41/protpy). </strong>
 
 Requirements
 ------------
 * [Python][python] >= 3.6
+* [aaindex][aaindex] >= 1.0.4
 * [numpy][numpy] >= 1.16.0
 * [pandas][pandas] >= 1.1.0
 * [requests][requests] >= 2.24.0
@@ -77,7 +78,7 @@ Usage
 import protpy as protpy
 ```
 
-# Import protein sequence from fasta:
+## Import protein sequence from fasta:
 ```python
 from Bio import SeqIO
 
@@ -180,7 +181,7 @@ socn = protpy.sequence_order_coupling_number_(protein_seq)
 #401.387        
 ```
 
-Calculate All SOCN per distance matrix:
+Calculate all SOCN's per distance matrix:
 ```python
 socn_all = protpy.sequence_order_coupling_number(protein_seq)
 #using default parameters: lag=30, distance_matrix="schneider-wrede-physiochemical-distance-matrix.json"
@@ -202,7 +203,7 @@ Directories
 -----------
 * `/tests` - unit and integration tests for `protpy` package.
 * `/protpy` - source code and all required external data files for package.
-* `/docs` - protpy documentation.
+* `/docs` - `protpy` documentation.
 
 Tests
 -----
@@ -247,6 +248,7 @@ subfamily classes. Bioinformatics, 2005,21,10-19.
 <!-- Links -->
 [python]: https://www.python.org/downloads/release/python-360/
 [protpy]: https://github.com/amckenna41/protpy
+[aaindex]: https://github.com/amckenna41/aaindex
 [requests]: https://requests.readthedocs.io/en/latest/
 [numpy]: https://numpy.org/
 [pandas]: https://pandas.pydata.org/
