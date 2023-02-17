@@ -221,10 +221,10 @@ def tripeptide_composition(sequence):
 
 def pseudo_amino_acid_composition(sequence, lamda=30, weight=0.05, properties=[]):
     """
-    Pseudo amino acid composition combines the vanilla amino acid composition descriptor with 
+    Pseudo amino acid composition (PAAComp) combines the vanilla amino acid composition descriptor with 
     additional local features, such as correlation between residues of a certain distance, as
     amino acid composition doesn't take into accont sequence order info. The pseudo 
-    components of the descriptor are a series rank-different correlation factors [1].
+    components of the descriptor are a series rank-different correlation factors [5].
     The first 20 components are a weighted sum of the amino acid composition and 30 are 
     physiochemical square correlations as dictated by the lamda and properties parameters.
     This generates an output of [(20 + lamda), 1] = 50 x 1 when using the default lamda of 30. 
@@ -262,6 +262,10 @@ def pseudo_amino_acid_composition(sequence, lamda=30, weight=0.05, properties=[]
     if ((lamda < 0) or (lamda > len(sequence)) or not isinstance(lamda, int)):
         lamda = 30  
 
+    #validate weight, set default weight if invalid value input
+    if ((weight<0) or not (isinstance(weight, float)) or not (isinstance(weight, int))):
+        weight = 0.05
+
     #cast properties to list 
     if not (isinstance(properties, list)):
         properties = [properties]
@@ -291,7 +295,7 @@ def pseudo_amino_acid_composition(sequence, lamda=30, weight=0.05, properties=[]
     #append descriptor values to dict
     temp = 1 + weight + right_part
     for index, i in enumerate(amino_acids):
-        psuedo_aac["PseudoAAC_" + str(index + 1)] = round(aa_comp[i].values[0] / temp, 3)
+        psuedo_aac["PAAC_" + str(index + 1)] = round(aa_comp[i].values[0] / temp, 3)
 
     #calculate correlation factor for protein sequence using propeties
     for i in range(lamda):
@@ -301,7 +305,7 @@ def pseudo_amino_acid_composition(sequence, lamda=30, weight=0.05, properties=[]
     #append descriptor values to dict
     temp = 1 + weight * sum(rightpart)
     for index in range(20, 20 + lamda):
-        psuedo_aac["PseudoAAC_" + str(index + 1)] = round(
+        psuedo_aac["PAAC_" + str(index + 1)] = round(
             weight * rightpart[index - 20] / temp * 100, 3)
 
     #transform values and columns to DataFrame
@@ -429,7 +433,7 @@ def amphiphilic_pseudo_amino_acid_composition(sequence, lamda=30, weight=0.5,
     sequence order of a protein and the distribution of the hydrophobic and 
     hydrophilic amino acids along its chain. The first 20 numbers in the 
     descriptor are the components of the conventional amino acid composition; 
-    the next 2λ numbers are a set of correlation factors that reflect different 
+    the next 2*λ numbers are a set of correlation factors that reflect different 
     hydrophobicity and hydrophilicity distribution patterns along a protein chain
 
     Parameters
@@ -464,6 +468,10 @@ def amphiphilic_pseudo_amino_acid_composition(sequence, lamda=30, weight=0.5,
     #set lamda to its default value if <0, or > sequence len or not an int
     if ((lamda < 0) or (lamda > len(sequence)) or not isinstance(lamda, int)):
         lamda = 30  
+
+    #validate weight, set default weight if invalid value input
+    if ((weight<0) or not (isinstance(weight, float)) or not (isinstance(weight, int))):
+        weight = 0.5
 
     #cast properties to list 
     if not (isinstance(properties, list)):

@@ -61,10 +61,10 @@ class ProtPyAutocorrelationTests(unittest.TestCase):
             self.assertTrue(all(col == np.float64 for col in list(moreaubroto_seq1.dtypes)), 
                 "Descriptor values not of correct datatype.")
 
-            #check all columns follow pattern of MoreauBrotoAuto_X_Y where x is the asscession number of
+            #check all columns follow pattern of MBAutoX_Y where x is the asscession number of
             #   the AAindex record and y is the count of the descriptor
             for col in list(moreaubroto_seq1.columns):
-                self.assertTrue(bool(re.match(r"MoreauBrotoAuto_[A-Z0-9]{10}_[0-9]", col)), 
+                self.assertTrue(bool(re.match(r"MBAuto_[A-Z0-9]{10}_[0-9]", col)), 
                     "Column name doesn't match expected regex pattern: {}.".format(col))     
 #2.)
         for lag in moreaubroto_lag:
@@ -76,10 +76,10 @@ class ProtPyAutocorrelationTests(unittest.TestCase):
             self.assertTrue(all(col == np.float64 for col in list(moreaubroto_seq2.dtypes)), 
                 "Descriptor values not of correct datatype.")
 
-            #check all columns follow pattern of MoreauBrotoAuto_X_Y where x is the asscession number of
+            #check all columns follow pattern of MBAutoX_Y where x is the asscession number of
             #   the AAindex record and y is the count of the descriptor
             for col in list(moreaubroto_seq2.columns):
-                self.assertTrue(bool(re.match(r"MoreauBrotoAuto_[A-Z0-9]{10}_[0-9]", col)), 
+                self.assertTrue(bool(re.match(r"MBAuto_[A-Z0-9]{10}_[0-9]", col)), 
                     "Column name doesn't match expected regex pattern: {}.".format(col))
 #3.)
         for lag in moreaubroto_lag:
@@ -91,10 +91,10 @@ class ProtPyAutocorrelationTests(unittest.TestCase):
             self.assertTrue(all(col == np.float64 for col in list(moreaubroto_seq3.dtypes)), 
                 "Descriptor values not of correct datatype.")
 
-            #check all columns follow pattern of MoreauBrotoAuto_X_Y where x is the asscession number of
+            #check all columns follow pattern of MBAutoX_Y where x is the asscession number of
             #   the AAindex record and y is the count of the descriptor
             for col in list(moreaubroto_seq3.columns):
-                self.assertTrue(bool(re.match(r"MoreauBrotoAuto_[A-Z0-9]{10}_[0-9]", col)), 
+                self.assertTrue(bool(re.match(r"MBAuto_[A-Z0-9]{10}_[0-9]", col)), 
                     "Column name doesn't match expected regex pattern: {}.".format(col))
 #4.)
         for lag in moreaubroto_lag:
@@ -106,10 +106,10 @@ class ProtPyAutocorrelationTests(unittest.TestCase):
             self.assertTrue(all(col == np.float64 for col in list(moreaubroto_seq4.dtypes)), 
                 "Descriptor values not of correct datatype.")
 
-            #check all columns follow pattern of MoreauBrotoAuto_X_Y where x is the asscession number of
+            #check all columns follow pattern of MBAutoX_Y where x is the asscession number of
             #   the AAindex record and y is the count of the descriptor
             for col in list(moreaubroto_seq4.columns):
-                self.assertTrue(bool(re.match(r"MoreauBrotoAuto_[A-Z0-9]{10}_[0-9]", col)), 
+                self.assertTrue(bool(re.match(r"MBAuto_[A-Z0-9]{10}_[0-9]", col)), 
                     "Column name doesn't match expected regex pattern: {}.".format(col))
 #5.)
         invalid_seq5 = "ABCDEF"
@@ -123,7 +123,6 @@ class ProtPyAutocorrelationTests(unittest.TestCase):
         invalid_seq7 = 12345
         with (self.assertRaises(TypeError)):
             moreaubroto_seq7 = protpy.moreaubroto_autocorrelation(invalid_seq7)
-
 
     def test_moran_autocorrelation(self):
         """ Testing moran autocorrelation descriptor attributes and functionality. """
@@ -141,10 +140,10 @@ class ProtPyAutocorrelationTests(unittest.TestCase):
             self.assertTrue(all(col == np.float64 for col in list(moran_auto_seq1.dtypes)), 
                 "Descriptor values not of correct datatype.")
 
-            #check all columns follow pattern of MoranAuto_X_Y where x is the asscession number of
+            #check all columns follow pattern of MAuto_X_Y where x is the asscession number of
             #   the AAindex record and y is the count of the descriptor
             for col in list(moran_auto_seq1.columns):
-                self.assertTrue(bool(re.match(r"MoranAuto_[A-Z0-9]{10}_[0-9]", col)), 
+                self.assertTrue(bool(re.match(r"MAuto_[A-Z0-9]{10}_[0-9]", col)), 
                     "Column name doesn't match expected regex pattern: {}.".format(col))
 #2.)
         for lag in moran_auto_lag:
@@ -156,10 +155,10 @@ class ProtPyAutocorrelationTests(unittest.TestCase):
             self.assertTrue(all(col == np.float64 for col in list(moran_auto_seq2.dtypes)), 
                 "Descriptor values not of correct datatype.")
 
-            #check all columns follow pattern of MoranAuto_X_Y where x is the asscession number of
+            #check all columns follow pattern of MAuto_X_Y where x is the asscession number of
             #   the AAindex record and y is the count of the descriptor
             for col in list(moran_auto_seq2.columns):
-                self.assertTrue(bool(re.match(r"MoranAuto_[A-Z0-9]{10}_[0-9]", col)), 
+                self.assertTrue(bool(re.match(r"MAuto_[A-Z0-9]{10}_[0-9]", col)), 
                     "Column name doesn't match expected regex pattern: {}.".format(col))
 #3.)
         for lag in moran_auto_lag:
@@ -171,10 +170,10 @@ class ProtPyAutocorrelationTests(unittest.TestCase):
             self.assertTrue(all(col == np.float64 for col in list(moran_auto_seq3.dtypes)), 
                 "Descriptor values not of correct datatype.")
 
-            #check all columns follow pattern of MoranAuto_X_Y where x is the asscession number of
+            #check all columns follow pattern of MAuto_X_Y where x is the asscession number of
             #   the AAindex record and y is the count of the descriptor
             for col in list(moran_auto_seq3.columns):
-                self.assertTrue(bool(re.match(r"MoranAuto_[A-Z0-9]{10}_[0-9]", col)), 
+                self.assertTrue(bool(re.match(r"MAuto_[A-Z0-9]{10}_[0-9]", col)), 
                     "Column name doesn't match expected regex pattern: {}".format(col))
 #4.)
         for lag in moran_auto_lag:
@@ -186,10 +185,10 @@ class ProtPyAutocorrelationTests(unittest.TestCase):
             self.assertTrue(all(col == np.float64 for col in list(moran_auto_seq4.dtypes)), 
                 "Descriptor values not of correct datatype.")
 
-            #check all columns follow pattern of MoranAuto_X_Y where x is the asscession number of
+            #check all columns follow pattern of MAuto_X_Y where x is the asscession number of
             #   the AAindex record and y is the count of the descriptor
             for col in list(moran_auto_seq4.columns):
-                self.assertTrue(bool(re.match(r"MoranAuto_[A-Z0-9]{10}_[0-9]", col)), 
+                self.assertTrue(bool(re.match(r"MAuto_[A-Z0-9]{10}_[0-9]", col)), 
                     "Column name doesn't match expected regex pattern: {}".format(col))
 #5.)
         invalid_seq5 = "ABCDEF"
@@ -220,10 +219,10 @@ class ProtPyAutocorrelationTests(unittest.TestCase):
             self.assertTrue(all(col == np.float64 for col in list(geary_auto_seq1.dtypes)), 
                 "Descriptor values not of correct datatype.")
 
-            #check all columns follow pattern of GearyAuto_X_Y where x is the asscession number of
+            #check all columns follow pattern of GAuto_X_Y where x is the asscession number of
             #   the AAindex record and y is the count of the descriptor
             for col in list(geary_auto_seq1.columns):
-                self.assertTrue(bool(re.match(r"GearyAuto_[A-Z0-9]{10}_[0-9]", col)), 
+                self.assertTrue(bool(re.match(r"GAuto_[A-Z0-9]{10}_[0-9]", col)), 
                     "Column name doesn't match expected regex pattern: {}.".format(col))
 #2.)
         for lag in geary_auto_lag:
@@ -235,10 +234,10 @@ class ProtPyAutocorrelationTests(unittest.TestCase):
             self.assertTrue(all(col == np.float64 for col in list(geary_auto_seq2.dtypes)), 
                 "Descriptor values not of correct datatype.")
 
-            #check all columns follow pattern of GearyAuto_X_Y where x is the asscession number of
+            #check all columns follow pattern of GAuto_X_Y where x is the asscession number of
             #   the AAindex record and y is the count of the descriptor
             for col in list(geary_auto_seq2.columns):
-                self.assertTrue(bool(re.match(r"GearyAuto_[A-Z0-9]{10}_[0-9]", col)), 
+                self.assertTrue(bool(re.match(r"GAuto_[A-Z0-9]{10}_[0-9]", col)), 
                     "Column name doesn't match expected regex pattern: {}.".format(col))
 #3.)
         for lag in geary_auto_lag:
@@ -250,10 +249,10 @@ class ProtPyAutocorrelationTests(unittest.TestCase):
             self.assertTrue(all(col == np.float64 for col in list(geary_auto_seq3.dtypes)), 
                 "Descriptor values not of correct datatype.")
 
-            #check all columns follow pattern of GearyAuto_X_Y where x is the asscession number of
+            #check all columns follow pattern of GAuto_X_Y where x is the asscession number of
             #   the AAindex record and y is the count of the descriptor
             for col in list(geary_auto_seq3.columns):
-                self.assertTrue(bool(re.match(r"GearyAuto_[A-Z0-9]{10}_[0-9]", col)), 
+                self.assertTrue(bool(re.match(r"GAuto_[A-Z0-9]{10}_[0-9]", col)), 
                     "Column name doesn't match expected regex pattern: {}".format(col))
 #4.)
         for lag in geary_auto_lag:
@@ -265,10 +264,10 @@ class ProtPyAutocorrelationTests(unittest.TestCase):
             self.assertTrue(all(col == np.float64 for col in list(geary_auto_seq4.dtypes)), 
                 "Descriptor values not of correct datatype.")
 
-            #check all columns follow pattern of GearyAuto_X_Y where x is the asscession number of
+            #check all columns follow pattern of GAuto_X_Y where x is the asscession number of
             #   the AAindex record and y is the count of the descriptor
             for col in list(geary_auto_seq4.columns):
-                self.assertTrue(bool(re.match(r"GearyAuto_[A-Z0-9]{10}_[0-9]", col)), 
+                self.assertTrue(bool(re.match(r"GAuto_[A-Z0-9]{10}_[0-9]", col)), 
                     "Column name doesn't match expected regex pattern: {}".format(col))
 #5.)
         invalid_seq5 = "ABCDEF"

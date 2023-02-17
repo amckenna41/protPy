@@ -268,7 +268,8 @@ class ProtPyCompositionTests(unittest.TestCase):
         self.assertEqual(pseudo_amino_acid_composition_seq1.shape, (1, 20+lamda), 'Descriptor not of correct shape.') 
         for col in list(pseudo_amino_acid_composition_seq1.columns):
             #check all columns follow correct naming convention
-            self.assertTrue(bool(re.match(r"PseudoAAC_[0-9]", col)), "Column doesn't follow correct naming convention: {}.".format(col))
+            self.assertTrue(bool(re.match(r"PAAC_[0-9]", col)), 
+                "Column doesn't follow correct naming convention: {}.".format(col))
         self.assertTrue(pseudo_amino_acid_composition_seq1.any().isnull().sum()==0, 'Descriptor should not contain any null values.')
         self.assertTrue(all(col == np.float64 for col in list(pseudo_amino_acid_composition_seq1.dtypes)),
             "Descriptor values not of correct datatype.")
@@ -279,7 +280,8 @@ class ProtPyCompositionTests(unittest.TestCase):
         self.assertEqual(pseudo_amino_acid_composition_seq2.shape, (1, 20+lamda), 'Descriptor not of correct shape.') 
         for col in list(pseudo_amino_acid_composition_seq2.columns):
             #check all columns follow correct naming convention
-            self.assertTrue(bool(re.match(r"PseudoAAC_[0-9]", col)), "Column doesn't follow correct naming convention: {}.".format(col))
+            self.assertTrue(bool(re.match(r"PAAC_[0-9]", col)), 
+                "Column doesn't follow correct naming convention: {}.".format(col))
         self.assertTrue(pseudo_amino_acid_composition_seq2.any().isnull().sum()==0, 'Descriptor should not contain any null values.')
         self.assertTrue(all(col == np.float64 for col in list(pseudo_amino_acid_composition_seq2.dtypes)),
             "Descriptor values not of correct datatype.")
@@ -290,7 +292,8 @@ class ProtPyCompositionTests(unittest.TestCase):
         self.assertEqual(pseudo_amino_acid_composition_seq3.shape, (1, 20+lamda), 'Descriptor not of correct shape.') 
         for col in list(pseudo_amino_acid_composition_seq3.columns):
             #check all columns follow correct naming convention
-            self.assertTrue(bool(re.match(r"PseudoAAC_[0-9]", col)), "Column doesn't follow correct naming convention: {}.".format(col))
+            self.assertTrue(bool(re.match(r"PAAC_[0-9]", col)), 
+                "Column doesn't follow correct naming convention: {}.".format(col))
         self.assertTrue(pseudo_amino_acid_composition_seq3.any().isnull().sum()==0, 'Descriptor should not contain any null values.')
         self.assertTrue(all(col == np.float64 for col in list(pseudo_amino_acid_composition_seq3.dtypes)),
             "Descriptor values not of correct datatype.")
@@ -301,7 +304,8 @@ class ProtPyCompositionTests(unittest.TestCase):
         self.assertEqual(pseudo_amino_acid_composition_seq4.shape, (1, 20+lamda), 'Descriptor not of correct shape.') 
         for col in list(pseudo_amino_acid_composition_seq4.columns):
             #check all columns follow correct naming convention
-            self.assertTrue(bool(re.match(r"PseudoAAC_[0-9]", col)), "Column doesn't follow correct naming convention: {}.".format(col))
+            self.assertTrue(bool(re.match(r"PAAC_[0-9]", col)), 
+                "Column doesn't follow correct naming convention: {}.".format(col))
         self.assertTrue(pseudo_amino_acid_composition_seq4.any().isnull().sum()==0, 'Descriptor should not contain any null values.')
         self.assertTrue(all(col == np.float64 for col in list(pseudo_amino_acid_composition_seq4.dtypes)),
             "Descriptor values not of correct datatype.")
@@ -325,11 +329,6 @@ class ProtPyCompositionTests(unittest.TestCase):
         weight = 0.05
 
         amp_pseudo_amino_acid_composition_seq1 = protpy.amphiphilic_pseudo_amino_acid_composition(self.protein_seq1, weight=weight, lamda=lamda)
-        print('here...')
-        print('here...')
-
-        print(amp_pseudo_amino_acid_composition_seq1)
-        # print(amp_pseudo_amino_acid_composition_seq1.columns)
 #1.)
         self.assertIsInstance(amp_pseudo_amino_acid_composition_seq1, pd.DataFrame, 'Descriptor not of type DataFrame.')
         self.assertEqual(amp_pseudo_amino_acid_composition_seq1.shape, (1, 20+(2*lamda)), 'Descriptor not of correct shape.') 

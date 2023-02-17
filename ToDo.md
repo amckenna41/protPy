@@ -33,3 +33,13 @@
 - [ ] Add descriptor abbreviations to each functiosn comments, change abbreviations of Pseudo AAComp -> PAAComp.
 - [ ] Add references to readme text.
 - [ ] In readme, add output of each function below its usage.
+- [ ] Add reference numbers to comments in descriptor functions - double check existing ones are correct.
+- [X] Add lag and weight param validation to sequence order module.
+- [ ] Change QSOrder to QSO.
+- [ ] Rewrite APAAComp descriptor comments to mention its dimensions change with lamda. 
+- [ ] For all functions that have lag in them:
+        #raise value error if int cant be parsed from input lag
+        try:
+            lag = int(lag)
+        except:
+            raise ValueError("Invalid lag value input, integer cannot be parsed from {}".format(lag))

@@ -87,7 +87,7 @@ def moreaubroto_autocorrelation(sequence, lag=30,
         if (aa not in amino_acids):
             raise ValueError("Invalid amino acid in protein sequence: .".format(aa))
 
-    #set default lag if invalid value input
+    #validate lag, set default lag if invalid value input
     if (lag>=len(sequence) or (lag<0) or not (isinstance(lag, int))):
         lag = 30
 
@@ -138,10 +138,10 @@ def moreaubroto_autocorrelation(sequence, lag=30,
             for j in range(len(sequence)-i):
                 temp = temp + aai_properties[key][sequence[j]] * aai_properties[key][sequence[j+1]]
             if len(sequence) - i == 0:
-                moreaubroto_autocorrelation["MoreauBrotoAuto_" + key + "_" + str(i)] = round(
+                moreaubroto_autocorrelation["MBAuto_" + key + "_" + str(i)] = round(
                     temp / (len(sequence)), 3)
             else:
-                moreaubroto_autocorrelation["MoreauBrotoAuto_" + key + "_" + str(i)] = round(
+                moreaubroto_autocorrelation["MBAuto_" + key + "_" + str(i)] = round(
                     temp / (len(sequence) - i), 3)
 
     #transform values and columns to DataFrame
@@ -182,7 +182,7 @@ def moran_autocorrelation(sequence, lag=30,
         if (aa not in amino_acids):
             raise ValueError("Invalid amino acid in protein sequence: .".format(aa))
 
-    #set default lag if invalid value input
+    #validate lag, set default lag if invalid value input
     if (lag>=len(sequence) or (lag<0) or not (isinstance(lag, int))):
         lag = 30
 
@@ -243,10 +243,10 @@ def moran_autocorrelation(sequence, lag=30,
                 temp = temp + aai_properties[key][sequence[j]] - prop_mean * (
                     aai_properties[key][sequence[j+i]] - prop_mean)
             if len(sequence) - i == 0:
-                moran_autocorrelation["MoranAuto_" + key + "_" + str(i)] = round(
+                moran_autocorrelation["MAuto_" + key + "_" + str(i)] = round(
                     temp / ((len(sequence)) / k), 5)
             else:
-                moran_autocorrelation["MoranAuto_" + key + "_" + str(i)] = round(
+                moran_autocorrelation["MAuto_" + key + "_" + str(i)] = round(
                     temp / ((len(sequence) - i) / k), 5)
 
     #transform values and columns to DataFrame
@@ -287,7 +287,7 @@ def geary_autocorrelation(sequence, lag=30,
         if (aa not in amino_acids):
             raise ValueError("Invalid amino acid in protein sequence: .".format(aa))
             
-    #set default lag if invalid value input
+    #validate lag, set default lag if invalid value input
     if (lag>=len(sequence) or (lag<0) or not (isinstance(lag, int))):
         lag = 30
 
@@ -344,10 +344,10 @@ def geary_autocorrelation(sequence, lag=30,
                 temp = (temp + (
                     aai_properties[key][sequence[j]] - aai_properties[key][sequence[j+i]]) **2)
             if len(sequence) - i == 0:
-                geary_autocorrelation["GearyAuto_" + key + "_" + str(i)] = round(
+                geary_autocorrelation["GAuto_" + key + "_" + str(i)] = round(
                     temp / (2* (len(sequence))) / k, 3)
             else:
-                geary_autocorrelation["GearyAuto_" + key + "_" + str(i)] = round(
+                geary_autocorrelation["GAuto_" + key + "_" + str(i)] = round(
                     temp / (2* (len(sequence) -i)) / k, 3)
 
     #transform values and columns to DataFrame

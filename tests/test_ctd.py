@@ -60,9 +60,10 @@ class ProtPyCTDTests(unittest.TestCase):
             for prop in properties:
                 if (col.startswith(prop)):
                     matching_col = True
-                    self.assertTrue(((bool(re.search(prop + r"_CTD_[A-Z]{1}_[0-9][0-9]", col))) or (bool(re.search(prop + r"_CTD_[A-Z]{1}_[0-9][0-9]_[0-9][0-9]", col)))), 
-                        "Column name does not follow expected format: {}.".format(col))
-            self.assertTrue(matching_col, "Column name's property name not found and doesn't match format: {}".format(matching_col))
+                    self.assertTrue(((bool(re.search(prop + r"_CTD_[A-Z]{1}_[0-9][0-9]", col))) or 
+                        (bool(re.search(prop + r"_CTD_[A-Z]{1}_[0-9][0-9]_[0-9][0-9]", col)))), 
+                            "Column name does not follow expected format: {}.".format(col))
+            self.assertTrue(matching_col, "Column name's property name not found and doesn't match format: {}.".format(matching_col))
 
     def test_ctd_composition(self):
         """ Testing CTD Composition descriptor attributes and functionality. """   
@@ -84,7 +85,7 @@ class ProtPyCTDTests(unittest.TestCase):
                     matching_col = True
                     self.assertTrue((bool(re.search(prop + r"_CTD_[A-Z]{1}_[0-9][0-9]", col))), 
                         "Column name does not follow expected format: {}.".format(col))
-                self.assertTrue(matching_col, "Column name's property name not found and doesn't match format: {}".format(matching_col))
+                self.assertTrue(matching_col, "Column name's property name not found and doesn't match format: {}.".format(matching_col))
 
     def test_ctd_distribution(self):
         """ Testing CTD Distribution descriptor attributes and functionality. """   
@@ -106,7 +107,7 @@ class ProtPyCTDTests(unittest.TestCase):
                     matching_col = True
                     self.assertTrue((bool(re.search(prop + r"_CTD_[A-Z]{1}_[0-9][0-9]", col))), 
                         "Column name does not follow expected format: {}.".format(col))
-                self.assertTrue(matching_col, "Column name's property name not found and doesn't match format: {}".format(matching_col))
+                self.assertTrue(matching_col, "Column name's property name not found and doesn't match format: {}.".format(matching_col))
 
     def test_ctd_transition(self):
         """ Testing CTD Transition descriptor attributes and functionality. """   
@@ -126,6 +127,7 @@ class ProtPyCTDTests(unittest.TestCase):
                 matching_col = False
                 if (col.startswith(prop)):
                     matching_col = True
-                    self.assertTrue(((bool(re.search(prop + r"_CTD_[A-Z]{1}_[0-9][0-9]", col))) or (bool(re.search(prop + r"_CTD_[A-Z]{1}_[0-9][0-9]_[0-9][0-9]", col)))), 
-                        "Column name does not follow expected format: {}.".format(col))
-                self.assertTrue(matching_col, "Column name's property name not found and doesn't match format: {}".format(matching_col))
+                    self.assertTrue(((bool(re.search(prop + r"_CTD_[A-Z]{1}_[0-9][0-9]", col))) or 
+                        (bool(re.search(prop + r"_CTD_[A-Z]{1}_[0-9][0-9]_[0-9][0-9]", col)))), 
+                            "Column name does not follow expected format: {}.".format(col))
+                self.assertTrue(matching_col, "Column name's property name not found and doesn't match format: {}.".format(matching_col))
