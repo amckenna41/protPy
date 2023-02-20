@@ -136,7 +136,7 @@ class ProtPySequenceOrderTests(unittest.TestCase):
         self.assertIsInstance(socn_seq1, pd.DataFrame, 'Descriptor not of type DataFrame.')
         for col in list(socn_seq1.columns):
             #check all columns follow pattern of SOCNX or SOCNXY where x & y integers between 0 and 9
-            self.assertTrue((bool(re.match(r'SOCN_SW_[0-9]', col)) or bool(re.match(r'SOCN_SW_[0-9][0-9]', col))), 
+            self.assertTrue((bool(re.match(r'SOCN_SW[0-9]', col)) or bool(re.match(r'SOCN_SW[0-9][0-9]', col))), 
                 "Column name doesn't match expected regex pattern: {}.".format(col))     
         self.assertTrue(socn_seq1.any().isnull().sum()==0, 'Descriptor should not contain any null values.')
         self.assertTrue(all(col == np.float64 for col in list(socn_seq1.dtypes)), 
@@ -149,7 +149,7 @@ class ProtPySequenceOrderTests(unittest.TestCase):
         self.assertIsInstance(socn_seq2, pd.DataFrame, 'Descriptor not of type DataFrame.')
         for col in list(socn_seq2.columns):
             #check all columns follow pattern of SOCNX or SOCNXY where x & y integers between 0 and 9
-            self.assertTrue((bool(re.match(r'SOCN_SW_[0-9]', col)) or bool(re.match(r'SOCN_SW_[0-9][0-9]', col))), 
+            self.assertTrue((bool(re.match(r'SOCN_SW[0-9]', col)) or bool(re.match(r'SOCN_SW[0-9][0-9]', col))), 
                 "Column name doesn't match expected regex pattern: {}.".format(col))     
         self.assertTrue(socn_seq2.any().isnull().sum()==0, 'Descriptor should not contain any null values.')
         self.assertTrue(all(col == np.float64 for col in list(socn_seq2.dtypes)), 
@@ -162,7 +162,7 @@ class ProtPySequenceOrderTests(unittest.TestCase):
         self.assertIsInstance(socn_seq3, pd.DataFrame, 'Descriptor not of type DataFrame.')
         for col in list(socn_seq3.columns):
             #check all columns follow pattern of SOCNX or SOCNXY where x & y integers between 0 and 9
-            self.assertTrue((bool(re.match(r'SOCN_SW_[0-9]', col)) or bool(re.match(r'SOCN_SW_[0-9][0-9]', col))), 
+            self.assertTrue((bool(re.match(r'SOCN_SW[0-9]', col)) or bool(re.match(r'SOCN_SW[0-9][0-9]', col))), 
                 "Column name doesn't match expected regex pattern: {}.".format(col))     
         self.assertTrue(socn_seq3.any().isnull().sum()==0, 'Descriptor should not contain any null values.')
         self.assertTrue(all(col == np.float64 for col in list(socn_seq3.dtypes)), 
@@ -176,7 +176,7 @@ class ProtPySequenceOrderTests(unittest.TestCase):
         self.assertIsInstance(socn_seq4, pd.DataFrame, 'Descriptor not of type DataFrame.')
         for col in list(socn_seq4.columns):
             #check all columns follow pattern of SOCNX or SOCNXY where x & y integers between 0 and 9
-            self.assertTrue((bool(re.match(r'SOCN_SW_[0-9]', col)) or bool(re.match(r'SOCN_SW_[0-9][0-9]', col))), 
+            self.assertTrue((bool(re.match(r'SOCN_SW[0-9]', col)) or bool(re.match(r'SOCN_SW[0-9][0-9]', col))), 
                 "Column name doesn't match expected regex pattern: {}.".format(col))     
         self.assertTrue(socn_seq4.any().isnull().sum()==0, 'Descriptor should not contain any null values.')
         self.assertTrue(all(col == np.float64 for col in list(socn_seq4.dtypes)), 
@@ -207,8 +207,8 @@ class ProtPySequenceOrderTests(unittest.TestCase):
         self.assertIsInstance(socn_all_seq1, pd.DataFrame, 'Descriptor not of type DataFrame.')
         for col in list(socn_all_seq1.columns):
             #check all columns follow pattern of SOCNX or SOCNXY where x & y integers between 0 and 9
-            self.assertTrue((bool(re.match(r'SOCN_SW_[0-9]', col)) or bool(re.match(r'SOCN_SW_[0-9][0-9]', col)) or
-                bool(re.match(r'SOCN_Grant_[0-9]', col)) or bool(re.match(r'SOCN_Grant_[0-9][0-9]', col))), 
+            self.assertTrue((bool(re.match(r'SOCN_SW[0-9]', col)) or bool(re.match(r'SOCN_SW[0-9][0-9]', col)) or
+                bool(re.match(r'SOCN_Grant[0-9]', col)) or bool(re.match(r'SOCN_Grant[0-9][0-9]', col))), 
                 "Column name doesn't match expected regex pattern: {}.".format(col))     
         self.assertTrue(socn_all_seq1.any().isnull().sum()==0, 'Descriptor should not contain any null values.')
         self.assertTrue(all(col == np.float64 for col in list(socn_all_seq1.dtypes)), 
@@ -221,8 +221,8 @@ class ProtPySequenceOrderTests(unittest.TestCase):
         self.assertIsInstance(socn_all_seq2, pd.DataFrame, 'Descriptor not of type DataFrame.')
         for col in list(socn_all_seq2.columns):
             #check all columns follow pattern of SOCNX or SOCNXY where x & y integers between 0 and 9
-            self.assertTrue((bool(re.match(r'SOCN_SW_[0-9]', col)) or bool(re.match(r'SOCN_SW_[0-9][0-9]', col)) or
-                bool(re.match(r'SOCN_Grant_[0-9]', col)) or bool(re.match(r'SOCN_Grant_[0-9][0-9]', col))), 
+            self.assertTrue((bool(re.match(r'SOCN_SW[0-9]', col)) or bool(re.match(r'SOCN_SW[0-9][0-9]', col)) or
+                bool(re.match(r'SOCN_Grant[0-9]', col)) or bool(re.match(r'SOCN_Grant[0-9][0-9]', col))), 
                 "Column name doesn't match expected regex pattern: {}.".format(col))     
         self.assertTrue(socn_all_seq2.any().isnull().sum()==0, 'Descriptor should not contain any null values.')
         self.assertTrue(all(col == np.float64 for col in list(socn_all_seq2.dtypes)), 
@@ -235,8 +235,8 @@ class ProtPySequenceOrderTests(unittest.TestCase):
         self.assertIsInstance(socn_all_seq3, pd.DataFrame, 'Descriptor not of type DataFrame.')
         for col in list(socn_all_seq3.columns):
             #check all columns follow pattern of SOCNX or SOCNXY where x & y integers between 0 and 9
-            self.assertTrue((bool(re.match(r'SOCN_SW_[0-9]', col)) or bool(re.match(r'SOCN_SW_[0-9][0-9]', col)) or
-                bool(re.match(r'SOCN_Grant_[0-9]', col)) or bool(re.match(r'SOCN_Grant_[0-9][0-9]', col))), 
+            self.assertTrue((bool(re.match(r'SOCN_SW[0-9]', col)) or bool(re.match(r'SOCN_SW[0-9][0-9]', col)) or
+                bool(re.match(r'SOCN_Grant[0-9]', col)) or bool(re.match(r'SOCN_Grant[0-9][0-9]', col))), 
                 "Column name doesn't match expected regex pattern: {}.".format(col))     
         self.assertTrue(socn_all_seq3.any().isnull().sum()==0, 'Descriptor should not contain any null values.')
         self.assertTrue(all(col == np.float64 for col in list(socn_all_seq3.dtypes)), 
@@ -249,8 +249,8 @@ class ProtPySequenceOrderTests(unittest.TestCase):
         self.assertIsInstance(socn_all_seq4, pd.DataFrame, 'Descriptor not of type DataFrame.')
         for col in list(socn_all_seq4.columns):
             #check all columns follow pattern of SOCNX or SOCNXY where x & y integers between 0 and 9
-            self.assertTrue((bool(re.match(r'SOCN_SW_[0-9]', col)) or bool(re.match(r'SOCN_SW_[0-9][0-9]', col)) or
-                bool(re.match(r'SOCN_Grant_[0-9]', col)) or bool(re.match(r'SOCN_Grant_[0-9][0-9]', col))), 
+            self.assertTrue((bool(re.match(r'SOCN_SW[0-9]', col)) or bool(re.match(r'SOCN_SW[0-9][0-9]', col)) or
+                bool(re.match(r'SOCN_Grant[0-9]', col)) or bool(re.match(r'SOCN_Grant[0-9][0-9]', col))), 
                 "Column name doesn't match expected regex pattern: {}.".format(col))     
         self.assertTrue(socn_all_seq4.any().isnull().sum()==0, 'Descriptor should not contain any null values.')
         self.assertTrue(all(col == np.float64 for col in list(socn_all_seq4.dtypes)), 

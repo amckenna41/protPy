@@ -269,16 +269,18 @@ def pseudo_amino_acid_composition(sequence, lamda=30, weight=0.05, properties=[]
     #cast properties to list 
     if not (isinstance(properties, list)):
         properties = [properties]
+    
+    property_values = []
 
     #by default use properties (hydrphocity, hydrophilicty, residue mass),
     #otherwise get the individual property values from aaindex1 using accession number
     if (properties == []):
-        properties = [hydrophobicity_, hydrophilicity_, residue_mass_]
+        property_values = [hydrophobicity_, hydrophilicity_, residue_mass_]
     else:
         for prop in properties:
             if (prop not in aaindex1.record_codes()):
                 raise ValueError('Accession number not found in aaindex1: {}.'.format(prop))
-            properties.append(aaindex1[prop].values)
+            property_values.append(aaindex1[prop].values)
 
     right_part = 0.0
     psuedo_aac = {}
@@ -286,12 +288,12 @@ def pseudo_amino_acid_composition(sequence, lamda=30, weight=0.05, properties=[]
 
     #calculate correlation factor for protein sequence using propeties
     for i in range(lamda):
-        right_part = right_part + sequence_order_correlation_factor(sequence, i+1, properties)
+        right_part = right_part + sequence_order_correlation_factor(sequence, i+1, property_values)
 
     #calculate amino acid composition
     aa_comp = amino_acid_composition(sequence)
     
-    #compute first 20 pseudo amino acid descriptor components based on properties,
+    #compute first 20 pseudo amino acid descriptor components based on property_values,
     #append descriptor values to dict
     temp = 1 + weight + right_part
     for index, i in enumerate(amino_acids):
@@ -299,9 +301,9 @@ def pseudo_amino_acid_composition(sequence, lamda=30, weight=0.05, properties=[]
 
     #calculate correlation factor for protein sequence using propeties
     for i in range(lamda):
-        rightpart.append(sequence_order_correlation_factor(sequence, i + 1, properties))
+        rightpart.append(sequence_order_correlation_factor(sequence, i + 1, property_values))
 
-    #compute last 20+lambda pseudo amino acid descriptor components based on properties,
+    #compute last 20+lambda pseudo amino acid descriptor components based on property_values,
     #append descriptor values to dict
     temp = 1 + weight * sum(rightpart)
     for index in range(20, 20 + lamda):

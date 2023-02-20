@@ -155,9 +155,9 @@ def sequence_order_coupling_number(sequence, lag=30,
     #set dataframe column name prefixes based on input distance matrix
     col_prefix = ""
     if (os.path.splitext(distance_matrix)[0] == "schneider-wrede-physiochemical-distance-matrix"):
-        col_prefix = "SOCN_SW_"
+        col_prefix = "SOCN_SW"
     elif (os.path.splitext(distance_matrix)[0] == "grantham-physiochemical-distance-matrix"):
-        col_prefix = "SOCN_Grant_"
+        col_prefix = "SOCN_Grant"
 
     #set default lag if invalid value input
     if (lag>=len(sequence) or (lag<0) or not (isinstance(lag, int))):
