@@ -13,9 +13,9 @@
 [![Size](https://img.shields.io/github/repo-size/amckenna41/protpy)](https://github.com/amckenna41/protpy)
 [![Commits](https://img.shields.io/github/commit-activity/w/amckenna41/protpy)](https://github.com/amckenna41/protpy)
 
-<p align="center">
+<!-- <p align="center">
 <img src="https://images.newscientist.com/wp-content/uploads/2021/07/22155326/22-july_deepmind-proteome.jpg?width=300" alt="protpyLogo" height="200"/>
-</p>
+</p> -->
 
 Table of Contents
 -----------------
