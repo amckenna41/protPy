@@ -44,5 +44,5 @@
         except:
             raise ValueError("Invalid lag value input, integer cannot be parsed from {}".format(lag))
 - [ ] Add logo/image to main readme.
-- [ ] Add emojis to readme.
+- [X] Add emojis to readme.
 - [ ] Add releases.

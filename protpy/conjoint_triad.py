@@ -76,8 +76,8 @@ def conjoint_triad(sequence):
         for j in range(1, 8):
             for k in range(1, 8):
                 temp = str(i) + str(j) + str(k)
-                conjoint_triad[temp] = protein_num.count(temp)
-
+                conjoint_triad["conj_triad_" + temp] = protein_num.count(temp)
+    
     #transform descriptor values to dataframe
     conjoint_triad_df = pd.DataFrame([list(conjoint_triad.values())], columns=list(conjoint_triad.keys()))
 

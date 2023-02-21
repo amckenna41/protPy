@@ -51,7 +51,7 @@ class ProtPyConjointTriadTests(unittest.TestCase):
 
         #iterate over all columns, checking they follow naming convention using regex
         for col in list(conjoint_triad_seq1.columns):
-            self.assertTrue(bool(re.match(r"[0-9]{3}", col)), 
+            self.assertTrue(bool(re.match(r"conj_triad_[0-9]{3}", col)), 
                 "Column name doesn't match expected regex pattern: {}.".format(col))   
 #2.)
         conjoint_triad_seq2 = protpy.conjoint_triad(self.protein_seq2)
@@ -64,7 +64,7 @@ class ProtPyConjointTriadTests(unittest.TestCase):
 
         #iterate over all columns, checking they follow naming convention using regex
         for col in list(conjoint_triad_seq2.columns):
-            self.assertTrue(bool(re.match(r"[0-9]{3}", col)), 
+            self.assertTrue(bool(re.match(r"conj_triad_[0-9]{3}", col)), 
                 "Column name doesn't match expected regex pattern: {}.".format(col))   
 #3.)
         conjoint_triad_seq3 = protpy.conjoint_triad(self.protein_seq3)
@@ -77,7 +77,7 @@ class ProtPyConjointTriadTests(unittest.TestCase):
 
         #iterate over all columns, checking they follow naming convention using regex
         for col in list(conjoint_triad_seq3.columns):
-            self.assertTrue(bool(re.match(r"[0-9]{3}", col)), 
+            self.assertTrue(bool(re.match(r"conj_triad_[0-9]{3}", col)), 
                 "Column name doesn't match expected regex pattern: {}.".format(col))   
 #4.)
         conjoint_triad_seq4 = protpy.conjoint_triad(self.protein_seq4)
@@ -90,7 +90,7 @@ class ProtPyConjointTriadTests(unittest.TestCase):
 
         #iterate over all columns, checking they follow naming convention using regex
         for col in list(conjoint_triad_seq4.columns):
-            self.assertTrue(bool(re.match(r"[0-9]{3}", col)), 
+            self.assertTrue(bool(re.match(r"conj_triad_[0-9]{3}", col)), 
                 "Column name doesn't match expected regex pattern: {}.".format(col))   
 #5.)
         invalid_seq5 = "ABCDEF"
