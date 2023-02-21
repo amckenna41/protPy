@@ -53,17 +53,18 @@ class ProtPyCTDTests(unittest.TestCase):
         self.assertIsInstance(ctd_seq1, pd.DataFrame, 'Descriptor not of type DataFrame.')
         self.assertTrue(ctd_seq1.any().isnull().sum()==0, 'Descriptor should not contain any null values.')  
         self.assertTrue(all(col == np.float64 for col in list(ctd_seq1.dtypes)), "")
-
+        
         #iterate over all columns, checking they follow naming convention using regex
         for col in list(ctd_seq1.columns):
             matching_col = False
             for prop in properties:
-                if (col.startswith(prop)):
+                if (col.endswith(prop)):
                     matching_col = True
-                    self.assertTrue(((bool(re.search(prop + r"_CTD_[A-Z]{1}_[0-9][0-9]", col))) or 
-                        (bool(re.search(prop + r"_CTD_[A-Z]{1}_[0-9][0-9]_[0-9][0-9]", col)))), 
+                    self.assertTrue(((bool(re.search(r"CTD_[A-Z]_[0-9]{2}_" + prop, col))) or 
+                        (bool(re.search(r"CTD_[A-Z]_[0-9]{2}_[0-9]{2}_" + prop, col))) or 
+                        (bool(re.search(r"CTD_[A-Z]_[0-9]{2}_[0-9]{3}_" + prop, col)))), 
                             "Column name does not follow expected format: {}.".format(col))
-            self.assertTrue(matching_col, "Column name's property name not found and doesn't match format: {}.".format(matching_col))
+            self.assertTrue(matching_col, "Column name's property name not found and doesn't match format: {}.".format(col))
 
     def test_ctd_composition(self):
         """ Testing CTD Composition descriptor attributes and functionality. """   
@@ -81,11 +82,11 @@ class ProtPyCTDTests(unittest.TestCase):
             #iterate over all columns, checking they follow naming convention using regex
             for col in list(ctd_composition_seq1.columns):
                 matching_col = False
-                if (col.startswith(prop)):
+                if (col.endswith(prop)):
                     matching_col = True
-                    self.assertTrue((bool(re.search(prop + r"_CTD_[A-Z]{1}_[0-9][0-9]", col))), 
+                    self.assertTrue((bool(re.search(r"CTD_[A-Z]_[0-9]{2}_" + prop, col))), 
                         "Column name does not follow expected format: {}.".format(col))
-                self.assertTrue(matching_col, "Column name's property name not found and doesn't match format: {}.".format(matching_col))
+                self.assertTrue(matching_col, "Column name's property name not found and doesn't match format: {}.".format(col))
 
     def test_ctd_distribution(self):
         """ Testing CTD Distribution descriptor attributes and functionality. """   
@@ -103,11 +104,11 @@ class ProtPyCTDTests(unittest.TestCase):
             #iterate over all columns, checking they follow naming convention using regex
             for col in list(ctd_distribution_seq1.columns):
                 matching_col = False
-                if (col.startswith(prop)):
+                if (col.endswith(prop)):
                     matching_col = True
-                    self.assertTrue((bool(re.search(prop + r"_CTD_[A-Z]{1}_[0-9][0-9]", col))), 
+                    self.assertTrue((bool(re.search(r"CTD_[A-Z]_[0-9]{2}_[0-9]{3}_" + prop, col))), 
                         "Column name does not follow expected format: {}.".format(col))
-                self.assertTrue(matching_col, "Column name's property name not found and doesn't match format: {}.".format(matching_col))
+                self.assertTrue(matching_col, "Column name's property name not found and doesn't match format: {}.".format(col))
 
     def test_ctd_transition(self):
         """ Testing CTD Transition descriptor attributes and functionality. """   
@@ -125,9 +126,9 @@ class ProtPyCTDTests(unittest.TestCase):
             #iterate over all columns and check its name follows expected format
             for col in list(ctd_transition_seq1.columns):
                 matching_col = False
-                if (col.startswith(prop)):
+                if (col.endswith(prop)):
                     matching_col = True
-                    self.assertTrue(((bool(re.search(prop + r"_CTD_[A-Z]{1}_[0-9][0-9]", col))) or 
-                        (bool(re.search(prop + r"_CTD_[A-Z]{1}_[0-9][0-9]_[0-9][0-9]", col)))), 
+                    self.assertTrue(((bool(re.search(r"CTD_[A-Z]_[0-9]{2}_" + prop, col))) or 
+                        (bool(re.search(r"CTD_[A-Z]_[0-9]{2}_[0-9]{2}_" + prop, col)))), 
                             "Column name does not follow expected format: {}.".format(col))
-                self.assertTrue(matching_col, "Column name's property name not found and doesn't match format: {}.".format(matching_col))
+                self.assertTrue(matching_col, "Column name's property name not found and doesn't match format: {}.".format(col))

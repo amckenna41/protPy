@@ -46,3 +46,4 @@
 - [ ] Add logo/image to main readme.
 - [X] Add emojis to readme.
 - [ ] Add releases.
+- [X] Change hydrophobicity_CTD_T_13 to CTD_T_13_hydrophobicity.

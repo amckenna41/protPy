@@ -80,7 +80,7 @@ def str_to_num(sequence, property):
     #if invalid amino acids in sequence, raise value error
     for aa in sequence:
         if (aa not in amino_acids):
-            raise ValueError("Invalid amino acid in protein sequence: ".format(aa))
+            raise ValueError("Invalid amino acid in protein sequence: {}".format(aa))
 
     sequence_converted = copy.deepcopy(sequence)
 
@@ -120,7 +120,7 @@ def ctd_composition(sequence, property="hydrophobicity"):
     #if invalid amino acids in sequence, raise value error
     for aa in sequence:
         if (aa not in amino_acids):
-            raise ValueError("Invalid amino acid in protein sequence: .".format(aa))
+            raise ValueError("Invalid amino acid in protein sequence: {}.".format(aa))
 
     #get closest matched CTD property 
     property_matches = get_close_matches(property, ctd_properties.keys(), cutoff=0.8)
@@ -137,9 +137,9 @@ def ctd_composition(sequence, property="hydrophobicity"):
     ctd_composition_ = {}
     
     #calculate descriptor values, append to ctd_composition_ dict
-    ctd_composition_[prop["name"] + '_CTD_C_01'] = round(float(seq.count("1"))/len(sequence), 3) 
-    ctd_composition_[prop["name"] + '_CTD_C_02'] = round(float(seq.count("2"))/len(sequence), 3)
-    ctd_composition_[prop["name"] + '_CTD_C_03'] = round(float(seq.count("3"))/len(sequence), 3)
+    ctd_composition_['CTD_C_01_' + prop["name"]] = round(float(seq.count("1"))/len(sequence), 3) 
+    ctd_composition_['CTD_C_02_' + prop["name"]] = round(float(seq.count("2"))/len(sequence), 3)
+    ctd_composition_['CTD_C_03_' + prop["name"]] = round(float(seq.count("3"))/len(sequence), 3)
 
     #transform values and columns to DataFrame
     ctd_composition_df = pd.DataFrame([list(ctd_composition_.values())], columns=list(ctd_composition_.keys()))
@@ -173,7 +173,7 @@ def ctd_transition(sequence, property="hydrophobicity"):
     #if invalid amino acids in sequence, raise value error
     for aa in sequence:
         if (aa not in amino_acids):
-            raise ValueError("Invalid amino acid in protein sequence: .".format(aa))
+            raise ValueError("Invalid amino acid in protein sequence: {}.".format(aa))
 
     #get closest matched CTD property 
     property_matches = get_close_matches(property, ctd_properties.keys(), cutoff=0.8)
@@ -190,11 +190,11 @@ def ctd_transition(sequence, property="hydrophobicity"):
     ctd_transition_ = {}
 
     #calculate descriptor values, append to ctd_transition_ dict
-    ctd_transition_[prop["name"] + "_CTD_T_12"] = round(
+    ctd_transition_["CTD_T_12_" + prop["name"]] = round(
         float(seq.count("12") + seq.count("21")) / (len(sequence)-1), 3)
-    ctd_transition_[prop["name"] + "_CTD_T_13"] = round(
+    ctd_transition_["CTD_T_13_" + prop["name"]] = round(
         float(seq.count("13") + seq.count("31")) / (len(sequence)-1), 3)
-    ctd_transition_[prop["name"] + "_CTD_T_23"] = round(
+    ctd_transition_["CTD_T_23_" + prop["name"]] = round(
         float(seq.count("23") + seq.count("32")) / (len(sequence)-1), 3)
 
     #transform values and columns to DataFrame
@@ -226,7 +226,7 @@ def ctd_distribution(sequence, property="hydrophobicity"):
     #if invalid amino acids in sequence, raise value error
     for aa in sequence:
         if (aa not in amino_acids):
-            raise ValueError("Invalid amino acid in protein sequence: .".format(aa))
+            raise ValueError("Invalid amino acid in protein sequence: {}.".format(aa))
 
     #get closest matched CTD property 
     property_matches = get_close_matches(property, ctd_properties.keys(), cutoff=0.8)
@@ -255,25 +255,25 @@ def ctd_distribution(sequence, property="hydrophobicity"):
            cds.append(indexk)
            ink = ink + 1
        if cds == []:
-           ctd_distribution_[prop["name"] + "_CTD_D_0" + key + "_001"] = 0
-           ctd_distribution_[prop["name"] + "_CTD_D_0" + key + "_025"] = 0
-           ctd_distribution_[prop["name"] + "_CTD_D_0" + key + "_050"] = 0
-           ctd_distribution_[prop["name"] + "_CTD_D_0" + key + "_075"] = 0
-           ctd_distribution_[prop["name"] + "_CTD_D_0" + key + "_100"] = 0
+           ctd_distribution_["CTD_D_0" + key + "_001_" + prop["name"]] = 0
+           ctd_distribution_["CTD_D_0" + key + "_025_" + prop["name"]] = 0
+           ctd_distribution_["CTD_D_0" + key + "_050_" + prop["name"]] = 0
+           ctd_distribution_["CTD_D_0" + key + "_075_" + prop["name"]] = 0
+           ctd_distribution_["CTD_D_0" + key + "_100_" + prop["name"]] = 0
        else:
-           ctd_distribution_[prop["name"] + "_CTD_D_0" + key + "_001"] = round(
+           ctd_distribution_["CTD_D_0" + key + "_001_" + prop["name"]] = round(
             float(cds[0]) / len(seq) * 100, 3
            )
-           ctd_distribution_[prop["name"] + "_CTD_D_0" + key + "_025"] = round(
+           ctd_distribution_["CTD_D_0" + key + "_025_" + prop["name"]] = round(
             float(cds[int(math.floor(num * 0.25)) - 1]) / len(seq) * 100, 3
            )
-           ctd_distribution_[prop["name"] + "_CTD_D_0" + key + "_050"] = round(
+           ctd_distribution_["CTD_D_0" + key + "_050_" + prop["name"]] = round(
             float(cds[int(math.floor(num * 0.5)) - 1]) / len(seq) * 100, 3
            )
-           ctd_distribution_[prop["name"] + "_CTD_D_0" + key + "_075"] = round(
+           ctd_distribution_["CTD_D_0" + key + "_075_" + prop["name"]] = round(
             float(cds[int(math.floor(num * 0.75)) - 1]) / len(seq) * 100, 3
            )
-           ctd_distribution_[prop["name"] + "_CTD_D_0" + key + "_100"] = round(
+           ctd_distribution_["CTD_D_0" + key + "_100_" + prop["name"]] = round(
             float(cds[-1]) / len(seq) * 100, 3)
 
     #transform values and columns to DataFrame
@@ -318,7 +318,7 @@ def ctd_(sequence, property="hydrophobicity", all_ctd=True):
     #if invalid amino acids in sequence, raise value error
     for aa in sequence:
         if (aa not in amino_acids):
-            raise ValueError("Invalid amino acid in protein sequence: .".format(aa))
+            raise ValueError("Invalid amino acid in protein sequence: {}.".format(aa))
     
     #initialise ctd dataframes
     comp_df = pd.DataFrame()
