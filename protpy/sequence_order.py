@@ -110,8 +110,8 @@ def sequence_order_coupling_number(sequence, lag=30,
     SOCN computes the dissimilarity between amino acid pairs. The distance between 
     amino acid pairs is determined by d which varies between 1 to lag. For each d, it 
     computes the sum of the dissimilarities of all amino acid pairs. The number of 
-    output features can be calculated as N * 2, where N = lag, by default this value 
-    is 30 which generates an output of 1 x 60.
+    output features can be calculated as N, where N = lag, by default this value 
+    is 30 which generates an output of 1 x 30.
 
     Parameters
     ----------
@@ -127,8 +127,8 @@ def sequence_order_coupling_number(sequence, lag=30,
     -------
     :sequence_order_df : pd.Dataframe
         Dataframe of SOCN descriptor values for all protein sequences. Output
-        will be of the shape N x 1, where N is the number of features calculated 
-        from the descriptor (calculated as M * 2 where M = lag).
+        will be of the shape 1 x N, where N is the number of features calculated 
+        from the descriptor (calculated as M where M = lag).
     """
     #check input sequence is a string, if not raise type error
     if not isinstance(sequence, str):
@@ -180,7 +180,11 @@ def sequence_order_coupling_number(sequence, lag=30,
 def sequence_order_coupling_number_all(sequence, lag=30):
     """
     Calculate Sequence Order Coupling Number (SOCN) descriptor values of input protein 
-    sequence using both matrices (schneider-wrede & grantham).
+    sequence using both matrices (schneider-wrede & grantham). The distance between 
+    amino acid pairs is determined by d which varies between 1 to lag. For each d, it 
+    computes the sum of the dissimilarities of all amino acid pairs. Each matrix generates
+    an output of 1 x N, where N is the lag, so the concatenated output will be 1 x (N * 2).
+    With a default lag of 30, this will generate an output of 1 x 60.
 
     Parameters
     ----------
@@ -194,7 +198,10 @@ def sequence_order_coupling_number_all(sequence, lag=30):
     -------
     :socn_all : pd.Dataframe
         Concatenated dataframe of SOCN descriptor values of input protein sequence using
-        both distance matrices.
+        both distance matrices. The number of output features can be calculated as N * 2, 
+        where N = lag, by default this value is 30 which generates an output of 1 x 60 
+        for each matrix, with the two matrices the output will be 1 x (30*2), using the 
+        default lag.
     """
     #check input sequence is a string, if not raise type error
     if not isinstance(sequence, str):
@@ -233,8 +240,8 @@ def quasi_sequence_order(sequence, lag=30, weight=0.1,
     the Scheider-Wrede physicochemical distance matrix was used. Also utilised in
     the descriptor calculation is the Grantham chemical distance matrix. Both of
     these matrices are used by Grantham et. al. in the calculation
-    of the descriptor [4]. 100 values are calculated per sequence, thus generating
-    an output of 1 x 100 per sequence.
+    of the descriptor [4]. N + 20 values are calculated per sequence, where N is the
+    lag, with a default lag of 30, the output will be 1 x 50.
 
     Parameters
     ----------
@@ -251,9 +258,9 @@ def quasi_sequence_order(sequence, lag=30, weight=0.1,
     Returns
     -------
     :quasi_sequence_order_df : pd.Dataframe
-        dataframe of quasi-sequence-order descriptor values for the
-        protein sequences, with output shape 1 x 100 where 100 is the 
-        number of calculated features per sequence.
+        dataframe of quasi-sequence-order descriptor values for the protein sequences, 
+        with output shape 1 x (N + 20) where N is the lag. With a default lag of 30 
+        the output will be 1 x 50.
     """
     #check input sequence is a string, if not raise type error
     if not isinstance(sequence, str):
@@ -329,7 +336,10 @@ def quasi_sequence_order_all(sequence, lag=30, weight=0.1):
     """
     Calculate Quasi Sequence Order features for input protein sequence using 
     both physiochemical distance matrices. Concatenate into one output dataframe. 
- 
+    The output will be in the shape 1 x ((N + 20)*2), where ((N + 20)*2) is the 
+    quasi sequence order output from one matrix and N is the lag. The output  
+    is multiplied by two to take into account the 2 matrices being concatenated. 
+
     Parameters
     ----------
     :sequence : str
@@ -344,8 +354,9 @@ def quasi_sequence_order_all(sequence, lag=30, weight=0.1):
     -------
     :quasi_sequence_order_all_df : pd.Dataframe
         dataframe of quasi-sequence-order descriptor values for the
-        protein sequences, with output shape 1 x 100 where 100 is the 
-        number of calculated features per sequence.
+        protein sequences, with output shape 1 x ((N + 20)*2) where ((N + 20)*2) is the 
+        quasi sequence order output from one matrix and N is the lag. The output  
+        is multiplied by two to take into account the 2 matrices being concatenated. 
     """
     #uppercase protein sequence 
     sequence = sequence.upper()

@@ -227,7 +227,7 @@ def pseudo_amino_acid_composition(sequence, lamda=30, weight=0.05, properties=[]
     components of the descriptor are a series rank-different correlation factors [5].
     The first 20 components are a weighted sum of the amino acid composition and 30 are 
     physiochemical square correlations as dictated by the lamda and properties parameters.
-    This generates an output of [(20 + lamda), 1] = 50 x 1 when using the default lamda of 30. 
+    This generates an output of [1, (20 + lamda)] = 1 x 50 when using the default lamda of 30. 
     By default, the physiochemical properties used are hydrophobicity and hydrophillicity, with 
     a lamda of 30 and weight of 0.05.
 

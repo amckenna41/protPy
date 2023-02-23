@@ -47,3 +47,7 @@
 - [X] Add emojis to readme.
 - [ ] Add releases.
 - [X] Change hydrophobicity_CTD_T_13 to CTD_T_13_hydrophobicity.
+- [ ] Python unit tests using ctd with 1 property, and using all properties, check dimensions - 21 vs 147 (147/21=7). 21 dimensions per property. 3 C, 3 T, 15 D.
+- [ ] Add output dimensions to SOCN functions.
+- [ ] def sequence_order_coupling_number() - dimesnion (1,lag). def sequence_order_coupling_number_all() - dimension (1,lag*2)
+- [ ] def quasi_sequence_order() - dimesnion (1,lag). def quasi_sequence_order_all() - dimension (1,lag*2)

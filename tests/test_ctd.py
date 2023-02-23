@@ -47,7 +47,7 @@ class ProtPyCTDTests(unittest.TestCase):
         properties = ["hydrophobicity", "normalized_vdwv", "polarity", "charge",
             "secondary_struct", "solvent_accessibility", "polarizability"]
  #1.)
-        ctd_seq1 = protpy.ctd_(self.protein_seq1)
+        ctd_seq1 = protpy.ctd_(self.protein_seq1,  all_ctd=True) #using all properties
 
         self.assertEqual(ctd_seq1.shape, (1, 147), 'Descriptor not of correct shape.') 
         self.assertIsInstance(ctd_seq1, pd.DataFrame, 'Descriptor not of type DataFrame.')
@@ -65,6 +65,22 @@ class ProtPyCTDTests(unittest.TestCase):
                         (bool(re.search(r"CTD_[A-Z]_[0-9]{2}_[0-9]{3}_" + prop, col)))), 
                             "Column name does not follow expected format: {}.".format(col))
             self.assertTrue(matching_col, "Column name's property name not found and doesn't match format: {}.".format(col))
+#2.)    
+        for prop in properties:
+            ctd_seq2 = protpy.ctd_(self.protein_seq2, property=prop, all_ctd=False) #using one property at a time
+
+            self.assertEqual(ctd_seq2.shape, (1, 21), 'Descriptor not of correct shape.') 
+            self.assertIsInstance(ctd_seq2, pd.DataFrame, 'Descriptor not of type DataFrame.')
+            self.assertTrue(ctd_seq2.any().isnull().sum()==0, 'Descriptor should not contain any null values.')  
+            self.assertTrue(all(col == np.float64 for col in list(ctd_seq2.dtypes)), "")
+            
+            #iterate over all columns, checking they follow naming convention using regex
+            for col in list(ctd_seq2.columns):
+                self.assertTrue(col.endswith(prop), "")
+                self.assertTrue(((bool(re.search(r"CTD_[A-Z]_[0-9]{2}_" + prop, col))) or 
+                    (bool(re.search(r"CTD_[A-Z]_[0-9]{2}_[0-9]{2}_" + prop, col))) or 
+                    (bool(re.search(r"CTD_[A-Z]_[0-9]{2}_[0-9]{3}_" + prop, col)))), 
+                        "Column name does not follow expected format: {}.".format(col))
 
     def test_ctd_composition(self):
         """ Testing CTD Composition descriptor attributes and functionality. """   

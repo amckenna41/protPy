@@ -58,7 +58,7 @@ class ProtPySequenceOrderTests(unittest.TestCase):
         # self.all_seqs = [self.protein_seq1, self.protein_seq2, 
         #     self.protein_seq3, self.protein_seq4]
 
-    def test_sequence_order_coupling_number(self):
+    def test_sequence_order_coupling_number_(self):
         """ Testing SOCN function that calculates the individial SOCN value. """
         lag = 15
 
@@ -126,7 +126,7 @@ class ProtPySequenceOrderTests(unittest.TestCase):
                 socn_seq6 = protpy.sequence_order_coupling_number_(invalid_seq6, i+1, 
                     distance_matrix=self.distance_matrix_grantham)
 
-    def test_sequence_order_coupling_number_(self):
+    def test_sequence_order_coupling_number(self):
         """ Testing sequence order coupling number descriptor attributes and functionality. """
 #1.)
         socn_seq1 = protpy.sequence_order_coupling_number(self.protein_seq1, lag=5, 
@@ -290,7 +290,7 @@ class ProtPySequenceOrderTests(unittest.TestCase):
         lag = 10
         quasi_sequence_order_seq3 = protpy.quasi_sequence_order(self.protein_seq3, lag=lag, 
             distance_matrix=self.distance_matrix_schneider_wrede)
-        
+
         self.assertEqual(quasi_sequence_order_seq3.shape, (1, lag+20), 'Descriptor not of correct shape.') 
         self.assertIsInstance(quasi_sequence_order_seq3, pd.DataFrame, 'Descriptor not of type DataFrame.')
         for col in list(quasi_sequence_order_seq3.columns):
@@ -304,7 +304,7 @@ class ProtPySequenceOrderTests(unittest.TestCase):
         lag = 5
         quasi_sequence_order_seq4 = protpy.quasi_sequence_order(self.protein_seq4, lag=lag, 
             distance_matrix=self.distance_matrix_schneider_wrede)
-        
+
         self.assertEqual(quasi_sequence_order_seq4.shape, (1, lag+20), 'Descriptor not of correct shape.') 
         self.assertIsInstance(quasi_sequence_order_seq4, pd.DataFrame, 'Descriptor not of type DataFrame.')
         for col in list(quasi_sequence_order_seq4.columns):
@@ -336,7 +336,7 @@ class ProtPySequenceOrderTests(unittest.TestCase):
         lag = 30
         qso_all_seq1 = protpy.quasi_sequence_order_all(self.protein_seq1, lag=lag)
 #1.)
-        self.assertEqual(qso_all_seq1.shape, (1, (lag*2 + 40)), 'Descriptor not of correct shape, expected (1, 60), got {}.'.format(qso_all_seq1.shape)) 
+        self.assertEqual(qso_all_seq1.shape, (1, (lag+20)*2), 'Descriptor not of correct shape, expected (1, 60), got {}.'.format(qso_all_seq1.shape)) 
         self.assertIsInstance(qso_all_seq1, pd.DataFrame, 'Descriptor not of type DataFrame.')
         for col in list(qso_all_seq1.columns):
             #check all columns follow pattern of SOCNX or SOCNXY where x & y integers between 0 and 9
@@ -350,7 +350,7 @@ class ProtPySequenceOrderTests(unittest.TestCase):
         lag = 15
         qso_all_seq2 = protpy.quasi_sequence_order_all(self.protein_seq2, lag=lag)
 
-        self.assertEqual(qso_all_seq2.shape, (1, (lag*2 + 40)), 'Descriptor not of correct shape, expected (1, 60), got {}.'.format(qso_all_seq2.shape)) 
+        self.assertEqual(qso_all_seq2.shape, (1, (lag+20)*2), 'Descriptor not of correct shape, expected (1, 60), got {}.'.format(qso_all_seq2.shape)) 
         self.assertIsInstance(qso_all_seq2, pd.DataFrame, 'Descriptor not of type DataFrame.')
         for col in list(qso_all_seq2.columns):
             #check all columns follow pattern of SOCNX or SOCNXY where x & y integers between 0 and 9
@@ -364,7 +364,7 @@ class ProtPySequenceOrderTests(unittest.TestCase):
         lag = 10
         qso_all_seq3 = protpy.quasi_sequence_order_all(self.protein_seq3, lag=lag)
 
-        self.assertEqual(qso_all_seq3.shape, (1, (lag*2 + 40)), 'Descriptor not of correct shape, expected (1, 60), got {}.'.format(qso_all_seq3.shape)) 
+        self.assertEqual(qso_all_seq3.shape, (1, (lag+20)*2), 'Descriptor not of correct shape, expected (1, 60), got {}.'.format(qso_all_seq3.shape)) 
         self.assertIsInstance(qso_all_seq3, pd.DataFrame, 'Descriptor not of type DataFrame.')
         for col in list(qso_all_seq3.columns):
             #check all columns follow pattern of SOCNX or SOCNXY where x & y integers between 0 and 9
@@ -378,7 +378,7 @@ class ProtPySequenceOrderTests(unittest.TestCase):
         lag = 5
         qso_all_seq4 = protpy.quasi_sequence_order_all(self.protein_seq4, lag=lag)
 
-        self.assertEqual(qso_all_seq4.shape, (1, (lag*2 + 40)), 'Descriptor not of correct shape, expected (1, 60), got {}.'.format(qso_all_seq4.shape)) 
+        self.assertEqual(qso_all_seq4.shape, (1, (lag+20)*2), 'Descriptor not of correct shape, expected (1, 60), got {}.'.format(qso_all_seq4.shape)) 
         self.assertIsInstance(qso_all_seq4, pd.DataFrame, 'Descriptor not of type DataFrame.')
         for col in list(qso_all_seq4.columns):
             #check all columns follow pattern of SOCNX or SOCNXY where x & y integers between 0 and 9
