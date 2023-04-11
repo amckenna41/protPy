@@ -14,7 +14,8 @@ import protpy as protpy
 class ProtPyCTDTests(unittest.TestCase):
     """
     Test suite for testing CTD (Composition, Transition, Distribution) 
-    module and functionality in protpy package. 
+    module and functionality in protpy package, including the CTD 
+    descriptors.
 
     Test Cases
     ----------
@@ -42,109 +43,148 @@ class ProtPyCTDTests(unittest.TestCase):
         with open(os.path.join("tests", "test_fasta4.fasta")) as pro:
             self.protein_seq4 = str(next(SeqIO.parse(pro,'fasta')).seq)
 
+        self.all_protein_seqs = [self.protein_seq1, self.protein_seq2, self.protein_seq3, self.protein_seq4]
+
     def test_ctd(self):
         """ Testing CTD descriptor attributes and functionality. """   
         properties = ["hydrophobicity", "normalized_vdwv", "polarity", "charge",
             "secondary_struct", "solvent_accessibility", "polarizability"]
  #1.)
-        ctd_seq1 = protpy.ctd_(self.protein_seq1,  all_ctd=True) #using all properties
+        for seq in self.all_protein_seqs:
+            ctd_seq1 = protpy.ctd_(seq,  all_ctd=True) #using all properties
 
-        self.assertEqual(ctd_seq1.shape, (1, 147), 'Descriptor not of correct shape.') 
-        self.assertIsInstance(ctd_seq1, pd.DataFrame, 'Descriptor not of type DataFrame.')
-        self.assertTrue(ctd_seq1.any().isnull().sum()==0, 'Descriptor should not contain any null values.')  
-        self.assertTrue(all(col == np.float64 for col in list(ctd_seq1.dtypes)), "")
-        
-        #iterate over all columns, checking they follow naming convention using regex
-        for col in list(ctd_seq1.columns):
-            matching_col = False
-            for prop in properties:
-                if (col.endswith(prop)):
-                    matching_col = True
-                    self.assertTrue(((bool(re.search(r"CTD_[A-Z]_[0-9]{2}_" + prop, col))) or 
-                        (bool(re.search(r"CTD_[A-Z]_[0-9]{2}_[0-9]{2}_" + prop, col))) or 
-                        (bool(re.search(r"CTD_[A-Z]_[0-9]{2}_[0-9]{3}_" + prop, col)))), 
-                            "Column name does not follow expected format: {}.".format(col))
-            self.assertTrue(matching_col, "Column name's property name not found and doesn't match format: {}.".format(col))
-#2.)    
-        for prop in properties:
-            ctd_seq2 = protpy.ctd_(self.protein_seq2, property=prop, all_ctd=False) #using one property at a time
+            self.assertIsInstance(ctd_seq1, pd.DataFrame,
+                'Expected output to be a DataFrame, got {}.'.format(type(ctd_seq1))
+            self.assertEqual(ctd_seq1.shape, (1, 147), 
+                'Expected output to be of shape {}, got {}.'.format((1, 147), ctd_seq1.shape))) 
+            self.assertTrue(ctd_seq1.any().isnull().sum()==0,
+                'Expected output to contain no null values.')        
+            self.assertTrue(all(col == np.float64 for col in list(ctd_seq1.dtypes)),
+                "Expected output values to be of datatype np.float64, got {}.".format(list(ctd_seq1.dtypes)))
 
-            self.assertEqual(ctd_seq2.shape, (1, 21), 'Descriptor not of correct shape.') 
-            self.assertIsInstance(ctd_seq2, pd.DataFrame, 'Descriptor not of type DataFrame.')
-            self.assertTrue(ctd_seq2.any().isnull().sum()==0, 'Descriptor should not contain any null values.')  
-            self.assertTrue(all(col == np.float64 for col in list(ctd_seq2.dtypes)), "")
-            
             #iterate over all columns, checking they follow naming convention using regex
-            for col in list(ctd_seq2.columns):
-                self.assertTrue(col.endswith(prop), "")
-                self.assertTrue(((bool(re.search(r"CTD_[A-Z]_[0-9]{2}_" + prop, col))) or 
-                    (bool(re.search(r"CTD_[A-Z]_[0-9]{2}_[0-9]{2}_" + prop, col))) or 
-                    (bool(re.search(r"CTD_[A-Z]_[0-9]{2}_[0-9]{3}_" + prop, col)))), 
-                        "Column name does not follow expected format: {}.".format(col))
+            for col in list(ctd_seq1.columns):
+                matching_col = False
+                for prop in properties:
+                    if (col.endswith(prop)):
+                        matching_col = True
+                        self.assertTrue(((bool(re.search(r"CTD_[A-Z]_[0-9]{2}_" + prop, col))) or 
+                            (bool(re.search(r"CTD_[A-Z]_[0-9]{2}_[0-9]{2}_" + prop, col))) or 
+                            (bool(re.search(r"CTD_[A-Z]_[0-9]{2}_[0-9]{3}_" + prop, col)))), 
+                                "Column name does not follow expected regex format: {}.".format(col))
+                    self.assertTrue(matching_col, 
+                        "Column name's property name not found and doesn't match format: {}.".format(col))
+#2.)    
+            for prop in properties:
+                ctd_seq2 = protpy.ctd_(seq, property=prop, all_ctd=False) #using one property at a time
+
+                self.assertIsInstance(ctd_seq2, pd.DataFrame,
+                    'Expected output to be a DataFrame, got {}.'.format(type(ctd_seq2))
+                self.assertEqual(ctd_seq2.shape, (1, 147), 
+                    'Expected output to be of shape {}, got {}.'.format((1, 147), ctd_seq2.shape))) 
+                self.assertTrue(ctd_seq2.any().isnull().sum()==0,
+                    'Expected output to contain no null values.')        
+                self.assertTrue(all(col == np.float64 for col in list(ctd_seq2.dtypes)),
+                    "Expected output values to be of datatype np.float64, got {}.".format(list(ctd_seq2.dtypes)))
+
+                #iterate over all columns, checking they follow naming convention using regex
+                for col in list(ctd_seq2.columns):
+                    matching_col = False
+                    for prop in properties:
+                        if (col.endswith(prop)):
+                            matching_col = True
+                            self.assertTrue(((bool(re.search(r"CTD_[A-Z]_[0-9]{2}_" + prop, col))) or 
+                                (bool(re.search(r"CTD_[A-Z]_[0-9]{2}_[0-9]{2}_" + prop, col))) or 
+                                (bool(re.search(r"CTD_[A-Z]_[0-9]{2}_[0-9]{3}_" + prop, col)))), 
+                                    "Column name does not follow expected regex format: {}.".format(col))
+                        self.assertTrue(matching_col, 
+                            "Column name's property name not found and doesn't match format: {}.".format(col))
 
     def test_ctd_composition(self):
         """ Testing CTD Composition descriptor attributes and functionality. """   
         properties = ["hydrophobicity", "normalized_vdwv", "polarity", "charge",
             "secondary_struct", "solvent_accessibility", "polarizability"]
 #1.)
-        for prop in properties:
-            ctd_composition_seq1 = protpy.ctd_composition(self.protein_seq1, property=prop)
+        for seq in self.all_protein_seqs:
+            for prop in properties:
+                ctd_composition_seq1 = protpy.ctd_composition(seq, property=prop)
 
-            self.assertEqual(ctd_composition_seq1.shape, (1, 3), 'Descriptor not of correct shape.') 
-            self.assertIsInstance(ctd_composition_seq1, pd.DataFrame, 'Descriptor not of type DataFrame.')
-            self.assertTrue(ctd_composition_seq1.any().isnull().sum()==0, 'Descriptor should not contain any null values.')  
-            self.assertTrue(all(col == np.float64 for col in list(ctd_composition_seq1.dtypes)), "")
-            
-            #iterate over all columns, checking they follow naming convention using regex
-            for col in list(ctd_composition_seq1.columns):
-                matching_col = False
-                if (col.endswith(prop)):
-                    matching_col = True
-                    self.assertTrue((bool(re.search(r"CTD_[A-Z]_[0-9]{2}_" + prop, col))), 
-                        "Column name does not follow expected format: {}.".format(col))
-                self.assertTrue(matching_col, "Column name's property name not found and doesn't match format: {}.".format(col))
+                self.assertIsInstance(ctd_composition_seq1, pd.DataFrame,
+                    'Expected output to be a DataFrame, got {}.'.format(type(ctd_composition_seq1))
+                self.assertEqual(ctd_composition_seq1.shape, (1, 147), 
+                    'Expected output to be of shape {}, got {}.'.format((1, 147), ctd_composition_seq1.shape))) 
+                self.assertTrue(ctd_composition_seq1.any().isnull().sum()==0,
+                    'Expected output to contain no null values.')        
+                self.assertTrue(all(col == np.float64 for col in list(ctd_composition_seq1.dtypes)),
+                    "Expected output values to be of datatype np.float64, got {}.".format(list(ctd_composition_seq1.dtypes)))
 
-    def test_ctd_distribution(self):
-        """ Testing CTD Distribution descriptor attributes and functionality. """   
-        properties = ["hydrophobicity", "normalized_vdwv", "polarity", "charge",
-            "secondary_struct", "solvent_accessibility", "polarizability"]
-#1.)
-        for prop in properties:
-            ctd_distribution_seq1 = protpy.ctd_distribution(self.protein_seq1, property=prop)
-
-            self.assertEqual(ctd_distribution_seq1.shape, (1, 15), 'Descriptor not of correct shape.') 
-            self.assertIsInstance(ctd_distribution_seq1, pd.DataFrame, 'Descriptor not of type DataFrame.')
-            self.assertTrue(ctd_distribution_seq1.any().isnull().sum()==0, 'Descriptor should not contain any null values.')  
-            self.assertTrue(all(col == np.float64 for col in list(ctd_distribution_seq1.dtypes)), "")
-            
-            #iterate over all columns, checking they follow naming convention using regex
-            for col in list(ctd_distribution_seq1.columns):
-                matching_col = False
-                if (col.endswith(prop)):
-                    matching_col = True
-                    self.assertTrue((bool(re.search(r"CTD_[A-Z]_[0-9]{2}_[0-9]{3}_" + prop, col))), 
-                        "Column name does not follow expected format: {}.".format(col))
-                self.assertTrue(matching_col, "Column name's property name not found and doesn't match format: {}.".format(col))
+                #iterate over all columns, checking they follow naming convention using regex
+                for col in list(ctd_composition_seq1.columns):
+                    matching_col = False
+                    for prop in properties:
+                        if (col.endswith(prop)):
+                            matching_col = True
+                            self.assertTrue(((bool(re.search(r"CTD_[A-Z]_[0-9]{2}_" + prop, col))) or 
+                                (bool(re.search(r"CTD_[A-Z]_[0-9]{2}_[0-9]{2}_" + prop, col))) or 
+                                (bool(re.search(r"CTD_[A-Z]_[0-9]{2}_[0-9]{3}_" + prop, col)))), 
+                                    "Column name does not follow expected regex format: {}.".format(col))
+                        self.assertTrue(matching_col, 
+                            "Column name's property name not found and doesn't match format: {}.".format(col))
 
     def test_ctd_transition(self):
         """ Testing CTD Transition descriptor attributes and functionality. """   
         properties = ["hydrophobicity", "normalized_vdwv", "polarity", "charge",
             "secondary_struct", "solvent_accessibility", "polarizability"]
 #1.)    
-        for prop in properties:
-            ctd_transition_seq1 = protpy.ctd_transition(self.protein_seq1, property=prop)
+        for seq in self.all_protein_seqs:
+            for prop in properties:
+                ctd_transition_seq1 = protpy.ctd_transition(seq, property=prop)
 
-            self.assertEqual(ctd_transition_seq1.shape, (1, 3), 'Descriptor not of correct shape.') 
-            self.assertIsInstance(ctd_transition_seq1, pd.DataFrame, 'Descriptor not of type DataFrame.')
-            self.assertTrue(ctd_transition_seq1.any().isnull().sum()==0, 'Descriptor should not contain any null values.')  
-            self.assertTrue(all(col == np.float64 for col in list(ctd_transition_seq1.dtypes)), "")
-            
-            #iterate over all columns and check its name follows expected format
-            for col in list(ctd_transition_seq1.columns):
-                matching_col = False
-                if (col.endswith(prop)):
-                    matching_col = True
-                    self.assertTrue(((bool(re.search(r"CTD_[A-Z]_[0-9]{2}_" + prop, col))) or 
-                        (bool(re.search(r"CTD_[A-Z]_[0-9]{2}_[0-9]{2}_" + prop, col)))), 
-                            "Column name does not follow expected format: {}.".format(col))
-                self.assertTrue(matching_col, "Column name's property name not found and doesn't match format: {}.".format(col))
+                self.assertIsInstance(ctd_transition_seq1, pd.DataFrame, 
+                    'Expected output to be a DataFrame, got {}.'.format(type(ctd_transition_seq1))
+                self.assertEqual(ctd_transition_seq1.shape, (1, 3), 
+                    'Expected output to be of shape {}, got {}.'.format((1, 3), ctd_transition_seq1.shape))) 
+                self.assertTrue(ctd_transition_seq1.any().isnull().sum()==0,
+                    'Expected output to contain no null values.')        
+                self.assertTrue(all(col == np.float64 for col in list(ctd_transition_seq1.dtypes)), 
+                    "Expected output values to be of datatype np.float64, got {}.".format(list(ctd_transition_seq1.dtypes)))
+
+                #iterate over all columns and check its name follows expected format
+                for col in list(ctd_transition_seq1.columns):
+                    matching_col = False
+                    if (col.endswith(prop)):
+                        matching_col = True
+                        self.assertTrue(((bool(re.search(r"CTD_[A-Z]_[0-9]{2}_" + prop, col))) or 
+                            (bool(re.search(r"CTD_[A-Z]_[0-9]{2}_[0-9]{2}_" + prop, col)))), 
+                                "Column name does not follow expected regex format: {}.".format(col))
+                    self.assertTrue(matching_col, 
+                        "Column name's property name not found and doesn't match format: {}.".format(col))
+
+    def test_ctd_distribution(self):
+        """ Testing CTD Distribution descriptor attributes and functionality. """   
+        properties = ["hydrophobicity", "normalized_vdwv", "polarity", "charge",
+            "secondary_struct", "solvent_accessibility", "polarizability"]
+#1.)
+        for seq in self.all_protein_seqs:
+            for prop in properties:
+                ctd_distribution_seq1 = protpy.ctd_distribution(seq, property=prop)
+
+                self.assertIsInstance(ctd_distribution_seq1, pd.DataFrame, 
+                    'Expected output to be a DataFrame, got {}.'.format(type(ctd_distribution_seq1))
+                self.assertEqual(ctd_distribution_seq1.shape, (1, 15), 
+                    'Expected output to be of shape {}, got {}.'.format((1, 15), ctd_distribution_seq1.shape))) 
+                self.assertTrue(ctd_distribution_seq1.any().isnull().sum()==0,
+                    'Expected output to contain no null values.')        
+                self.assertTrue(all(col == np.float64 for col in list(ctd_distribution_seq1.dtypes)), 
+                    "Expected output values to be of datatype np.float64, got {}.".format(list(ctd_distribution_seq1.dtypes)))
+                
+                #iterate over all columns and check its name follows expected format
+                for col in list(ctd_distribution_seq1.columns):
+                    matching_col = False
+                    if (col.endswith(prop)):
+                        matching_col = True
+                        self.assertTrue(((bool(re.search(r"CTD_[A-Z]_[0-9]{2}_" + prop, col))) or 
+                            (bool(re.search(r"CTD_[A-Z]_[0-9]{2}_[0-9]{2}_" + prop, col)))), 
+                                "Column name does not follow expected regex format: {}.".format(col))
+                    self.assertTrue(matching_col, 
+                        "Column name's property name not found and doesn't match format: {}.".format(col))

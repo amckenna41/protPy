@@ -32,13 +32,15 @@ References
 amino_acids = ["A", "C", "D", "E", "F", "G", "H", "I", "K", "L", "M", "N", "P", 
     "Q", "R", "S", "T", "V", "W", "Y"]
 
+############################# Sequence Order Coupling Number ##############################
+
 def sequence_order_coupling_number_(sequence, d=1, distance_matrix="schneider-wrede-physiochemical-distance-matrix"):
     """
     Calculate Sequence Order Coupling Number (SOCN) features for input protein sequence.
     SOCN computes the dissimilarity between amino acid pairs. The distance between 
     amino acid pairs is determined by d which varies between 1 to lag. For each d, it 
     computes the sum of the dissimilarities of all amino acid pairs. The output will be 
-    a single float value representing the SOCN.
+    a single float value representing the SOCN [1].
     
     This function should not be confused with sequence_order_coupling_number() below 
     which calculates the multiple SOCN descriptor values for the input sequence 
@@ -69,7 +71,7 @@ def sequence_order_coupling_number_(sequence, d=1, distance_matrix="schneider-wr
     #if invalid amino acids in sequence, raise value error
     for aa in sequence:
         if (aa not in amino_acids):
-            raise ValueError("Invalid amino acid in protein sequence: .".format(aa))
+            raise ValueError("Invalid amino acid in protein sequence: {}.".format(aa))
 
     #append extension if missing from input
     if (os.path.splitext(distance_matrix)[1] == ''):
@@ -95,7 +97,7 @@ def sequence_order_coupling_number_(sequence, d=1, distance_matrix="schneider-wr
     tau = 0.0
 
     #iterate over length of sequence minus gap, incrementing the SOCN at each iteration using
-    # the values from the distance matrix with the current and next amino acid, round to 2 dp
+    #the values from the distance matrix with the current and next amino acid, round to 2 dp
     for aa in range(len(sequence) - d):
         current_aa = sequence[aa]
         next_aa = sequence[aa + d]
@@ -140,7 +142,7 @@ def sequence_order_coupling_number(sequence, lag=30,
     #if invalid amino acids in sequence, raise value error
     for aa in sequence:
         if (aa not in amino_acids):
-            raise ValueError("Invalid amino acid in protein sequence: .".format(aa))
+            raise ValueError("Invalid amino acid in protein sequence: {}.".format(aa))
 
     #raise value error if int cant be parsed from input lag
     try:
@@ -148,7 +150,7 @@ def sequence_order_coupling_number(sequence, lag=30,
     except:
         raise ValueError("Invalid lag value input, integer cannot be parsed: {}.".format(lag))
 
-    #validate lag, set default lag if invalid value input
+    #validate lag, set default lag of 30 if invalid value input
     if (not (isinstance(lag, int) or int(lag)>=len(sequence) or (int(lag)<0))):
         lag = 30
 
@@ -159,7 +161,7 @@ def sequence_order_coupling_number(sequence, lag=30,
     elif (os.path.splitext(distance_matrix)[0] == "grantham-physiochemical-distance-matrix"):
         col_prefix = "SOCN_Grant"
 
-    #set default lag if invalid value input
+    #set default lag of 30 if invalid value input
     if (lag>=len(sequence) or (lag<0) or not (isinstance(lag, int))):
         lag = 30
 
@@ -180,7 +182,7 @@ def sequence_order_coupling_number(sequence, lag=30,
 def sequence_order_coupling_number_all(sequence, lag=30):
     """
     Calculate Sequence Order Coupling Number (SOCN) descriptor values of input protein 
-    sequence using both matrices (schneider-wrede & grantham). The distance between 
+    sequence using both matrices (schneider-wrede & grantham) [3]. The distance between 
     amino acid pairs is determined by d which varies between 1 to lag. For each d, it 
     computes the sum of the dissimilarities of all amino acid pairs. Each matrix generates
     an output of 1 x N, where N is the lag, so the concatenated output will be 1 x (N * 2).
@@ -214,9 +216,9 @@ def sequence_order_coupling_number_all(sequence, lag=30):
     try:
         lag = int(lag)
     except:
-        raise ValueError("Invalid lag value input, integer cannot be parsed: {}.".format(lag))
+        raise TypeError("Invalid lag value input, integer cannot be parsed: {}.".format(lag))
 
-    #validate lag, set default lag if invalid value input
+    #validate lag, set default lag of 30 if invalid value input
     if (lag>=len(sequence) or (lag<0) or not (isinstance(lag, int))):
         lag = 30
 
@@ -231,6 +233,8 @@ def sequence_order_coupling_number_all(sequence, lag=30):
 
     return socn_all
 
+################################## Quasi Sequence Order ###################################
+
 def quasi_sequence_order(sequence, lag=30, weight=0.1,
     distance_matrix="schneider-wrede-physiochemical-distance-matrix.json"):
     """
@@ -240,7 +244,7 @@ def quasi_sequence_order(sequence, lag=30, weight=0.1,
     the Scheider-Wrede physicochemical distance matrix was used. Also utilised in
     the descriptor calculation is the Grantham chemical distance matrix. Both of
     these matrices are used by Grantham et. al. in the calculation
-    of the descriptor [4]. N + 20 values are calculated per sequence, where N is the
+    of the descriptor [3, 4]. N + 20 values are calculated per sequence, where N is the
     lag, with a default lag of 30, the output will be 1 x 50.
 
     Parameters
@@ -251,7 +255,7 @@ def quasi_sequence_order(sequence, lag=30, weight=0.1,
         maximum gap betwwen 2 amino acids; the length of the protein should be larger
         than lag. Default set to 30.
     :weight: float (default = 0.1)
-        weighting factor
+        weighting factor.
     :distance_matrix : str (default="schneider-wrede-physicochemical-distance-matrix")
         path to physiochemical distance matrix for calculating quasi sequence order.
 
@@ -272,19 +276,19 @@ def quasi_sequence_order(sequence, lag=30, weight=0.1,
     #if invalid amino acids in sequence, raise value error
     for aa in sequence:
         if (aa not in amino_acids):
-            raise ValueError("Invalid amino acid in protein sequence: .".format(aa))
+            raise ValueError("Invalid amino acid in protein sequence: {}.".format(aa))
 
-    #raise value error if int cant be parsed from input lag
+    #raise value error if int can't be parsed from input lag
     try:
         lag = int(lag)
     except:
         raise ValueError("Invalid lag value input, integer cannot be parsed: {}.".format(lag))
 
-    #validate lag, set default lag if invalid value input
+    #validate lag, set default lag of 30 if invalid value input
     if (lag>=len(sequence) or (lag<0) or not (isinstance(lag, int))):
         lag = 30
 
-    #validate weight, set default weight if invalid value input
+    #validate weight, set default weight of 0.1 if invalid value input
     if ((weight<0) or not (isinstance(lag, float)) or not (isinstance(lag, int))):
         weight = 0.1
 
@@ -309,7 +313,6 @@ def quasi_sequence_order(sequence, lag=30, weight=0.1,
     #iterate over amino acids, calculating descriptor value 
     temp = 1 + weight * right_part
     for index, aa in enumerate(amino_acids):
-        # quasi_sequence_order[col_prefix + "_1_" + str(index + 1)] = round(aa_comp[aa].values[0] / temp, 6)
         quasi_sequence_order[col_prefix + str(index + 1)] = round(aa_comp[aa].values[0] / temp, 6)
     
     #calculate SOCN up until maxlag
@@ -321,8 +324,6 @@ def quasi_sequence_order(sequence, lag=30, weight=0.1,
     #calculate the last maxlag descriptor values
     temp = 1 + weight * sum(_right_part)
     for index in range(20, 20 + lag):
-        # quasi_sequence_order[col_prefix + "_2" + str(index + 1)] = round(
-        #     weight * right_part[index - 20] / temp, 6)
         quasi_sequence_order[col_prefix + str(index + 1)] = round(
             weight * _right_part[index - 20] / temp, 6)
     
@@ -358,16 +359,20 @@ def quasi_sequence_order_all(sequence, lag=30, weight=0.1):
         quasi sequence order output from one matrix and N is the lag. The output  
         is multiplied by two to take into account the 2 matrices being concatenated. 
     """
+    #check input sequence is a string, if not raise type error
+    if not isinstance(sequence, str):
+        raise TypeError('Input sequence must be a string, got input of type {}.'.format(type(sequence)))
+    
     #uppercase protein sequence 
     sequence = sequence.upper()
 
-    #raise value error if int cant be parsed from input lag
+    #raise value error if int can't be parsed from input lag
     try:
         lag = int(lag)
     except:
         raise ValueError("Invalid lag value input, integer cannot be parsed: {}.".format(lag))
 
-    #validate lag, set default lag if invalid value input
+    #validate lag, set default lag of 30 if invalid value input
     if (lag>=len(sequence) or (lag<0) or not (isinstance(lag, int))):
         lag = 30
 

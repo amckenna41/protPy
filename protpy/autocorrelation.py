@@ -26,24 +26,28 @@ References
 amino_acids = ["A", "C", "D", "E", "F", "G", "H", "I", "K", "L", "M", "N", "P", 
     "Q", "R", "S", "T", "V", "W", "Y"]
     
+############################### MoreauBroto Autocorrelation ###############################
+
 def moreaubroto_autocorrelation(sequence, lag=30, 
     properties=["CIDH920105", "BHAR880101", "CHAM820101", "CHAM820102",
     "CHOC760101", "BIGC670101", "CHAM810101", "DAYM780201"], normalize=True):
     """
-    Calculate Normalized MoreauBrotoAuto Autocorrelation (NMBAuto) descriptor.
+    Calculate MoreauBrotoAuto Autocorrelation (MBAuto) descriptor for sequence.
     Autocorrelation descriptors are a class of topological descriptors,
     also known as molecular connectivity indices, that describe the level of
     correlation between two objects (protein or peptide sequences) in terms of
     their specific structural or physicochemical properties, which are
     defined based on the distribution of amino acid properties along the sequence.
-    By default, 8 amino acid properties are used for deriving the descriptors. The derivations
-    and detailed explanations of this type of descriptor is outlind in [2].
-    The NMBAuto descriptor is a type of Autocorrelation descriptor that uses
-    the property values as the basis for measurement. Each autocorrelation will
-    generate the number of features depending on the lag value and number of
-    properties input with total features = lag * number of properties. Using 
-    the default 8 properties with default lag value of 30, 240 features are 
-    generated, the default 8 properties are:
+    By default, 8 amino acid properties are used for deriving the descriptors. 
+    The derivations and detailed explanations of this type of descriptor is 
+    outlind in [2]. The MBAuto descriptor is a type of Autocorrelation 
+    descriptor that uses the property values as the basis for measurement. 
+    Each autocorrelation will generate the number of features depending on the 
+    lag value and number of properties input with total features = lag * number 
+    of properties. The output autocorrelation can also be normalized by setting
+    the normalize parameter to true, this occurs by default. Using the default 8 
+    properties with default lag value of 30, 240 features are generated, 
+    the default 8 properties are:
 
     AccNo. CIDH920105 - Normalized Average Hydrophobicity Scales
     AccNo. BHAR880101 - Average Flexibility Indices
@@ -63,17 +67,17 @@ def moreaubroto_autocorrelation(sequence, lag=30,
     :properties : list (default=["CIDH920105", "BHAR880101", "CHAM820101", "CHAM820102",
             "CHOC760101", "BIGC670101", "CHAM810101", "DAYM780201"])
         list of AAI index record codes/accession numbers for the physiochemical properties to 
-        use in the calculation of descriptor.
+        use in the calculation of the descriptor.
     :normalize : bool (default=True)
         rescale/normalize MoreauBroto Autocorrelation values into range of 0-1.
 
     Returns
     -------
     :moreaubroto_autocorrelation_df : pd.Dataframe
-        pandas Dataframe of NMBAuto values for protein sequence. Output will
+        pandas Dataframe of MBAuto values for protein sequence. Output will
         be of the shape N x 1, where N is the number of features calculated from
         the descriptor. By default, the shape will be 240 x 1 (30 features per 
-        property - using 8 properties).
+        property - using 8 properties and lag=30).
     """
     #check input sequence is a string, if not raise type error
     if not isinstance(sequence, str):
@@ -85,7 +89,7 @@ def moreaubroto_autocorrelation(sequence, lag=30,
     #if invalid amino acids in sequence, raise value error
     for aa in sequence:
         if (aa not in amino_acids):
-            raise ValueError("Invalid amino acid in protein sequence: .".format(aa))
+            raise ValueError("Invalid amino acid in protein sequence: {}.".format(aa))
 
     #validate lag, set default lag if invalid value input
     if (lag>=len(sequence) or (lag<0) or not (isinstance(lag, int))):
@@ -102,9 +106,9 @@ def moreaubroto_autocorrelation(sequence, lag=30,
     #initialise dicts to store AAI properties and values
     aai_properties = {}
     for prop in properties:
-        #go to next iteration if invalid accession number in aaindex1
+        #raise value error if accession number not found in aaindex1
         if not (prop in aaindex1.record_codes()):
-            continue
+            raise ValueError("Property {} not found in list of available properties in the aaindex1.".format(prop))
         aai_properties[prop] = {}
 
     #iterate through list of properties, getting property values from AAIndex
@@ -119,7 +123,6 @@ def moreaubroto_autocorrelation(sequence, lag=30,
             for i, j in prop_amino_acid_values.items():
                 aai_property_vals[i] = (j - (sum(prop_amino_acid_values.values()) / 
                     len(prop_amino_acid_values.values()))) / _std(prop_amino_acid_values.values(), ddof=0)
-
         aa_counter = 0
 
         #assign property and associated amino acid values to aai_property_vals array
@@ -134,10 +137,10 @@ def moreaubroto_autocorrelation(sequence, lag=30,
     #iterate through list of properties, calculating autocorrelation values for the sequence, append to results dict
     for key in aai_properties:
         temp = 0
-        for i in range(1,lag+1):
+        for i in range(1, lag+1):
             for j in range(len(sequence)-i):
                 temp = temp + aai_properties[key][sequence[j]] * aai_properties[key][sequence[j+1]]
-            if len(sequence) - i == 0:
+            if (len(sequence) - i == 0):
                 moreaubroto_autocorrelation["MBAuto_" + key + "_" + str(i)] = round(
                     temp / (len(sequence)), 3)
             else:
@@ -150,17 +153,19 @@ def moreaubroto_autocorrelation(sequence, lag=30,
 
     return moreaubroto_autocorrelation_df
 
+################################## Moran Autocorrelation ##################################
+
 def moran_autocorrelation(sequence, lag=30, 
     properties=["CIDH920105", "BHAR880101", "CHAM820101", "CHAM820102",
     "CHOC760101", "BIGC670101", "CHAM810101", "DAYM780201"], normalize=True):
     """
-    **refer to NMBAuto docstring for autocorrelation description.
+    **refer to MBAuto docstring for autocorrelation description.
     Moran autocorrelation (MAuto) utilizes property deviations from the
     average values.
 
     Parameters
     ----------
-    **refer to NMBAuto docstring for autocorrelation parameters.
+    **refer to MBAuto docstring for autocorrelation parameters.
 
     Returns
     -------
@@ -168,7 +173,7 @@ def moran_autocorrelation(sequence, lag=30,
         pandas Dataframe of MAuto values for protein sequence. Output will
         be of the shape N x 1, where N is the number of features calculated from
         the descriptor. By default, the shape will be 240 x 1 (30 features per 
-        property - using 8 properties).  
+        property - using 8 properties and lag=30).  
     """
     #check input sequence is a string, if not raise type error
     if not isinstance(sequence, str):
@@ -180,7 +185,7 @@ def moran_autocorrelation(sequence, lag=30,
     #if invalid amino acids in sequence, raise value error
     for aa in sequence:
         if (aa not in amino_acids):
-            raise ValueError("Invalid amino acid in protein sequence: .".format(aa))
+            raise ValueError("Invalid amino acid in protein sequence: {}.".format(aa))
 
     #validate lag, set default lag if invalid value input
     if (lag>=len(sequence) or (lag<0) or not (isinstance(lag, int))):
@@ -197,9 +202,9 @@ def moran_autocorrelation(sequence, lag=30,
     #initialise dicts to store AAI properties and values
     aai_properties = {}
     for prop in properties:
-        #go to next iteration if invalid accession number in aaindex1
+        #raise value error if accession number not found in aaindex1
         if not (prop in aaindex1.record_codes()):
-            continue
+            raise ValueError("Property {} not found in list of available properties in the aaindex1.".format(prop))
         aai_properties[prop] = {}
 
     #iterate through list of properties, getting property values from AAIndex
@@ -215,7 +220,6 @@ def moran_autocorrelation(sequence, lag=30,
             for i, j in prop_aminoacid_values.items():
                 aai_property_vals[i] = (j - (sum(prop_aminoacid_values.values()) / 
                     len(prop_aminoacid_values.values()))) / _std(prop_aminoacid_values.values(), ddof=0)
-
         aa_counter = 0
 
         #assign property and associated amino acid values to aai_property_vals array
@@ -237,7 +241,7 @@ def moran_autocorrelation(sequence, lag=30,
         for aa in sequence:
             cc.append(aai_properties[key][aa])
         k = (_std(cc, ddof=0)) ** 2
-        for i in range(1,lag+1):
+        for i in range(1, lag+1):
             temp = 0
             for j in range(len(sequence) - i):
                 temp = temp + aai_properties[key][sequence[j]] - prop_mean * (
@@ -255,17 +259,19 @@ def moran_autocorrelation(sequence, lag=30,
 
     return moran_autocorrelation_df
 
+################################## Geary Autocorrelation ##################################
+
 def geary_autocorrelation(sequence, lag=30, 
     properties=["CIDH920105", "BHAR880101", "CHAM820101", "CHAM820102",
     "CHOC760101", "BIGC670101", "CHAM810101", "DAYM780201"], normalize=True):
     """
-    **refer to NMBAuto docstring for autocorrelation description.
+    **refer to MBAuto docstring for autocorrelation description.
     Geary Autocorrelation (GAuto) utilizes the square-difference of property
     values instead of vector-products (of property values or deviations).
     
     Parameters
     ----------
-    **refer to NMBAuto docstring for autocorrelation parameters.
+    **refer to MBAuto docstring for autocorrelation parameters.
 
     Returns
     -------
@@ -273,7 +279,7 @@ def geary_autocorrelation(sequence, lag=30,
         pandas DataFrame of GAuto values for protein sequence. Output will
         be of the shape N x 1, where N is the number of features calculated from
         the descriptor. By default, the shape will be 240 x 1 (30 features per 
-        property - using 8 properties).
+        property - using 8 properties and lag=30).
     """
     #check input sequence is a string, if not raise type error
     if not isinstance(sequence, str):
@@ -285,7 +291,7 @@ def geary_autocorrelation(sequence, lag=30,
     #if invalid amino acids in sequence, raise value error
     for aa in sequence:
         if (aa not in amino_acids):
-            raise ValueError("Invalid amino acid in protein sequence: .".format(aa))
+            raise ValueError("Invalid amino acid in protein sequence: {}.".format(aa))
             
     #validate lag, set default lag if invalid value input
     if (lag>=len(sequence) or (lag<0) or not (isinstance(lag, int))):
@@ -302,9 +308,9 @@ def geary_autocorrelation(sequence, lag=30,
     #initialise dicts to store AAI properties and values
     aai_properties = {}
     for prop in properties:
-        #go to next iteration if invalid accession number in aaindex1
+        #raise value error if accession number not found in aaindex1
         if not (prop in aaindex1.record_codes()):
-            continue
+            raise ValueError("Property {} not found in list of available properties in the aaindex1.".format(prop))
         aai_properties[prop] = {}
 
     #iterate through list of properties, getting property values from AAIndex
@@ -320,7 +326,6 @@ def geary_autocorrelation(sequence, lag=30,
             for i, j in prop_aminoacid_values.items():
                 aai_property_vals[i] = (j - (sum(prop_aminoacid_values.values()) / 
                     len(prop_aminoacid_values.values()))) / _std(prop_aminoacid_values.values(), ddof=0)
-
         aa_counter = 0
 
         #assign property and associated amino acid values to aai_property_vals array
@@ -338,11 +343,11 @@ def geary_autocorrelation(sequence, lag=30,
         for aa in sequence:
             cc.append(aai_properties[key][aa])
         k = ((np.std(cc, ddof=0)) ** 2) * len(sequence) / (len(sequence) - 1)
-        for i in range(1,lag+1):
+        for i in range(1, lag+1):
             temp = 0
             for j in range(len(sequence) - i):
                 temp = (temp + (
-                    aai_properties[key][sequence[j]] - aai_properties[key][sequence[j+i]]) **2)
+                    aai_properties[key][sequence[j]] - aai_properties[key][sequence[j+i]]) ** 2)
             if len(sequence) - i == 0:
                 geary_autocorrelation["GAuto_" + key + "_" + str(i)] = round(
                     temp / (2* (len(sequence))) / k, 3)

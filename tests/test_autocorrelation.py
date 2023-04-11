@@ -15,7 +15,8 @@ import protpy as protpy
 class ProtPyAutocorrelationTests(unittest.TestCase):
     """
     Test suite for testing autcorrelation module and functionality 
-    in protpy package. 
+    in protpy package, including the MoreauBroto, Moran and Geary
+    Autocorrelation descriptors.
 
     Test Cases
     ----------
@@ -55,14 +56,17 @@ class ProtPyAutocorrelationTests(unittest.TestCase):
         for lag in moreaubroto_lag:
             moreaubroto_seq1 = protpy.moreaubroto_autocorrelation(self.protein_seq1, lag=lag, 
                 properties=properties, normalize=True)
-            self.assertIsInstance(moreaubroto_seq1, pd.DataFrame, 'Descriptor not of type DataFrame.')
-            self.assertEqual(moreaubroto_seq1.shape, (1, lag*len(properties)), 'Descriptor not of correct shape.') 
-            self.assertTrue(moreaubroto_seq1.any().isnull().sum()==0, 'Descriptor should not contain any null values.')        
+            self.assertIsInstance(moreaubroto_seq1, pd.DataFrame, 
+                'Expected output to be of type DataFrame, got {}.'.format(type(moreaubroto_seq1)))
+            self.assertEqual(moreaubroto_seq1.shape, (1, lag*len(properties)), 
+                'Expected output to be of shape {}, got {}.'.format((1, lag*len(properties), moreaubroto_seq1.shape))) 
+            self.assertTrue(moreaubroto_seq1.any().isnull().sum()==0, 
+                'Expected output to contain no null values.')        
             self.assertTrue(all(col == np.float64 for col in list(moreaubroto_seq1.dtypes)), 
-                "Descriptor values not of correct datatype.")
+                "Expected output values to be of datatype np.float64, got {}.".format(list(moreaubroto_seq1.dtypes)))
 
             #check all columns follow pattern of MBAutoX_Y where x is the asscession number of
-            #   the AAindex record and y is the count of the descriptor
+            #the AAindex record and y is the count of the descriptor
             for col in list(moreaubroto_seq1.columns):
                 self.assertTrue(bool(re.match(r"MBAuto_[A-Z0-9]{10}_[0-9]", col)), 
                     "Column name doesn't match expected regex pattern: {}.".format(col))     
@@ -70,14 +74,17 @@ class ProtPyAutocorrelationTests(unittest.TestCase):
         for lag in moreaubroto_lag:
             moreaubroto_seq2 = protpy.moreaubroto_autocorrelation(self.protein_seq2, lag=lag, 
                 properties=properties, normalize=True)
-            self.assertIsInstance(moreaubroto_seq2, pd.DataFrame, 'Descriptor not of type DataFrame.')
-            self.assertEqual(moreaubroto_seq2.shape, (1, lag*len(properties)), 'Descriptor not of correct shape.') 
-            self.assertTrue(moreaubroto_seq2.any().isnull().sum()==0, 'Descriptor should not contain any null values.')        
+            self.assertIsInstance(moreaubroto_seq2, pd.DataFrame,
+                'Expected output to be of type DataFrame, got {}.'.format(type(moreaubroto_seq2)))
+            self.assertEqual(moreaubroto_seq2.shape, (1, lag*len(properties)),
+                'Expected output to be of shape {}, got {}.'.format((1, lag*len(properties), moreaubroto_seq2.shape))) 
+            self.assertTrue(moreaubroto_seq2.any().isnull().sum()==0, 
+                'Expected output to contain no null values.')        
             self.assertTrue(all(col == np.float64 for col in list(moreaubroto_seq2.dtypes)), 
-                "Descriptor values not of correct datatype.")
+                "Expected output values to be of datatype np.float64, got {}.".format(list(moreaubroto_seq2.dtypes)))
 
             #check all columns follow pattern of MBAutoX_Y where x is the asscession number of
-            #   the AAindex record and y is the count of the descriptor
+            #the AAindex record and y is the count of the descriptor
             for col in list(moreaubroto_seq2.columns):
                 self.assertTrue(bool(re.match(r"MBAuto_[A-Z0-9]{10}_[0-9]", col)), 
                     "Column name doesn't match expected regex pattern: {}.".format(col))
@@ -85,14 +92,17 @@ class ProtPyAutocorrelationTests(unittest.TestCase):
         for lag in moreaubroto_lag:
             moreaubroto_seq3 = protpy.moreaubroto_autocorrelation(self.protein_seq3, lag=lag, 
                 properties=properties, normalize=True)
-            self.assertIsInstance(moreaubroto_seq3, pd.DataFrame, 'Descriptor not of type DataFrame.')
-            self.assertEqual(moreaubroto_seq3.shape, (1, lag*len(properties)), 'Descriptor not of correct shape.') 
-            self.assertTrue(moreaubroto_seq3.any().isnull().sum()==0, 'Descriptor should not contain any null values.')        
+            self.assertIsInstance(moreaubroto_seq3, pd.DataFrame, 
+                'Expected output to be of type DataFrame, got {}.'.format(type(moreaubroto_seq3)))
+            self.assertEqual(moreaubroto_seq3.shape, (1, lag*len(properties)), 
+                'Expected output to be of shape {}, got {}.'.format((1, lag*len(properties), moreaubroto_seq3.shape))) 
+            self.assertTrue(moreaubroto_seq3.any().isnull().sum()==0, 
+                'Expected output to contain no null values.')        
             self.assertTrue(all(col == np.float64 for col in list(moreaubroto_seq3.dtypes)), 
-                "Descriptor values not of correct datatype.")
+                "Expected output values to be of datatype np.float64, got {}.".format(list(moreaubroto_seq3.dtypes)))
 
             #check all columns follow pattern of MBAutoX_Y where x is the asscession number of
-            #   the AAindex record and y is the count of the descriptor
+            # the AAindex record and y is the count of the descriptor
             for col in list(moreaubroto_seq3.columns):
                 self.assertTrue(bool(re.match(r"MBAuto_[A-Z0-9]{10}_[0-9]", col)), 
                     "Column name doesn't match expected regex pattern: {}.".format(col))
@@ -100,14 +110,17 @@ class ProtPyAutocorrelationTests(unittest.TestCase):
         for lag in moreaubroto_lag:
             moreaubroto_seq4 = protpy.moreaubroto_autocorrelation(self.protein_seq4, lag=lag, 
                 properties=properties, normalize=True)
-            self.assertIsInstance(moreaubroto_seq4, pd.DataFrame, 'Descriptor not of type DataFrame.')
-            self.assertEqual(moreaubroto_seq4.shape, (1, lag*len(properties)), 'Descriptor not of correct shape.') 
-            self.assertTrue(moreaubroto_seq4.any().isnull().sum()==0, 'Descriptor should not contain any null values.')        
+            self.assertIsInstance(moreaubroto_seq4, pd.DataFrame, 
+                'Expected output to be of type DataFrame, got {}.'.format(type(moreaubroto_seq4)))
+            self.assertEqual(moreaubroto_seq4.shape, (1, lag*len(properties)), 
+                'Expected output to be of shape {}, got {}.'.format((1, lag*len(properties), moreaubroto_seq4.shape))) 
+            self.assertTrue(moreaubroto_seq4.any().isnull().sum()==0,
+                'Expected output to contain no null values.')        
             self.assertTrue(all(col == np.float64 for col in list(moreaubroto_seq4.dtypes)), 
-                "Descriptor values not of correct datatype.")
+                "Expected output values to be of datatype np.float64, got {}.".format(list(moreaubroto_seq4.dtypes)))
 
             #check all columns follow pattern of MBAutoX_Y where x is the asscession number of
-            #   the AAindex record and y is the count of the descriptor
+            #the AAindex record and y is the count of the descriptor
             for col in list(moreaubroto_seq4.columns):
                 self.assertTrue(bool(re.match(r"MBAuto_[A-Z0-9]{10}_[0-9]", col)), 
                     "Column name doesn't match expected regex pattern: {}.".format(col))
@@ -134,14 +147,17 @@ class ProtPyAutocorrelationTests(unittest.TestCase):
         for lag in moran_auto_lag:
             moran_auto_seq1 = protpy.moran_autocorrelation(self.protein_seq1, lag=lag, 
                 properties=properties, normalize=True)
-            self.assertIsInstance(moran_auto_seq1, pd.DataFrame, 'Descriptor not of type DataFrame.')
-            self.assertEqual(moran_auto_seq1.shape, (1, lag*len(properties)), 'Descriptor not of correct shape.') 
-            self.assertTrue(moran_auto_seq1.any().isnull().sum()==0, 'Descriptor should not contain any null values.')        
+            self.assertIsInstance(moran_auto_seq1, pd.DataFrame, 
+                'Expected output to be of type DataFrame, got {}.'.format(type(moran_auto_seq1)))
+            self.assertEqual(moran_auto_seq1.shape, (1, lag*len(properties)),
+                'Expected output to be of shape {}, got {}.'.format((1, lag*len(properties), moran_auto_seq1.shape))) 
+            self.assertTrue(moran_auto_seq1.any().isnull().sum()==0,
+                'Expected output to contain no null values.')        
             self.assertTrue(all(col == np.float64 for col in list(moran_auto_seq1.dtypes)), 
-                "Descriptor values not of correct datatype.")
+                "Expected output values to be of datatype np.float64, got {}.".format(list(moran_auto_seq1.dtypes)))
 
             #check all columns follow pattern of MAuto_X_Y where x is the asscession number of
-            #   the AAindex record and y is the count of the descriptor
+            #the AAindex record and y is the count of the descriptor
             for col in list(moran_auto_seq1.columns):
                 self.assertTrue(bool(re.match(r"MAuto_[A-Z0-9]{10}_[0-9]", col)), 
                     "Column name doesn't match expected regex pattern: {}.".format(col))
@@ -149,11 +165,14 @@ class ProtPyAutocorrelationTests(unittest.TestCase):
         for lag in moran_auto_lag:
             moran_auto_seq2 = protpy.moran_autocorrelation(self.protein_seq2, lag=lag, 
                 properties=properties, normalize=True)
-            self.assertIsInstance(moran_auto_seq2, pd.DataFrame, 'Descriptor not of type DataFrame.')
-            self.assertEqual(moran_auto_seq2.shape, (1, lag*len(properties)), 'Descriptor not of correct shape.') 
-            self.assertTrue(moran_auto_seq2.any().isnull().sum()==0, 'Descriptor should not contain any null values.')        
+            self.assertIsInstance(moran_auto_seq2, pd.DataFrame, 
+                'Expected output to be of type DataFrame, got {}.'.format(type(moran_auto_seq2)))
+            self.assertEqual(moran_auto_seq2.shape, (1, lag*len(properties)), 
+                'Expected output to be of shape {}, got {}.'.format((1, lag*len(properties), moran_auto_seq2.shape))) 
+            self.assertTrue(moran_auto_seq2.any().isnull().sum()==0,
+                'Expected output to contain no null values.')        
             self.assertTrue(all(col == np.float64 for col in list(moran_auto_seq2.dtypes)), 
-                "Descriptor values not of correct datatype.")
+                "Expected output values to be of datatype np.float64, got {}.".format(list(moran_auto_seq2.dtypes)))
 
             #check all columns follow pattern of MAuto_X_Y where x is the asscession number of
             #   the AAindex record and y is the count of the descriptor
@@ -164,14 +183,17 @@ class ProtPyAutocorrelationTests(unittest.TestCase):
         for lag in moran_auto_lag:
             moran_auto_seq3 = protpy.moran_autocorrelation(self.protein_seq3, lag=lag, 
                 properties=properties, normalize=True)
-            self.assertIsInstance(moran_auto_seq3, pd.DataFrame, 'Descriptor not of type DataFrame.')
-            self.assertEqual(moran_auto_seq3.shape, (1, lag*len(properties)), 'Descriptor not of correct shape.') 
-            self.assertTrue(moran_auto_seq3.any().isnull().sum()==0, 'Descriptor should not contain any null values.')        
+            self.assertIsInstance(moran_auto_seq3, pd.DataFrame, 
+                'Expected output to be of type DataFrame, got {}.'.format(type(moran_auto_seq3)))
+            self.assertEqual(moran_auto_seq3.shape, (1, lag*len(properties)), 
+                'Expected output to be of shape {}, got {}.'.format((1, lag*len(properties), moran_auto_seq3.shape))) 
+            self.assertTrue(moran_auto_seq3.any().isnull().sum()==0,
+                'Expected output to contain no null values.')        
             self.assertTrue(all(col == np.float64 for col in list(moran_auto_seq3.dtypes)), 
-                "Descriptor values not of correct datatype.")
+                "Expected output values to be of datatype np.float64, got {}.".format(list(moran_auto_seq3.dtypes)))
 
             #check all columns follow pattern of MAuto_X_Y where x is the asscession number of
-            #   the AAindex record and y is the count of the descriptor
+            #the AAindex record and y is the count of the descriptor
             for col in list(moran_auto_seq3.columns):
                 self.assertTrue(bool(re.match(r"MAuto_[A-Z0-9]{10}_[0-9]", col)), 
                     "Column name doesn't match expected regex pattern: {}".format(col))
@@ -179,14 +201,17 @@ class ProtPyAutocorrelationTests(unittest.TestCase):
         for lag in moran_auto_lag:
             moran_auto_seq4 = protpy.moran_autocorrelation(self.protein_seq4, lag=lag, 
                 properties=properties, normalize=True)
-            self.assertIsInstance(moran_auto_seq4, pd.DataFrame, 'Descriptor not of type DataFrame.')
-            self.assertEqual(moran_auto_seq4.shape, (1, lag*len(properties)), 'Descriptor not of correct shape.') 
-            self.assertTrue(moran_auto_seq4.any().isnull().sum()==0, 'Descriptor should not contain any null values.')        
+            self.assertIsInstance(moran_auto_seq4, pd.DataFrame, 
+                'Expected output to be of type DataFrame, got {}.'.format(type(moran_auto_seq4)))
+            self.assertEqual(moran_auto_seq4.shape, (1, lag*len(properties)), 
+                'Expected output to be of shape {}, got {}.'.format((1, lag*len(properties), moran_auto_seq4.shape))) 
+            self.assertTrue(moran_auto_seq4.any().isnull().sum()==0,
+                'Expected output to contain no null values.')        
             self.assertTrue(all(col == np.float64 for col in list(moran_auto_seq4.dtypes)), 
-                "Descriptor values not of correct datatype.")
+                "Expected output values to be of datatype np.float64, got {}.".format(list(moran_auto_seq4.dtypes)))
 
             #check all columns follow pattern of MAuto_X_Y where x is the asscession number of
-            #   the AAindex record and y is the count of the descriptor
+            #the AAindex record and y is the count of the descriptor
             for col in list(moran_auto_seq4.columns):
                 self.assertTrue(bool(re.match(r"MAuto_[A-Z0-9]{10}_[0-9]", col)), 
                     "Column name doesn't match expected regex pattern: {}".format(col))
@@ -213,14 +238,17 @@ class ProtPyAutocorrelationTests(unittest.TestCase):
         for lag in geary_auto_lag:
             geary_auto_seq1 = protpy.geary_autocorrelation(self.protein_seq1, lag=lag, 
                 properties=properties, normalize=True)
-            self.assertIsInstance(geary_auto_seq1, pd.DataFrame, 'Descriptor not of type DataFrame.')
-            self.assertEqual(geary_auto_seq1.shape, (1, lag*len(properties)), 'Descriptor not of correct shape.') 
-            self.assertTrue(geary_auto_seq1.any().isnull().sum()==0, 'Descriptor should not contain any null values.')        
+            self.assertIsInstance(geary_auto_seq1, pd.DataFrame, 
+                'Expected output to be of type DataFrame, got {}.'.format(type(geary_auto_seq1)))
+            self.assertEqual(geary_auto_seq1.shape, (1, lag*len(properties)), 
+                'Expected output to be of shape {}, got {}.'.format((1, lag*len(properties), geary_auto_seq1.shape))) 
+            self.assertTrue(geary_auto_seq1.any().isnull().sum()==0,
+                'Expected output to contain no null values.')        
             self.assertTrue(all(col == np.float64 for col in list(geary_auto_seq1.dtypes)), 
-                "Descriptor values not of correct datatype.")
+                "Expected output values to be of datatype np.float64, got {}.".format(list(geary_auto_seq1.dtypes)))
 
             #check all columns follow pattern of GAuto_X_Y where x is the asscession number of
-            #   the AAindex record and y is the count of the descriptor
+            #the AAindex record and y is the count of the descriptor
             for col in list(geary_auto_seq1.columns):
                 self.assertTrue(bool(re.match(r"GAuto_[A-Z0-9]{10}_[0-9]", col)), 
                     "Column name doesn't match expected regex pattern: {}.".format(col))
@@ -228,14 +256,17 @@ class ProtPyAutocorrelationTests(unittest.TestCase):
         for lag in geary_auto_lag:
             geary_auto_seq2 = protpy.geary_autocorrelation(self.protein_seq2, lag=lag, 
                 properties=properties, normalize=True)
-            self.assertIsInstance(geary_auto_seq2, pd.DataFrame, 'Descriptor not of type DataFrame.')
-            self.assertEqual(geary_auto_seq2.shape, (1, lag*len(properties)), 'Descriptor not of correct shape.') 
-            self.assertTrue(geary_auto_seq2.any().isnull().sum()==0, 'Descriptor should not contain any null values.')        
+            self.assertIsInstance(geary_auto_seq2, pd.DataFrame, 
+                'Expected output to be of type DataFrame, got {}.'.format(type(geary_auto_seq2)))
+            self.assertEqual(geary_auto_seq2.shape, (1, lag*len(properties)), 
+                'Expected output to be of shape {}, got {}.'.format((1, lag*len(properties), geary_auto_seq2.shape))) 
+            self.assertTrue(geary_auto_seq2.any().isnull().sum()==0,
+                'Expected output to contain no null values.')        
             self.assertTrue(all(col == np.float64 for col in list(geary_auto_seq2.dtypes)), 
-                "Descriptor values not of correct datatype.")
+                "Expected output values to be of datatype np.float64, got {}.".format(list(geary_auto_seq2.dtypes)))
 
             #check all columns follow pattern of GAuto_X_Y where x is the asscession number of
-            #   the AAindex record and y is the count of the descriptor
+            #the AAindex record and y is the count of the descriptor
             for col in list(geary_auto_seq2.columns):
                 self.assertTrue(bool(re.match(r"GAuto_[A-Z0-9]{10}_[0-9]", col)), 
                     "Column name doesn't match expected regex pattern: {}.".format(col))
@@ -243,14 +274,17 @@ class ProtPyAutocorrelationTests(unittest.TestCase):
         for lag in geary_auto_lag:
             geary_auto_seq3 = protpy.geary_autocorrelation(self.protein_seq3, lag=lag, 
                 properties=properties, normalize=True)
-            self.assertIsInstance(geary_auto_seq3, pd.DataFrame, 'Descriptor not of type DataFrame.')
-            self.assertEqual(geary_auto_seq3.shape, (1, lag*len(properties)), 'Descriptor not of correct shape.') 
-            self.assertTrue(geary_auto_seq3.any().isnull().sum()==0, 'Descriptor should not contain any null values.')        
+            self.assertIsInstance(geary_auto_seq3, pd.DataFrame, 
+                'Expected output to be of type DataFrame, got {}.'.format(type(geary_auto_seq3)))
+            self.assertEqual(geary_auto_seq3.shape, (1, lag*len(properties)), 
+                'Expected output to be of shape {}, got {}.'.format((1, lag*len(properties), geary_auto_seq3.shape))) 
+            self.assertTrue(geary_auto_seq3.any().isnull().sum()==0,
+                'Expected output to contain no null values.')        
             self.assertTrue(all(col == np.float64 for col in list(geary_auto_seq3.dtypes)), 
-                "Descriptor values not of correct datatype.")
+                "Expected output values to be of datatype np.float64, got {}.".format(list(geary_auto_seq3.dtypes)))
 
             #check all columns follow pattern of GAuto_X_Y where x is the asscession number of
-            #   the AAindex record and y is the count of the descriptor
+            #the AAindex record and y is the count of the descriptor
             for col in list(geary_auto_seq3.columns):
                 self.assertTrue(bool(re.match(r"GAuto_[A-Z0-9]{10}_[0-9]", col)), 
                     "Column name doesn't match expected regex pattern: {}".format(col))
@@ -258,14 +292,17 @@ class ProtPyAutocorrelationTests(unittest.TestCase):
         for lag in geary_auto_lag:
             geary_auto_seq4 = protpy.geary_autocorrelation(self.protein_seq4, lag=lag, 
                 properties=properties, normalize=True)
-            self.assertIsInstance(geary_auto_seq4, pd.DataFrame, 'Descriptor not of type DataFrame.')
-            self.assertEqual(geary_auto_seq4.shape, (1, lag*len(properties)), 'Descriptor not of correct shape.') 
-            self.assertTrue(geary_auto_seq4.any().isnull().sum()==0, 'Descriptor should not contain any null values.')        
+            self.assertIsInstance(geary_auto_seq4, pd.DataFrame, 
+                'Expected output to be of type DataFrame, got {}.'.format(type(geary_auto_seq4)))
+            self.assertEqual(geary_auto_seq4.shape, (1, lag*len(properties)), 
+                'Expected output to be of shape {}, got {}.'.format((1, lag*len(properties), geary_auto_seq4.shape))) 
+            self.assertTrue(geary_auto_seq4.any().isnull().sum()==0,
+                'Expected output to contain no null values.')        
             self.assertTrue(all(col == np.float64 for col in list(geary_auto_seq4.dtypes)), 
-                "Descriptor values not of correct datatype.")
+                "Expected output values to be of datatype np.float64, got {}.".format(list(geary_auto_seq4.dtypes)))
 
             #check all columns follow pattern of GAuto_X_Y where x is the asscession number of
-            #   the AAindex record and y is the count of the descriptor
+            #the AAindex record and y is the count of the descriptor
             for col in list(geary_auto_seq4.columns):
                 self.assertTrue(bool(re.match(r"GAuto_[A-Z0-9]{10}_[0-9]", col)), 
                     "Column name doesn't match expected regex pattern: {}".format(col))

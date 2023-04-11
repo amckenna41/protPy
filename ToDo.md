@@ -9,7 +9,7 @@
 - [X] Remove .empty tests from unit tests as validating shape of DF will test for emptiness.
 - [X] Add 0 to singualr descriptor columns, e.g polarizability_CTD_C_1 -> polarizability_CTD_C_01 
 - [X] Change sec_struct to secondary_struct.
-- [ ] Reduce number of tests by iterating over list of protein seqs.
+- [X] Reduce number of tests by iterating over list of protein seqs.
 - [X] Test dtypes of output dataframe -> test_autocorrelation 
 - [X] Add shape to comment on testing shape unittests.
 - [X] Mention lag is similar to gap between 2 amino acids.
@@ -33,10 +33,10 @@
 - [X] Add descriptor abbreviations to each functiosn comments, change abbreviations of Pseudo AAComp -> PAAComp.
 - [X] Add references to readme text.
 - [X] In readme, add output of each function below its usage.
-- [ ] Add reference numbers to comments in descriptor functions - double check existing ones are correct.
+- [X] Add reference numbers to comments in descriptor functions - double check existing ones are correct.
 - [X] Add lag and weight param validation to sequence order module.
 - [X] Change QSOrder to QSO.
-- [ ] Rewrite APAAComp descriptor comments to mention its dimensions change with lamda. 
+- [X] Rewrite APAAComp descriptor comments to mention its dimensions change with lamda. 
 - [X] For all functions that have lag in them:
         #raise value error if int cant be parsed from input lag
         try:
@@ -49,5 +49,6 @@
 - [X] Change hydrophobicity_CTD_T_13 to CTD_T_13_hydrophobicity.
 - [ ] Python unit tests using ctd with 1 property, and using all properties, check dimensions - 21 vs 147 (147/21=7). 21 dimensions per property. 3 C, 3 T, 15 D.
 - [ ] Add output dimensions to SOCN functions.
-- [ ] def sequence_order_coupling_number() - dimesnion (1,lag). def sequence_order_coupling_number_all() - dimension (1,lag*2)
-- [ ] def quasi_sequence_order() - dimesnion (1,lag). def quasi_sequence_order_all() - dimension (1,lag*2)
+- [X] def sequence_order_coupling_number() - dimesnion (1,lag). def sequence_order_coupling_number_all() - dimension (1,lag*2)
+- [X] def quasi_sequence_order() - dimesnion (1,lag). def quasi_sequence_order_all() - dimension (1,lag*2)
+- [X] Double check references in each descriptor comments.

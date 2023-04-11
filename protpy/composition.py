@@ -10,23 +10,21 @@ from aaindex import aaindex1
 """
 References
 ----------
-[1] Reczko, M. and Bohr, H. (1994) The DEF data base of sequence based protein
-    fold class predictions. Nucleic Acids Res, 22, 3616-3619.
-
+[1] Gromiha, M. M. (2010). Protein Sequence Analysis. In M. M. Gromiha (Ed.), 
+    Protein Bioinformatics (pp. 29–62). Elsevier.
 [2] Hua, S. and Sun, Z. (2001) Support vector machine approach for protein
     subcellular localization prediction. Bioinformatics, 17, 721-728.
-
 [3] Grassmann, J., Reczko, M., Suhai, S. and Edler, L. (1999) Protein fold
     class prediction: new methods of statistical classification. Proc Int Conf
     Intell Syst Mol Biol, 106-112.
 [4] Kuo-Chen Chou. Prediction of Protein Cellular Attributes Using Pseudo-Amino Acid
     Composition. PROTEINS: Structure, Function, and Genetics, 2001, 43: 246-255.
-
 [5] Kuo-Chen Chou, Using amphiphilic pseudo amino acid composition to predict enzyme 
     subfamily classes, Bioinformatics, Volume 21, Issue 1, January 2005, Pages 10–19, 
     https://doi.org/10.1093/bioinformatics/bth466
-
 [6] http://www.csbio.sjtu.edu.cn/bioinf/PseAAC/ParaValue.htm.
+[7] Reczko, M. and Bohr, H. (1994) The DEF data base of sequence based protein
+    fold class predictions. Nucleic Acids Res, 22, 3616-3619.
 """
 #list of amino acids
 amino_acids = ["A", "C", "D", "E", "F", "G", "H", "I", "K", "L", "M", "N", "P", 
@@ -57,6 +55,8 @@ residue_mass_ = {
         "W": 130.0, "Y": 107.0
 }
 
+################################# Amino Acid Composition ##################################
+
 def amino_acid_composition(sequence):
     """
     Calculate Amino Acid Composition (AAComp) of protein sequence. AAComp
@@ -67,7 +67,7 @@ def amino_acid_composition(sequence):
 
     where AA_Comp(s) is the AAComp of protein sequence s, AA(t) is the number
     of amino acid types t (where t = 1,2,..,20) and N(s) is the length of the
-    sequence s.
+    sequence s [1].
 
     Parameters
     ----------
@@ -91,7 +91,7 @@ def amino_acid_composition(sequence):
     #if invalid amino acids in sequence, raise value error
     for aa in sequence:
         if (aa not in amino_acids):
-            raise ValueError("Invalid amino acid in protein sequence: .".format(aa))
+            raise ValueError("Invalid amino acid in protein sequence: {}.".format(aa))
 
     amino_acid_composition = {}
 
@@ -104,6 +104,8 @@ def amino_acid_composition(sequence):
         columns=list(amino_acid_composition.keys()))
 
     return amino_acid_composition_df
+
+################################## Dipeptide Composition ##################################
 
 def dipeptide_composition(sequence):
     """
@@ -118,7 +120,7 @@ def dipeptide_composition(sequence):
     where DPComp(s,t) is the dipeptide composition of the protein sequence
     for amino acid type s and t (where s and t = 1,2,..,20), AA(s,t) is the number
     of dipeptides represented by amino acid type s and t and N is the total number
-    of dipeptides.
+    of dipeptides [1].
 
     Parameters
     ----------
@@ -142,7 +144,7 @@ def dipeptide_composition(sequence):
     #if invalid amino acids in sequence, raise value error
     for aa in sequence:
         if (aa not in amino_acids):
-            raise ValueError("Invalid amino acid in protein sequence: .".format(aa))
+            raise ValueError("Invalid amino acid in protein sequence: {}.".format(aa))
 
     dipeptide_composition = {}
 
@@ -159,6 +161,8 @@ def dipeptide_composition(sequence):
 
     return dipeptide_composition_df
 
+################################## Tripeptide Composition #################################
+
 def tripeptide_composition(sequence):
     """
     Calculate Tripeptide Composition (TPComp) of protein sequence.
@@ -172,7 +176,7 @@ def tripeptide_composition(sequence):
     where TPComp(s,t,u) is the tripeptide composition of the protein sequence
     for amino acid type s, t and u (where s, t and u = 1,2,..,20), AA(s,t,u) is
     the number of tripeptides represented by amino acid type s and t, and N is
-    the total number of tripeptides.
+    the total number of tripeptides [1].
 
     Parameters
     ----------
@@ -196,7 +200,7 @@ def tripeptide_composition(sequence):
     #if invalid amino acids in sequence, raise value error
     for aa in sequence:
         if (aa not in amino_acids):
-            raise ValueError("Invalid amino acid in protein sequence: .".format(aa))
+            raise ValueError("Invalid amino acid in protein sequence: {}.".format(aa))
 
     tripeptide_composition = {}
     tripeptides = []    
@@ -223,7 +227,7 @@ def pseudo_amino_acid_composition(sequence, lamda=30, weight=0.05, properties=[]
     """
     Pseudo amino acid composition (PAAComp) combines the vanilla amino acid composition descriptor with 
     additional local features, such as correlation between residues of a certain distance, as
-    amino acid composition doesn't take into accont sequence order info. The pseudo 
+    amino acid composition doesn't take into account sequence order info. The pseudo 
     components of the descriptor are a series rank-different correlation factors [5].
     The first 20 components are a weighted sum of the amino acid composition and 30 are 
     physiochemical square correlations as dictated by the lamda and properties parameters.
@@ -234,7 +238,7 @@ def pseudo_amino_acid_composition(sequence, lamda=30, weight=0.05, properties=[]
     Parameters
     ----------
     :lamda: int
-        rank of correlation. Number of calculable descriptors depends on lamda.
+        rank of correlation. Number of calculable descriptors depends on lamda value.
     :weight: float
         weighting factor.
     :properties : list 
@@ -256,13 +260,13 @@ def pseudo_amino_acid_composition(sequence, lamda=30, weight=0.05, properties=[]
     #if invalid amino acids in sequence, raise value error
     for aa in sequence:
         if (aa not in amino_acids):
-            raise ValueError("Invalid amino acid in protein sequence: .".format(aa))
+            raise ValueError("Invalid amino acid in protein sequence: {}.".format(aa))
 
-    #set lamda to its default value if <0, or > sequence len or not an int
+    #set lamda to its default value of 30 if <0, or > sequence len or not an int
     if ((lamda < 0) or (lamda > len(sequence)) or not isinstance(lamda, int)):
         lamda = 30  
 
-    #validate weight, set default weight if invalid value input
+    #validate weight, set default weight of 0.05 if invalid value input
     if ((weight<0) or not (isinstance(weight, float)) or not (isinstance(weight, int))):
         weight = 0.05
 
@@ -273,7 +277,7 @@ def pseudo_amino_acid_composition(sequence, lamda=30, weight=0.05, properties=[]
     property_values = []
 
     #by default use properties (hydrphocity, hydrophilicty, residue mass),
-    #otherwise get the individual property values from aaindex1 using accession number
+    #otherwise get the individual property values from aaindex1 using accession numbers
     if (properties == []):
         property_values = [hydrophobicity_, hydrophilicity_, residue_mass_]
     else:
@@ -311,7 +315,8 @@ def pseudo_amino_acid_composition(sequence, lamda=30, weight=0.05, properties=[]
             weight * rightpart[index - 20] / temp * 100, 3)
 
     #transform values and columns to DataFrame
-    psuedo_amino_acid_composition_df = pd.DataFrame([list(psuedo_aac.values())], columns=list(psuedo_aac.keys()))
+    psuedo_amino_acid_composition_df = pd.DataFrame([list(psuedo_aac.values())], 
+        columns=list(psuedo_aac.keys()))
 
     return psuedo_amino_acid_composition_df 
 
@@ -414,7 +419,7 @@ def _std(prop, mean, ddof=1):
     :mean : float
         mean of physiochemical property values.
     :ddof : int (default=1)
-        delta degrees of freedom
+        delta degrees of freedom.
         
     Returns
     -------
@@ -430,20 +435,20 @@ def _std(prop, mean, ddof=1):
 def amphiphilic_pseudo_amino_acid_composition(sequence, lamda=30, weight=0.5, 
     properties=[hydrophobicity_, hydrophilicity_]):
     """
-    Amphiphillic pseudo amino acid composition has the same form as the amino
+    Amphiphillic pseudo amino acid composition (APAAComp) has the same form as the amino
     acid composition, but contains much more information that is related to the 
     sequence order of a protein and the distribution of the hydrophobic and 
     hydrophilic amino acids along its chain. The first 20 numbers in the 
     descriptor are the components of the conventional amino acid composition; 
     the next 2*λ numbers are a set of correlation factors that reflect different 
-    hydrophobicity and hydrophilicity distribution patterns along a protein chain
+    hydrophobicity and hydrophilicity distribution patterns along a protein chain [5].
 
     Parameters
     ----------
     :sequence : str
         protein sequence.
     :lamda: int
-        rank of correlation. Number of calculable descriptors depends on lamda.
+        rank of correlation. Number of calculable descriptors depends on lambda value.
     :weight: float
         weighting factor.
     :properties : list (default=[hydrophobicity_, hydrophilicity_])
@@ -465,13 +470,13 @@ def amphiphilic_pseudo_amino_acid_composition(sequence, lamda=30, weight=0.5,
     #if invalid amino acids in sequence, raise value error
     for aa in sequence:
         if (aa not in amino_acids):
-            raise ValueError("Invalid amino acid in protein sequence: .".format(aa))
+            raise ValueError("Invalid amino acid in protein sequence: {}.".format(aa))
 
-    #set lamda to its default value if <0, or > sequence len or not an int
+    #set lamda to its default value of 30 if <0, or > sequence len or not an int
     if ((lamda < 0) or (lamda > len(sequence)) or not isinstance(lamda, int)):
         lamda = 30  
 
-    #validate weight, set default weight if invalid value input
+    #validate weight, set default weight of 0.5 if invalid value input
     if ((weight<0) or not (isinstance(weight, float)) or not (isinstance(weight, int))):
         weight = 0.5
 
@@ -495,7 +500,6 @@ def amphiphilic_pseudo_amino_acid_composition(sequence, lamda=30, weight=0.5,
     for index, i in enumerate(amino_acids):
         amp_pseudo_amino_acid_composition["APAAC_" + str(index + 1)] = round(aa_composition[i].values[0] / temp, 3)
 
-
     #calculate correlation factor in protein sequence
     rightpart = []
     for i in range(lamda):
@@ -513,12 +517,11 @@ def amphiphilic_pseudo_amino_acid_composition(sequence, lamda=30, weight=0.5,
     amp_pseudo_amino_acid_composition_df = pd.DataFrame([list(amp_pseudo_amino_acid_composition.values())], 
         columns=list(amp_pseudo_amino_acid_composition.keys()))
 
-
     return amp_pseudo_amino_acid_composition_df
 
 def amphiphilic_sequence_order_correllation_factor(sequence, k=1):
     """ 
-    Calculate Amphipilic sequence order correlation factor for sequence
+    Calculate Amphipillic sequence order correlation factor for sequence
     with gap=k.
 
     Parameters

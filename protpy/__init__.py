@@ -7,7 +7,7 @@ from .sequence_order import *
 
 #protPy package metadata
 __name__ = 'protpy'
-__version__ = "1.0.8"
+__version__ = "1.1.10"
 __description__ = "Python package for generating various biochemical, physiochemical and structural descriptors/features of protein sequences."
 __author__ = 'AJ McKenna, https://github.com/amckenna41'
 __authorEmail__ = 'amckenna41@qub.ac.uk'
@@ -22,7 +22,7 @@ __keywords__ = ["bioinformatics", "protein engineering", "python", "pypi", "mach
 __test_suite__ = "tests"
 
 #list of all available descriptors in protPy
-all_descriptors = ["aa_composition", "dipeptide_composition", "tripeptide_composition",
+all_descriptors = ["amino_acid_composition", "dipeptide_composition", "tripeptide_composition",
     "moreaubroto_autocorrelation", "moran_autocorrelation", "geary_autocorrelation",
     "pseudo_amino_acid_composition", "amphiphilic_pseudo_amino_acid_composition", 
     "sequence_order_coupling_number", "conjoint_triad", "ctd_composition", 

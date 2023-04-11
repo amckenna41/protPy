@@ -15,7 +15,7 @@ import protpy as protpy
 class ProtPyConjointTriadTests(unittest.TestCase):
     """
     Test suite for testing conjoint triad module and functionality 
-    in protpy package. 
+    in protpy package, including the Conjoint Triad descriptor.
 
     Test Cases
     ----------
@@ -42,13 +42,14 @@ class ProtPyConjointTriadTests(unittest.TestCase):
 #1.)
         conjoint_triad_seq1 = protpy.conjoint_triad(self.protein_seq1)
 
-        self.assertFalse(conjoint_triad_seq1.empty, 'Descriptor dataframe should not be empty')
-        self.assertEqual(conjoint_triad_seq1.shape, (1, 343), 'Descriptor not of correct shape.') 
-        self.assertIsInstance(conjoint_triad_seq1, pd.DataFrame, 'Descriptor not of type DataFrame.')
-        self.assertTrue(conjoint_triad_seq1.any().isnull().sum()==0, 'Descriptor should not contain any null values.')    
+        self.assertIsInstance(conjoint_triad_seq1, pd.DataFrame, 
+            'Expected output to be a DataFrame, got {}.'.format(type(conjoint_triad_seq1))
+        self.assertEqual(conjoint_triad_seq1.shape, (1, 343),
+            'Expected output to be of shape {}, got {}.'.format((1, 343), conjoint_triad_seq1.shape))) 
+        self.assertTrue(conjoint_triad_seq1.any().isnull().sum()==0,
+            'Expected output to contain no null values.')        
         self.assertTrue(all(col == np.int64 for col in list(conjoint_triad_seq1.dtypes)),
-            "Descriptor values not of correct datatype.")
-
+            "Expected output values to be of datatype np.int64, got {}.".format(list(conjoint_triad_seq1.dtypes)))
         #iterate over all columns, checking they follow naming convention using regex
         for col in list(conjoint_triad_seq1.columns):
             self.assertTrue(bool(re.match(r"conj_triad_[0-9]{3}", col)), 
@@ -56,12 +57,14 @@ class ProtPyConjointTriadTests(unittest.TestCase):
 #2.)
         conjoint_triad_seq2 = protpy.conjoint_triad(self.protein_seq2)
 
-        self.assertFalse(conjoint_triad_seq2.empty, 'Descriptor dataframe should not be empty')
-        self.assertEqual(conjoint_triad_seq2.shape, (1, 343), 'Descriptor not of correct shape.') 
-        self.assertIsInstance(conjoint_triad_seq2, pd.DataFrame, 'Descriptor not of type DataFrame.')
-        self.assertTrue(conjoint_triad_seq2.any().isnull().sum()==0, 'Descriptor should not contain any null values.') 
-        self.assertTrue(all(col == np.int64 for col in list(conjoint_triad_seq2.dtypes)), "")
-
+        self.assertIsInstance(conjoint_triad_seq2, pd.DataFrame, 
+            'Expected output to be a DataFrame, got {}.'.format(type(conjoint_triad_seq2))
+        self.assertEqual(conjoint_triad_seq2.shape, (1, 343),
+            'Expected output to be of shape {}, got {}.'.format((1, 343), conjoint_triad_seq2.shape))) 
+        self.assertTrue(conjoint_triad_seq2.any().isnull().sum()==0,
+            'Expected output to contain no null values.')        
+        self.assertTrue(all(col == np.int64 for col in list(conjoint_triad_seq2.dtypes)),
+            "Expected output values to be of datatype np.int64, got {}.".format(list(conjoint_triad_seq2.dtypes)))
         #iterate over all columns, checking they follow naming convention using regex
         for col in list(conjoint_triad_seq2.columns):
             self.assertTrue(bool(re.match(r"conj_triad_[0-9]{3}", col)), 
@@ -69,25 +72,29 @@ class ProtPyConjointTriadTests(unittest.TestCase):
 #3.)
         conjoint_triad_seq3 = protpy.conjoint_triad(self.protein_seq3)
 
-        self.assertFalse(conjoint_triad_seq3.empty, 'Descriptor dataframe should not be empty')
-        self.assertEqual(conjoint_triad_seq3.shape, (1, 343), 'Descriptor not of correct shape.') 
-        self.assertIsInstance(conjoint_triad_seq3, pd.DataFrame, 'Descriptor not of type DataFrame.')
-        self.assertTrue(conjoint_triad_seq3.any().isnull().sum()==0, 'Descriptor should not contain any null values.') 
-        self.assertTrue(all(col == np.int64 for col in list(conjoint_triad_seq3.dtypes)), "")
-
+        self.assertIsInstance(conjoint_triad_seq3, pd.DataFrame, 
+            'Expected output to be a DataFrame, got {}.'.format(type(conjoint_triad_seq3))
+        self.assertEqual(conjoint_triad_seq3.shape, (1, 343),
+            'Expected output to be of shape {}, got {}.'.format((1, 343), conjoint_triad_seq3.shape))) 
+        self.assertTrue(conjoint_triad_seq3.any().isnull().sum()==0,
+            'Expected output to contain no null values.')        
+        self.assertTrue(all(col == np.int64 for col in list(conjoint_triad_seq3.dtypes)),
+            "Expected output values to be of datatype np.int64, got {}.".format(list(conjoint_triad_seq3.dtypes)))
         #iterate over all columns, checking they follow naming convention using regex
         for col in list(conjoint_triad_seq3.columns):
             self.assertTrue(bool(re.match(r"conj_triad_[0-9]{3}", col)), 
-                "Column name doesn't match expected regex pattern: {}.".format(col))   
+                "Column name doesn't match expected regex pattern: {}.".format(col))    
 #4.)
         conjoint_triad_seq4 = protpy.conjoint_triad(self.protein_seq4)
 
-        self.assertFalse(conjoint_triad_seq4.empty, 'Descriptor dataframe should not be empty')
-        self.assertEqual(conjoint_triad_seq4.shape, (1, 343), 'Descriptor not of correct shape.') 
-        self.assertIsInstance(conjoint_triad_seq4, pd.DataFrame, 'Descriptor not of type DataFrame.')
-        self.assertTrue(conjoint_triad_seq4.any().isnull().sum()==0, 'Descriptor should not contain any null values.') 
-        self.assertTrue(all(col == np.int64 for col in list(conjoint_triad_seq4.dtypes)), "")
-
+        self.assertIsInstance(conjoint_triad_seq4, pd.DataFrame, 
+            'Expected output to be a DataFrame, got {}.'.format(type(conjoint_triad_seq4))
+        self.assertEqual(conjoint_triad_seq4.shape, (1, 343),
+            'Expected output to be of shape {}, got {}.'.format((1, 343), conjoint_triad_seq4.shape))) 
+        self.assertTrue(conjoint_triad_seq4.any().isnull().sum()==0,
+            'Expected output to contain no null values.')        
+        self.assertTrue(all(col == np.int64 for col in list(conjoint_triad_seq4.dtypes)),
+            "Expected output values to be of datatype np.int64, got {}.".format(list(conjoint_triad_seq4.dtypes)))
         #iterate over all columns, checking they follow naming convention using regex
         for col in list(conjoint_triad_seq4.columns):
             self.assertTrue(bool(re.match(r"conj_triad_[0-9]{3}", col)), 

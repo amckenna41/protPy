@@ -18,7 +18,6 @@ References
 [1] Inna Dubchak, Ilya Muchink, Stephen R.Holbrook and Sung-Hou Kim.
     Prediction of protein folding class using global description of amino
     acid sequence. Proc.Natl. Acad.Sci.USA, 1995, 92, 8700-8704.
-
 [2] Inna Dubchak, Ilya Muchink, Christopher Mayor, Igor Dralyuk and Sung-Hou
     Kim. Recognition of a Protein Fold in the Context of the SCOP
     classification. Proteins: Structure, Function and
@@ -82,6 +81,7 @@ def str_to_num(sequence, property):
         if (aa not in amino_acids):
             raise ValueError("Invalid amino acid in protein sequence: {}".format(aa))
 
+    #create deep copy of sequence
     sequence_converted = copy.deepcopy(sequence)
 
     #convert amino acid into corresponding CTD keys
@@ -93,9 +93,12 @@ def str_to_num(sequence, property):
 
     return sequence_converted
 
+##################################### CTD Composition #####################################
+
 def ctd_composition(sequence, property="hydrophobicity"):
     """
-    Calculate composition physiochemical/structural descriptor.
+    Calculate composition physiochemical/structural descriptor. The shape of the
+    output will be 1 x 3, with 3 features being generated per sequence.
 
     Parameters
     ----------
@@ -108,7 +111,8 @@ def ctd_composition(sequence, property="hydrophobicity"):
     -------
     :ctd_composition_df : pd.DataFrame
         dataframe of calculated composition values for sequence using
-        selected physiochemical property.
+        selected physiochemical property. Output will be of shape 1 x 3,
+        with 3 features being generated per sequence.
     """
     #check input sequence is a string, if not raise type error
     if not isinstance(sequence, str):
@@ -146,9 +150,12 @@ def ctd_composition(sequence, property="hydrophobicity"):
 
     return ctd_composition_df
 
+##################################### CTD Transition ######################################
+
 def ctd_transition(sequence, property="hydrophobicity"):
     """
-    Calculate transition physiochemical/structural descriptor.
+    Calculate transition physiochemical/structural descriptor. The shape of the
+    output will be 1 x 3, with 3 features being generated per sequence.
 
     Parameters
     ----------
@@ -161,7 +168,8 @@ def ctd_transition(sequence, property="hydrophobicity"):
     -------
     :ctd_transition_df : pd.DataFrame
         dataframe of calculated transition values for sequence using
-        selected physiochemical property.
+        selected physiochemical property. Output will be of shape 1 x 3,
+        with 3 features being generated per sequence.
     """
     #check input sequence is a string, if not raise type error
     if not isinstance(sequence, str):
@@ -202,9 +210,12 @@ def ctd_transition(sequence, property="hydrophobicity"):
 
     return ctd_transition_df
 
+#################################### CTD Distribution #####################################
+
 def ctd_distribution(sequence, property="hydrophobicity"):
     """
-    Calculate distribution physiochemical/structural descriptor.
+    Calculate distribution physiochemical/structural descriptor. The shape of the
+    output will be 1 x 15, with 15 features being generated per sequence.
 
     Parameters
     ----------
@@ -217,7 +228,8 @@ def ctd_distribution(sequence, property="hydrophobicity"):
     -------
     :ctd_distribution_df : pd.DataFrame
         dataframe of calculated distribution values for sequence using
-        selected physiochemical property.
+        selected physiochemical property. Output will be of shape 1 x 15,
+        with 15 features being generated per sequence.
     """
     #check input sequence is a string, if not raise type error
     if not isinstance(sequence, str):
@@ -283,17 +295,19 @@ def ctd_distribution(sequence, property="hydrophobicity"):
 
 def ctd_(sequence, property="hydrophobicity", all_ctd=True):
     """
-    Calculate Composition, transition and distribution (CTD) features of protein sequences.
+    Calculate all Composition, Transition and Distribution (CTD) features of protein sequences.
     Composition is the number of amino acids of a particular property (e.g., hydrophobicity)
     divided by the total number of amino acids in a protein sequence. Transition
     characterizes the percent frequency with which amino acids of a particular
     property is followed by amino acids of a different property. Distribution
     measures the chain length within which the first, 25%, 50%, 75%, and 100% of
-    the amino acids of a particular property are located, respectively [6].
-    CTD properties used are: Polarizability, Solvent Accessibility, Secondary 
-    Structure, Charge, Polarity, Normalized VDWV, Hydrophobicity. The output 
-    will be of shape 1 x 147. 21/147 will be
-    composition, 21/147 will be transition and the remaining 105 are distribution.
+    the amino acids of a particular property are located, respectively [1, 2].
+    CTD properties available are: Polarizability, Solvent Accessibility, Secondary 
+    Structure, Charge, Polarity, Normalized VDWV, Hydrophobicity. Each property generates an 
+    output of shape 1 x 21, 3/21 will be Composition, 3/21 will be Transition, 15/21 will be
+    Distribution. When Calculating all available features the generated output will be of shape 
+    1 x 147, 21/147 will be composition, 21/147 will be transition and the remaining 105 are 
+    distribution.
     
     Parameters
     ----------
@@ -308,8 +322,8 @@ def ctd_(sequence, property="hydrophobicity", all_ctd=True):
     -------
     :ctd_df : pd.DataFrame
         dataframe of CTD descriptor values for all protein sequences. DataFrame will
-        be of the shape 1 x 147, where 147 is the number of features calculated from t
-        he descriptors.
+        be of the shape 1 x 147, where 147 is the total number of features calculated from
+        the CTD descriptors, with each property generating an output of 1 x 21.
     """
     #check input sequence is a string, if not raise type error
     if not isinstance(sequence, str):
