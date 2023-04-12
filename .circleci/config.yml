@@ -41,6 +41,7 @@ jobs:
           command: |
             pip install coverage
             pip install codecov
+            pip install pytest
             pip install pytest-cov
         # pytest --cov-report term --cov=test_protpy tests/ > /tmp/coverage_report.txt || true
         # coverage run 
