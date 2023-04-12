@@ -1,4 +1,3 @@
-# from .autocorrelation import moreaubroto_autocorrelation, moran_autocorrelation, geary_autocorrelation
 from .autocorrelation import *
 from .composition import *
 from .conjoint_triad import *
