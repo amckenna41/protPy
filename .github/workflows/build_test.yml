@@ -39,14 +39,13 @@ jobs:
         python3 -m pip install setuptools wheel twine
         pip install flake8 pytest
         pip3 install codecov
-      # pip3 install coverage
         pip3 install pytest
         pip3 install pytest-cov
         pip3 install bandit
         pip3 install safety
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
         python3 setup.py install
-
+    
     #create artifacts dir
     - name: Artifacts mkdir
       run: mkdir artifacts
