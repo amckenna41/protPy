@@ -63,7 +63,7 @@ class ProtPyCompositionTests(unittest.TestCase):
         self.assertIsInstance(amino_acid_composition_seq1, pd.DataFrame,
             'Expected output to be of type DataFrame, got {}.'.format(type(amino_acid_composition_seq1)))
         self.assertEqual(amino_acid_composition_seq1.shape, (1, 20),
-            'Expected output to be of shape {}, got {}.'.format((1, 20), amino_acid_composition_seq1.shape))) 
+            'Expected output to be of shape {}, got {}.'.format((1, 20), amino_acid_composition_seq1.shape)) 
         self.assertEqual(self.amino_acids, list(amino_acid_composition_seq1.columns), 
             'Incorrect column values found in output:\n{}'.format(list(amino_acid_composition_seq1.columns)))
         self.assertTrue(amino_acid_composition_seq1.any().isnull().sum()==0,
@@ -82,7 +82,7 @@ class ProtPyCompositionTests(unittest.TestCase):
         self.assertIsInstance(amino_acid_composition_seq2, pd.DataFrame,
             'Expected output to be of type DataFrame, got {}.'.format(type(amino_acid_composition_seq2)))
         self.assertEqual(amino_acid_composition_seq2.shape, (1, 20),
-            'Expected output to be of shape {}, got {}.'.format((1, 20), amino_acid_composition_seq2.shape))) 
+            'Expected output to be of shape {}, got {}.'.format((1, 20), amino_acid_composition_seq2.shape)) 
         self.assertEqual(self.amino_acids, list(amino_acid_composition_seq2.columns), 
             'Incorrect column values found in output:\n{}'.format(list(amino_acid_composition_seq2.columns)))
         self.assertTrue(amino_acid_composition_seq2.any().isnull().sum()==0,
@@ -101,7 +101,7 @@ class ProtPyCompositionTests(unittest.TestCase):
         self.assertIsInstance(amino_acid_composition_seq3, pd.DataFrame,
             'Expected output to be of type DataFrame, got {}.'.format(type(amino_acid_composition_seq3)))
         self.assertEqual(amino_acid_composition_seq3.shape, (1, 20),
-            'Expected output to be of shape {}, got {}.'.format((1, 20), amino_acid_composition_seq3.shape))) 
+            'Expected output to be of shape {}, got {}.'.format((1, 20), amino_acid_composition_seq3.shape)) 
         self.assertEqual(self.amino_acids, list(amino_acid_composition_seq3.columns), 
             'Incorrect column values found in output:\n{}'.format(list(amino_acid_composition_seq3.columns)))
         self.assertTrue(amino_acid_composition_seq3.any().isnull().sum()==0,
@@ -120,7 +120,7 @@ class ProtPyCompositionTests(unittest.TestCase):
         self.assertIsInstance(amino_acid_composition_seq4, pd.DataFrame,
             'Expected output to be of type DataFrame, got {}.'.format(type(amino_acid_composition_seq4)))
         self.assertEqual(amino_acid_composition_seq4.shape, (1, 20),
-            'Expected output to be of shape {}, got {}.'.format((1, 20), amino_acid_composition_seq4.shape))) 
+            'Expected output to be of shape {}, got {}.'.format((1, 20), amino_acid_composition_seq4.shape)) 
         self.assertEqual(self.amino_acids, list(amino_acid_composition_seq4.columns), 
             'Incorrect column values found in output:\n{}'.format(list(amino_acid_composition_seq4.columns)))
         self.assertTrue(amino_acid_composition_seq4.any().isnull().sum()==0,
@@ -150,7 +150,7 @@ class ProtPyCompositionTests(unittest.TestCase):
         self.assertIsInstance(dipeptide_comp_seq1, pd.DataFrame,
             'Expected output to be of type DataFrame, got {}.'.format(type(dipeptide_comp_seq1)))
         self.assertEqual(dipeptide_comp_seq1.shape, (1, 400),
-            'Expected output to be of shape {}, got {}.'.format((1, 400), dipeptide_comp_seq1.shape))) 
+            'Expected output to be of shape {}, got {}.'.format((1, 400), dipeptide_comp_seq1.shape)) 
         for col in list(dipeptide_comp_seq1.columns):
             #check all columns follow pattern of XY where x & y are amino acids 
             self.assertTrue(bool(re.match(r'^[A-Z]{2}$', col)), 
@@ -169,7 +169,7 @@ class ProtPyCompositionTests(unittest.TestCase):
         self.assertIsInstance(dipeptide_comp_seq2, pd.DataFrame,
             'Expected output to be of type DataFrame, got {}.'.format(type(dipeptide_comp_seq2)))
         self.assertEqual(dipeptide_comp_seq2.shape, (1, 400),
-            'Expected output to be of shape {}, got {}.'.format((1, 400), dipeptide_comp_seq2.shape))) 
+            'Expected output to be of shape {}, got {}.'.format((1, 400), dipeptide_comp_seq2.shape)) 
         for col in list(dipeptide_comp_seq2.columns):
             #check all columns follow pattern of XY where x & y are amino acids 
             self.assertTrue(bool(re.match(r'^[A-Z]{2}$', col)), 
@@ -188,7 +188,7 @@ class ProtPyCompositionTests(unittest.TestCase):
         self.assertIsInstance(dipeptide_comp_seq3, pd.DataFrame,
             'Expected output to be of type DataFrame, got {}.'.format(type(dipeptide_comp_seq3)))
         self.assertEqual(dipeptide_comp_seq3.shape, (1, 400),
-            'Expected output to be of shape {}, got {}.'.format((1, 400), dipeptide_comp_seq3.shape))) 
+            'Expected output to be of shape {}, got {}.'.format((1, 400), dipeptide_comp_seq3.shape)) 
         for col in list(dipeptide_comp_seq3.columns):
             #check all columns follow pattern of XY where x & y are amino acids 
             self.assertTrue(bool(re.match(r'^[A-Z]{2}$', col)), 
@@ -207,7 +207,7 @@ class ProtPyCompositionTests(unittest.TestCase):
         self.assertIsInstance(dipeptide_comp_seq4, pd.DataFrame,
             'Expected output to be of type DataFrame, got {}.'.format(type(dipeptide_comp_seq4)))
         self.assertEqual(dipeptide_comp_seq3.shape, (1, 400),
-            'Expected output to be of shape {}, got {}.'.format((1, 400), dipeptide_comp_seq4.shape))) 
+            'Expected output to be of shape {}, got {}.'.format((1, 400), dipeptide_comp_seq4.shape)) 
         for col in list(dipeptide_comp_seq4.columns):
             #check all columns follow pattern of XY where x & y are amino acids 
             self.assertTrue(bool(re.match(r'^[A-Z]{2}$', col)), 
@@ -242,7 +242,7 @@ class ProtPyCompositionTests(unittest.TestCase):
         self.assertIsInstance(tripeptide_comp_seq1, pd.DataFrame,
             'Expected output to be of type DataFrame, got {}.'.format(type(tripeptide_comp_seq1)))
         self.assertEqual(tripeptide_comp_seq1.shape, (1, 8000),
-            'Expected output to be of shape {}, got {}.'.format((1, 8000), tripeptide_comp_seq1.shape))) 
+            'Expected output to be of shape {}, got {}.'.format((1, 8000), tripeptide_comp_seq1.shape)) 
         for col in list(tripeptide_comp_seq1.columns):
             #check all columns follow pattern of XY where x & y are amino acids 
             self.assertTrue(bool(re.match(r'^[A-Z]{3}$', col)), 
@@ -263,7 +263,7 @@ class ProtPyCompositionTests(unittest.TestCase):
         self.assertIsInstance(tripeptide_comp_seq2, pd.DataFrame,
             'Expected output to be of type DataFrame, got {}.'.format(type(tripeptide_comp_seq2)))
         self.assertEqual(tripeptide_comp_seq2.shape, (1, 8000),
-            'Expected output to be of shape {}, got {}.'.format((1, 8000), tripeptide_comp_seq2.shape))) 
+            'Expected output to be of shape {}, got {}.'.format((1, 8000), tripeptide_comp_seq2.shape)) 
         for col in list(tripeptide_comp_seq2.columns):
             #check all columns follow pattern of XY where x & y are amino acids 
             self.assertTrue(bool(re.match(r'^[A-Z]{3}$', col)), 
@@ -284,7 +284,7 @@ class ProtPyCompositionTests(unittest.TestCase):
         self.assertIsInstance(tripeptide_comp_seq3, pd.DataFrame,
             'Expected output to be of type DataFrame, got {}.'.format(type(tripeptide_comp_seq3)))
         self.assertEqual(tripeptide_comp_seq3.shape, (1, 8000),
-            'Expected output to be of shape {}, got {}.'.format((1, 8000), tripeptide_comp_seq3.shape))) 
+            'Expected output to be of shape {}, got {}.'.format((1, 8000), tripeptide_comp_seq3.shape)) 
         for col in list(tripeptide_comp_seq3.columns):
             #check all columns follow pattern of XY where x & y are amino acids 
             self.assertTrue(bool(re.match(r'^[A-Z]{3}$', col)), 
@@ -305,7 +305,7 @@ class ProtPyCompositionTests(unittest.TestCase):
         self.assertIsInstance(tripeptide_comp_seq4, pd.DataFrame,
             'Expected output to be of type DataFrame, got {}.'.format(type(tripeptide_comp_seq4)))
         self.assertEqual(tripeptide_comp_seq4.shape, (1, 8000),
-            'Expected output to be of shape {}, got {}.'.format((1, 8000), tripeptide_comp_seq4.shape))) 
+            'Expected output to be of shape {}, got {}.'.format((1, 8000), tripeptide_comp_seq4.shape)) 
         for col in list(tripeptide_comp_seq4.columns):
             #check all columns follow pattern of XY where x & y are amino acids 
             self.assertTrue(bool(re.match(r'^[A-Z]{3}$', col)), 
@@ -344,7 +344,7 @@ class ProtPyCompositionTests(unittest.TestCase):
         self.assertIsInstance(pseudo_amino_acid_composition_seq1, pd.DataFrame, 
             'Expected output to be of type DataFrame, got {}.'.format(type(pseudo_amino_acid_composition_seq1)))
         self.assertEqual(pseudo_amino_acid_composition_seq1.shape, (1, 20+lamda), 
-            'Expected output to be of shape {}, got {}.'.format((1, 20+lamda), pseudo_amino_acid_composition_seq1.shape))) 
+            'Expected output to be of shape {}, got {}.'.format((1, 20+lamda), pseudo_amino_acid_composition_seq1.shape)) 
         for col in list(pseudo_amino_acid_composition_seq1.columns):
             #check all columns follow correct naming convention
             self.assertTrue(bool(re.match(r"PAAC_[0-9]", col)), 
@@ -359,7 +359,7 @@ class ProtPyCompositionTests(unittest.TestCase):
         self.assertIsInstance(pseudo_amino_acid_composition_seq2, pd.DataFrame, 
             'Expected output to be of type DataFrame, got {}.'.format(type(pseudo_amino_acid_composition_seq2)))
         self.assertEqual(pseudo_amino_acid_composition_seq2.shape, (1, 20+lamda), 
-            'Expected output to be of shape {}, got {}.'.format((1, 20+lamda), pseudo_amino_acid_composition_seq2.shape))) 
+            'Expected output to be of shape {}, got {}.'.format((1, 20+lamda), pseudo_amino_acid_composition_seq2.shape)) 
         for col in list(pseudo_amino_acid_composition_seq2.columns):
             #check all columns follow correct naming convention
             self.assertTrue(bool(re.match(r"PAAC_[0-9]", col)), 
@@ -374,7 +374,7 @@ class ProtPyCompositionTests(unittest.TestCase):
         self.assertIsInstance(pseudo_amino_acid_composition_seq3, pd.DataFrame, 
             'Expected output to be of type DataFrame, got {}.'.format(type(pseudo_amino_acid_composition_seq3)))
         self.assertEqual(pseudo_amino_acid_composition_seq3.shape, (1, 20+lamda), 
-            'Expected output to be of shape {}, got {}.'.format((1, 20+lamda), pseudo_amino_acid_composition_seq3.shape))) 
+            'Expected output to be of shape {}, got {}.'.format((1, 20+lamda), pseudo_amino_acid_composition_seq3.shape)) 
         for col in list(pseudo_amino_acid_composition_seq3.columns):
             #check all columns follow correct naming convention
             self.assertTrue(bool(re.match(r"PAAC_[0-9]", col)), 
@@ -389,7 +389,7 @@ class ProtPyCompositionTests(unittest.TestCase):
         self.assertIsInstance(pseudo_amino_acid_composition_seq4, pd.DataFrame, 
             'Expected output to be of type DataFrame, got {}.'.format(type(pseudo_amino_acid_composition_seq4)))
         self.assertEqual(pseudo_amino_acid_composition_seq4.shape, (1, 20+lamda), 
-            'Expected output to be of shape {}, got {}.'.format((1, 20+lamda), pseudo_amino_acid_composition_seq4.shape))) 
+            'Expected output to be of shape {}, got {}.'.format((1, 20+lamda), pseudo_amino_acid_composition_seq4.shape)) 
         for col in list(pseudo_amino_acid_composition_seq4.columns):
             #check all columns follow correct naming convention
             self.assertTrue(bool(re.match(r"PAAC_[0-9]", col)), 
@@ -422,7 +422,7 @@ class ProtPyCompositionTests(unittest.TestCase):
         self.assertIsInstance(amp_pseudo_amino_acid_composition_seq1, pd.DataFrame, 
             'Expected output to be of type DataFrame, got {}.'.format(type(amp_pseudo_amino_acid_composition_seq1)))
         self.assertEqual(amp_pseudo_amino_acid_composition_seq1.shape, (1, 20+(2*lamda)),
-            'Expected output to be of shape {}, got {}.'.format((1, 20+(2*lamda)), amp_pseudo_amino_acid_composition_seq1.shape))) 
+            'Expected output to be of shape {}, got {}.'.format((1, 20+(2*lamda)), amp_pseudo_amino_acid_composition_seq1.shape)) 
         for col in list(amp_pseudo_amino_acid_composition_seq1.columns):
             #check all columns follow correct naming convention
             self.assertTrue(bool(re.match(r"APAAC_[0-9]", col)),
@@ -437,7 +437,7 @@ class ProtPyCompositionTests(unittest.TestCase):
         self.assertIsInstance(amp_pseudo_amino_acid_composition_seq2, pd.DataFrame, 
             'Expected output to be of type DataFrame, got {}.'.format(type(amp_pseudo_amino_acid_composition_seq2)))
         self.assertEqual(amp_pseudo_amino_acid_composition_seq2.shape, (1, 20+(2*lamda)),
-            'Expected output to be of shape {}, got {}.'.format((1, 20+(2*lamda)), amp_pseudo_amino_acid_composition_seq2.shape))) 
+            'Expected output to be of shape {}, got {}.'.format((1, 20+(2*lamda)), amp_pseudo_amino_acid_composition_seq2.shape)) 
         for col in list(amp_pseudo_amino_acid_composition_seq2.columns):
             #check all columns follow correct naming convention
             self.assertTrue(bool(re.match(r"APAAC_[0-9]", col)),
@@ -452,7 +452,7 @@ class ProtPyCompositionTests(unittest.TestCase):
         self.assertIsInstance(amp_pseudo_amino_acid_composition_seq3, pd.DataFrame, 
             'Expected output to be of type DataFrame, got {}.'.format(type(amp_pseudo_amino_acid_composition_seq3)))
         self.assertEqual(amp_pseudo_amino_acid_composition_seq3.shape, (1, 20+(2*lamda)),
-            'Expected output to be of shape {}, got {}.'.format((1, 20+(2*lamda)), amp_pseudo_amino_acid_composition_seq3.shape))) 
+            'Expected output to be of shape {}, got {}.'.format((1, 20+(2*lamda)), amp_pseudo_amino_acid_composition_seq3.shape)) 
         for col in list(amp_pseudo_amino_acid_composition_seq3.columns):
             #check all columns follow correct naming convention
             self.assertTrue(bool(re.match(r"APAAC_[0-9]", col)),
@@ -467,7 +467,7 @@ class ProtPyCompositionTests(unittest.TestCase):
         self.assertIsInstance(amp_pseudo_amino_acid_composition_seq4, pd.DataFrame, 
             'Expected output to be of type DataFrame, got {}.'.format(type(amp_pseudo_amino_acid_composition_seq4)))
         self.assertEqual(amp_pseudo_amino_acid_composition_seq4.shape, (1, 20+(2*lamda)),
-            'Expected output to be of shape {}, got {}.'.format((1, 20+(2*lamda)), amp_pseudo_amino_acid_composition_seq4.shape))) 
+            'Expected output to be of shape {}, got {}.'.format((1, 20+(2*lamda)), amp_pseudo_amino_acid_composition_seq4.shape)) 
         for col in list(amp_pseudo_amino_acid_composition_seq4.columns):
             #check all columns follow correct naming convention
             self.assertTrue(bool(re.match(r"APAAC_[0-9]", col)),

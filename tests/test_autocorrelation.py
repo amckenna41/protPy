@@ -59,7 +59,7 @@ class ProtPyAutocorrelationTests(unittest.TestCase):
             self.assertIsInstance(moreaubroto_seq1, pd.DataFrame, 
                 'Expected output to be of type DataFrame, got {}.'.format(type(moreaubroto_seq1)))
             self.assertEqual(moreaubroto_seq1.shape, (1, lag*len(properties)), 
-                'Expected output to be of shape {}, got {}.'.format((1, lag*len(properties), moreaubroto_seq1.shape))) 
+                'Expected output to be of shape {}, got {}.'.format((1, lag*len(properties)), moreaubroto_seq1.shape)) 
             self.assertTrue(moreaubroto_seq1.any().isnull().sum()==0, 
                 'Expected output to contain no null values.')        
             self.assertTrue(all(col == np.float64 for col in list(moreaubroto_seq1.dtypes)), 
@@ -77,7 +77,7 @@ class ProtPyAutocorrelationTests(unittest.TestCase):
             self.assertIsInstance(moreaubroto_seq2, pd.DataFrame,
                 'Expected output to be of type DataFrame, got {}.'.format(type(moreaubroto_seq2)))
             self.assertEqual(moreaubroto_seq2.shape, (1, lag*len(properties)),
-                'Expected output to be of shape {}, got {}.'.format((1, lag*len(properties), moreaubroto_seq2.shape))) 
+                'Expected output to be of shape {}, got {}.'.format((1, lag*len(properties)), moreaubroto_seq2.shape)) 
             self.assertTrue(moreaubroto_seq2.any().isnull().sum()==0, 
                 'Expected output to contain no null values.')        
             self.assertTrue(all(col == np.float64 for col in list(moreaubroto_seq2.dtypes)), 
@@ -95,7 +95,7 @@ class ProtPyAutocorrelationTests(unittest.TestCase):
             self.assertIsInstance(moreaubroto_seq3, pd.DataFrame, 
                 'Expected output to be of type DataFrame, got {}.'.format(type(moreaubroto_seq3)))
             self.assertEqual(moreaubroto_seq3.shape, (1, lag*len(properties)), 
-                'Expected output to be of shape {}, got {}.'.format((1, lag*len(properties), moreaubroto_seq3.shape))) 
+                'Expected output to be of shape {}, got {}.'.format((1, lag*len(properties)), moreaubroto_seq3.shape)) 
             self.assertTrue(moreaubroto_seq3.any().isnull().sum()==0, 
                 'Expected output to contain no null values.')        
             self.assertTrue(all(col == np.float64 for col in list(moreaubroto_seq3.dtypes)), 
@@ -113,7 +113,7 @@ class ProtPyAutocorrelationTests(unittest.TestCase):
             self.assertIsInstance(moreaubroto_seq4, pd.DataFrame, 
                 'Expected output to be of type DataFrame, got {}.'.format(type(moreaubroto_seq4)))
             self.assertEqual(moreaubroto_seq4.shape, (1, lag*len(properties)), 
-                'Expected output to be of shape {}, got {}.'.format((1, lag*len(properties), moreaubroto_seq4.shape))) 
+                'Expected output to be of shape {}, got {}.'.format((1, lag*len(properties)), moreaubroto_seq4.shape)) 
             self.assertTrue(moreaubroto_seq4.any().isnull().sum()==0,
                 'Expected output to contain no null values.')        
             self.assertTrue(all(col == np.float64 for col in list(moreaubroto_seq4.dtypes)), 
@@ -150,7 +150,7 @@ class ProtPyAutocorrelationTests(unittest.TestCase):
             self.assertIsInstance(moran_auto_seq1, pd.DataFrame, 
                 'Expected output to be of type DataFrame, got {}.'.format(type(moran_auto_seq1)))
             self.assertEqual(moran_auto_seq1.shape, (1, lag*len(properties)),
-                'Expected output to be of shape {}, got {}.'.format((1, lag*len(properties), moran_auto_seq1.shape))) 
+                'Expected output to be of shape {}, got {}.'.format((1, lag*len(properties)), moran_auto_seq1.shape)) 
             self.assertTrue(moran_auto_seq1.any().isnull().sum()==0,
                 'Expected output to contain no null values.')        
             self.assertTrue(all(col == np.float64 for col in list(moran_auto_seq1.dtypes)), 
@@ -168,7 +168,7 @@ class ProtPyAutocorrelationTests(unittest.TestCase):
             self.assertIsInstance(moran_auto_seq2, pd.DataFrame, 
                 'Expected output to be of type DataFrame, got {}.'.format(type(moran_auto_seq2)))
             self.assertEqual(moran_auto_seq2.shape, (1, lag*len(properties)), 
-                'Expected output to be of shape {}, got {}.'.format((1, lag*len(properties), moran_auto_seq2.shape))) 
+                'Expected output to be of shape {}, got {}.'.format((1, lag*len(properties)), moran_auto_seq2.shape)) 
             self.assertTrue(moran_auto_seq2.any().isnull().sum()==0,
                 'Expected output to contain no null values.')        
             self.assertTrue(all(col == np.float64 for col in list(moran_auto_seq2.dtypes)), 
@@ -186,7 +186,7 @@ class ProtPyAutocorrelationTests(unittest.TestCase):
             self.assertIsInstance(moran_auto_seq3, pd.DataFrame, 
                 'Expected output to be of type DataFrame, got {}.'.format(type(moran_auto_seq3)))
             self.assertEqual(moran_auto_seq3.shape, (1, lag*len(properties)), 
-                'Expected output to be of shape {}, got {}.'.format((1, lag*len(properties), moran_auto_seq3.shape))) 
+                'Expected output to be of shape {}, got {}.'.format((1, lag*len(properties)), moran_auto_seq3.shape)) 
             self.assertTrue(moran_auto_seq3.any().isnull().sum()==0,
                 'Expected output to contain no null values.')        
             self.assertTrue(all(col == np.float64 for col in list(moran_auto_seq3.dtypes)), 
@@ -204,7 +204,7 @@ class ProtPyAutocorrelationTests(unittest.TestCase):
             self.assertIsInstance(moran_auto_seq4, pd.DataFrame, 
                 'Expected output to be of type DataFrame, got {}.'.format(type(moran_auto_seq4)))
             self.assertEqual(moran_auto_seq4.shape, (1, lag*len(properties)), 
-                'Expected output to be of shape {}, got {}.'.format((1, lag*len(properties), moran_auto_seq4.shape))) 
+                'Expected output to be of shape {}, got {}.'.format((1, lag*len(properties)), moran_auto_seq4.shape)) 
             self.assertTrue(moran_auto_seq4.any().isnull().sum()==0,
                 'Expected output to contain no null values.')        
             self.assertTrue(all(col == np.float64 for col in list(moran_auto_seq4.dtypes)), 
@@ -241,7 +241,7 @@ class ProtPyAutocorrelationTests(unittest.TestCase):
             self.assertIsInstance(geary_auto_seq1, pd.DataFrame, 
                 'Expected output to be of type DataFrame, got {}.'.format(type(geary_auto_seq1)))
             self.assertEqual(geary_auto_seq1.shape, (1, lag*len(properties)), 
-                'Expected output to be of shape {}, got {}.'.format((1, lag*len(properties), geary_auto_seq1.shape))) 
+                'Expected output to be of shape {}, got {}.'.format((1, lag*len(properties)), geary_auto_seq1.shape)) 
             self.assertTrue(geary_auto_seq1.any().isnull().sum()==0,
                 'Expected output to contain no null values.')        
             self.assertTrue(all(col == np.float64 for col in list(geary_auto_seq1.dtypes)), 
@@ -259,7 +259,7 @@ class ProtPyAutocorrelationTests(unittest.TestCase):
             self.assertIsInstance(geary_auto_seq2, pd.DataFrame, 
                 'Expected output to be of type DataFrame, got {}.'.format(type(geary_auto_seq2)))
             self.assertEqual(geary_auto_seq2.shape, (1, lag*len(properties)), 
-                'Expected output to be of shape {}, got {}.'.format((1, lag*len(properties), geary_auto_seq2.shape))) 
+                'Expected output to be of shape {}, got {}.'.format((1, lag*len(properties)), geary_auto_seq2.shape)) 
             self.assertTrue(geary_auto_seq2.any().isnull().sum()==0,
                 'Expected output to contain no null values.')        
             self.assertTrue(all(col == np.float64 for col in list(geary_auto_seq2.dtypes)), 
@@ -277,7 +277,7 @@ class ProtPyAutocorrelationTests(unittest.TestCase):
             self.assertIsInstance(geary_auto_seq3, pd.DataFrame, 
                 'Expected output to be of type DataFrame, got {}.'.format(type(geary_auto_seq3)))
             self.assertEqual(geary_auto_seq3.shape, (1, lag*len(properties)), 
-                'Expected output to be of shape {}, got {}.'.format((1, lag*len(properties), geary_auto_seq3.shape))) 
+                'Expected output to be of shape {}, got {}.'.format((1, lag*len(properties)), geary_auto_seq3.shape)) 
             self.assertTrue(geary_auto_seq3.any().isnull().sum()==0,
                 'Expected output to contain no null values.')        
             self.assertTrue(all(col == np.float64 for col in list(geary_auto_seq3.dtypes)), 
@@ -295,7 +295,7 @@ class ProtPyAutocorrelationTests(unittest.TestCase):
             self.assertIsInstance(geary_auto_seq4, pd.DataFrame, 
                 'Expected output to be of type DataFrame, got {}.'.format(type(geary_auto_seq4)))
             self.assertEqual(geary_auto_seq4.shape, (1, lag*len(properties)), 
-                'Expected output to be of shape {}, got {}.'.format((1, lag*len(properties), geary_auto_seq4.shape))) 
+                'Expected output to be of shape {}, got {}.'.format((1, lag*len(properties)), geary_auto_seq4.shape)) 
             self.assertTrue(geary_auto_seq4.any().isnull().sum()==0,
                 'Expected output to contain no null values.')        
             self.assertTrue(all(col == np.float64 for col in list(geary_auto_seq4.dtypes)), 

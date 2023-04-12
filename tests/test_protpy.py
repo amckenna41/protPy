@@ -70,7 +70,7 @@ class ProtPyTests(unittest.TestCase):
             "Expected there to be 14 total descriptors, got {}".format(len(protpy.all_descriptors)))
         self.assertIsInstance(protpy.all_descriptors, list, 
             "all_descriptors should be of type list, got {}.".format(type(protpy.all_descriptors)))
-        self.assertIn('aa_composition', protpy.all_descriptors, 
+        self.assertIn('amino_acid_composition', protpy.all_descriptors, 
             "aa_composition should be in available descriptors list.")
         self.assertIn('dipeptide_composition', protpy.all_descriptors, 
             "dipeptide_composition should be in available descriptors list.")

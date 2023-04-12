@@ -43,9 +43,9 @@ class ProtPyConjointTriadTests(unittest.TestCase):
         conjoint_triad_seq1 = protpy.conjoint_triad(self.protein_seq1)
 
         self.assertIsInstance(conjoint_triad_seq1, pd.DataFrame, 
-            'Expected output to be a DataFrame, got {}.'.format(type(conjoint_triad_seq1))
+            'Expected output to be a DataFrame, got {}.'.format(type(conjoint_triad_seq1)))
         self.assertEqual(conjoint_triad_seq1.shape, (1, 343),
-            'Expected output to be of shape {}, got {}.'.format((1, 343), conjoint_triad_seq1.shape))) 
+            'Expected output to be of shape {}, got {}.'.format((1, 343), conjoint_triad_seq1.shape)) 
         self.assertTrue(conjoint_triad_seq1.any().isnull().sum()==0,
             'Expected output to contain no null values.')        
         self.assertTrue(all(col == np.int64 for col in list(conjoint_triad_seq1.dtypes)),
@@ -58,9 +58,9 @@ class ProtPyConjointTriadTests(unittest.TestCase):
         conjoint_triad_seq2 = protpy.conjoint_triad(self.protein_seq2)
 
         self.assertIsInstance(conjoint_triad_seq2, pd.DataFrame, 
-            'Expected output to be a DataFrame, got {}.'.format(type(conjoint_triad_seq2))
+            'Expected output to be a DataFrame, got {}.'.format(type(conjoint_triad_seq2)))
         self.assertEqual(conjoint_triad_seq2.shape, (1, 343),
-            'Expected output to be of shape {}, got {}.'.format((1, 343), conjoint_triad_seq2.shape))) 
+            'Expected output to be of shape {}, got {}.'.format((1, 343), conjoint_triad_seq2.shape)) 
         self.assertTrue(conjoint_triad_seq2.any().isnull().sum()==0,
             'Expected output to contain no null values.')        
         self.assertTrue(all(col == np.int64 for col in list(conjoint_triad_seq2.dtypes)),
@@ -73,9 +73,9 @@ class ProtPyConjointTriadTests(unittest.TestCase):
         conjoint_triad_seq3 = protpy.conjoint_triad(self.protein_seq3)
 
         self.assertIsInstance(conjoint_triad_seq3, pd.DataFrame, 
-            'Expected output to be a DataFrame, got {}.'.format(type(conjoint_triad_seq3))
+            'Expected output to be a DataFrame, got {}.'.format(type(conjoint_triad_seq3)))
         self.assertEqual(conjoint_triad_seq3.shape, (1, 343),
-            'Expected output to be of shape {}, got {}.'.format((1, 343), conjoint_triad_seq3.shape))) 
+            'Expected output to be of shape {}, got {}.'.format((1, 343), conjoint_triad_seq3.shape)) 
         self.assertTrue(conjoint_triad_seq3.any().isnull().sum()==0,
             'Expected output to contain no null values.')        
         self.assertTrue(all(col == np.int64 for col in list(conjoint_triad_seq3.dtypes)),
@@ -88,9 +88,9 @@ class ProtPyConjointTriadTests(unittest.TestCase):
         conjoint_triad_seq4 = protpy.conjoint_triad(self.protein_seq4)
 
         self.assertIsInstance(conjoint_triad_seq4, pd.DataFrame, 
-            'Expected output to be a DataFrame, got {}.'.format(type(conjoint_triad_seq4))
+            'Expected output to be a DataFrame, got {}.'.format(type(conjoint_triad_seq4)))
         self.assertEqual(conjoint_triad_seq4.shape, (1, 343),
-            'Expected output to be of shape {}, got {}.'.format((1, 343), conjoint_triad_seq4.shape))) 
+            'Expected output to be of shape {}, got {}.'.format((1, 343), conjoint_triad_seq4.shape))
         self.assertTrue(conjoint_triad_seq4.any().isnull().sum()==0,
             'Expected output to contain no null values.')        
         self.assertTrue(all(col == np.int64 for col in list(conjoint_triad_seq4.dtypes)),
