@@ -59,7 +59,7 @@ setup(name=__name__,
       install_requires=[
         "aaindex",
         "numpy",
-        "pandas==1.1.0",
+        "pandas",
         "varname",
       ],
       test_suite=__test_suite__,
