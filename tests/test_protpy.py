@@ -9,9 +9,9 @@ unittest.TestLoader.sortTestMethodsUsing = None
 
 import protpy as protpy
 
-class ProtPyTests(unittest.TestCase):
+class ProtpyTests(unittest.TestCase):
     """
-    Test suite for testing protpy package. 
+    Test suite for testing protpy package and its variables and metadata.
 
     Test Cases
     ----------
@@ -20,54 +20,35 @@ class ProtPyTests(unittest.TestCase):
     test_valid_descriptors:
         testing correct list of valid descriptors.
     """
-    def setUp(self):
-        """ Import protein sequences from test fasta files using Biopython package. """
-        #using next() to get first item (protein seq) from SeqIO Generator
-        with open(os.path.join("tests", "test_fasta1.fasta")) as pro:
-            self.protein_seq1 = str(next(SeqIO.parse(pro,'fasta')).seq)
-
-        with open(os.path.join("tests", "test_fasta2.fasta")) as pro:
-            self.protein_seq2 = str(next(SeqIO.parse(pro,'fasta')).seq)
-        
-        with open(os.path.join("tests", "test_fasta3.fasta")) as pro:
-            self.protein_seq3 = str(next(SeqIO.parse(pro,'fasta')).seq)
-
-        with open(os.path.join("tests", "test_fasta4.fasta")) as pro:
-            self.protein_seq4 = str(next(SeqIO.parse(pro,'fasta')).seq)
-
-        #list of canonical amino acids
-        self.amino_acids = ["A", "C", "D", "E", "F", "G", "H", "I", "K", "L", "M", "N", "P", 
-            "Q", "R", "S", "T", "V", "W", "Y"]
-
     def test_protpy_metadata(self):
         """ Testing correct protpy version and metadata. """
-        self.assertEqual(protpy.__version__, "1.1.10", 
-            "protpy version is not correct, got: {}".format(protpy.__version__))
+        self.assertEqual(protpy.__version__, "1.2.0", 
+            "protpy version is not correct, got version {}.".format(protpy.__version__))
         self.assertEqual(protpy.__name__, "protpy", 
-            "protpy software name is not correct, got: {}".format(protpy.__name__))
+            "protpy software name is not correct, got {}.".format(protpy.__name__))
         self.assertEqual(protpy.__author__, "AJ McKenna, https://github.com/amckenna41", 
-            "protpy author is not correct, got: {}".format(protpy.__author__))
+            "protpy author is not correct, got {}.".format(protpy.__author__))
         self.assertEqual(protpy.__authorEmail__, "amckenna41@qub.ac.uk", 
-            "protpy author email is not correct, got: {}".format(protpy.__authorEmail__))
+            "protpy author email is not correct, got {}.".format(protpy.__authorEmail__))
         self.assertEqual(protpy.__url__, "https://github.com/amckenna41/protPy", 
-            "protpy repo URL is not correct, got: {}".format(protpy.__url__))
+            "protpy repo URL is not correct, got {}.".format(protpy.__url__))
         self.assertEqual(protpy.__download_url__, "https://github.com/amckenna41/protPy/archive/refs/heads/main.zip", 
-            "protpy repo download URL is not correct, got: {}".format(protpy.__download_url__))
+            "protpy repo download URL is not correct, got {}.".format(protpy.__download_url__))
         self.assertEqual(protpy.__status__, "Production", 
-            "protpy status is not correct, got: {}".format(protpy.__status__))
+            "protpy status is not correct, got {}.".format(protpy.__status__))
         self.assertEqual(protpy.__license__, "MIT", 
-            "protpy license type is not correct, got: {}".format(protpy.__license__))
+            "protpy license type is not correct, got {}.".format(protpy.__license__))
         self.assertEqual(protpy.__maintainer__, "AJ McKenna", 
-            "protpy maintainer is not correct, got: {}".format(protpy.__license__))
+            "protpy maintainer is not correct, got {}.".format(protpy.__license__))
         self.assertEqual(protpy.__keywords__, ["bioinformatics", "protein engineering", 
             "python", "pypi", "machine learning", "aaindex", "protein descriptors", 
-            "physiochemical descriptors", "biochemical descriptors" "structural descriptors"], 
-            "protpy keywords is not correct, got: {}".format(protpy.__keywords__))
+            "physiochemical descriptors", "biochemical descriptors" "structural descriptors", "pySAR"], 
+            "protpy keywords is not correct, got\n{}.".format(protpy.__keywords__))
 
     def test_valid_descriptors(self):
         """ Testing correct list of available descriptors is included in package attribute. """
         self.assertEqual(len(protpy.all_descriptors), 14, 
-            "Expected there to be 14 total descriptors, got {}".format(len(protpy.all_descriptors)))
+            "Expected there to be 14 total descriptors, got {}.".format(len(protpy.all_descriptors)))
         self.assertIsInstance(protpy.all_descriptors, list, 
             "all_descriptors should be of type list, got {}.".format(type(protpy.all_descriptors)))
         self.assertIn('amino_acid_composition', protpy.all_descriptors, 

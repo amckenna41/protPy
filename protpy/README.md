@@ -8,12 +8,12 @@ Modules
 
 Usage
 -----
-## Import `protpy` after installation: 
+### Import `protpy` after installation: 
 ```python
 import protpy as protpy
 ```
 
-## Import protein sequence from fasta:
+### Import protein sequence from fasta:
 ```python
 from Bio import SeqIO
 
@@ -21,31 +21,31 @@ with open("test_fasta.fasta") as pro:
     protein_seq = str(next(SeqIO.parse(pro,'fasta')).seq)
 ```
 
-## Composition Descriptors
+### Composition Descriptors
 Calculate Amino Acid Composition:
 ```python
-amino_acid_comp = protpy.amino_acid_composition(protein_seq)
+amino_acid_composition = protpy.amino_acid_composition(protein_seq)
 # A      C      D      E      F ...
 # 6.693  3.108  5.817  3.347  6.614 ...
 ```
 
 Calculate Dipeptide Composition:
 ```python
-dipeptide_comp = protpy.dipeptide_composition(protein_seq)
+dipeptide_composition = protpy.dipeptide_composition(protein_seq)
 # AA    AC    AD   AE    AF ...
 # 0.72  0.16  0.48  0.4  0.24 ...
 ```
 
 Calculate Tripeptide Composition:
 ```python
-tripeptide_comp = protpy.tripeptide_composition(protein_seq)
+tripeptide_composition = protpy.tripeptide_composition(protein_seq)
 # AAA  AAC  AAD  AAE  AAF ...
 # 1    0    0    2    0 ...
 ```
 
 Calculate Pseudo Composition:
 ```python
-pseudo_comp = protpy.pseudo_amino_acid_composition(protein_seq) 
+pseudo_composition = protpy.pseudo_amino_acid_composition(protein_seq) 
 #using default parameters: lamda=30, weight=0.05, properties=[]
 
 # PAAC_1  PAAC_2  PAAC_3  PAAC_4  PAAC_5 ...
@@ -54,14 +54,14 @@ pseudo_comp = protpy.pseudo_amino_acid_composition(protein_seq)
 
 Calculate Amphiphilic Composition:
 ```python
-amphiphilic_comp = protpy.amphiphilic_amino_acid_composition(protein_seq)
+amphiphilic_composition = protpy.amphiphilic_amino_acid_composition(protein_seq)
 #using default parameters: lamda=30, weight=0.5, properties=[hydrophobicity_, hydrophilicity_]
 
 # APAAC_1  APAAC_2  APAAC_3  APAAC_4  APAAC_5 ...
 # 6.06    2.814    5.267     3.03    5.988 ...
 ```
 
-## Autocorrelation Descriptors
+### Autocorrelation Descriptors
 Calculate MoreauBroto Autocorrelation:
 ```python
 moreaubroto_autocorrelation = protpy.moreaubroto_autocorrelation(protein_seq)
@@ -89,15 +89,15 @@ geary_autocorrelation = protpy.geary_autocorrelation(protein_seq)
 # 1.057               1.077               1.04                1.02                1.013 ...
 ```
 
-## Conjoint Triad Descriptors
+### Conjoint Triad Descriptors
 Calculate Conjoint Triad:
 ```python
-conj_triad = protpy.conjoint_triad(protein_seq)
+conjoint_triad = protpy.conjoint_triad(protein_seq)
 # 111  112  113  114  115 ...
 # 7    17   11   3    6 ...
 ```
 
-## CTD Descriptors
+### CTD Descriptors
 Calculate CTD:
 ```python
 ctd = protpy.ctd(protein_seq)
@@ -107,29 +107,41 @@ ctd = protpy.ctd(protein_seq)
 # 0.279                    0.386                    0.335                    0.389 ...                   
 ```
 
-## Sequence Order Descriptors 
+### Sequence Order Descriptors 
 Calculate Sequence Order Coupling Number (SOCN):
 ```python
 socn = protpy.sequence_order_coupling_number_(protein_seq)
-#using default parameters: d=1, distance_matrix="schneider-wrede-physiochemical-distance-matrix"
+#using default parameters: d=1, distance_matrix="schneider-wrede"
 
 #401.387        
 ```
 
-Calculate All SOCN per distance matrix:
+Calculate all SOCN's per distance matrix:
 ```python
+#using default parameters: lag=30, distance_matrix="schneider-wrede"
 socn_all = protpy.sequence_order_coupling_number(protein_seq)
-#using default parameters: lag=30, distance_matrix="schneider-wrede-physiochemical-distance-matrix.json"
 
-# SOCN_SW_1  SOCN_SW_2  SOCN_SW_3  SOCN_SW_4  SOCN_SW_5 ...
-# 401.387    409.243    376.946    393.042    396.196 ...        
+# SOCN_SW1  SOCN_SW2  SOCN_SW3  SOCN_SW4  SOCN_SW5 ...
+# 401.387    409.243    376.946    393.042    396.196 ...  
+
+#using custom parameters: lag=10, distance_matrix="grantham"
+socn_all = protpy.sequence_order_coupling_number(protein_seq, lag=10, distance_matrix="grantham")      
+
+# SOCN_Grant1  SOCN_Grant_2  SOCN_Grant_3  SOCN_Grant_4  SOCN_Grant_5 ...
+# 399.125    402.153    387.820    393.111    409.096 ...  
 ```
 
 Calculate Quasi Sequence Order (QSO):
 ```python
+#using default parameters: lag=30, weight=0.1, distance_matrix="schneider-wrede"
 qso = protpy.quasi_sequence_order(protein_seq)
-#using default parameters: lag=30, weight=0.1, distance_matrix="schneider-wrede-physiochemical-distance-matrix.json"
 
 # QSO_SW1   QSO_SW2   QSO_SW3   QSO_SW4   QSO_SW5 ...
-# 0.005692  0.002643  0.004947  0.002846  0.005625 ...        
+# 0.005692  0.002643  0.004947  0.002846  0.005625 ...  
+
+#using custom parameters: lag=10, weight=0.2, distance_matrix="grantham"
+qso = protpy.quasi_sequence_order(protein_seq, lag=10, weight=0.2, distance_matrix="grantham")
+
+# QSO_Grant1   QSO_Grant2   QSO_Grant3   QSO_Grant4   QSO_Grant5 ...
+# 0.123287  0.079967  0.04332  0.039983  0.013332 ...  
 ```

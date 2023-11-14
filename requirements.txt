@@ -2,4 +2,3 @@ aaindex
 numpy
 pandas
 varname
-biopython

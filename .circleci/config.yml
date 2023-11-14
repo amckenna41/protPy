@@ -103,31 +103,23 @@ workflows:
     jobs:
       - build-and-test:
           filters:
-            tags:
-              only: /.*/
             branches:
               only:
-                - master
+                - main
       - lint-and-coverage:
           filters:
-            tags:
-              only: /.*/
             branches:
               only:
-                - master
+                - main
       - safety-and-bandit:
           filters:
-            tags:
-              only: /.*/
             branches:
               only:
-                - master
+                - main
       - protpy-pipeline:
           requires:
             - build-and-test
           filters:
-            tags:
-              only: /.*/
             branches:
               only:
-                - master
+                - main

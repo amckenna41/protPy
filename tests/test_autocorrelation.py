@@ -12,7 +12,7 @@ unittest.TestLoader.sortTestMethodsUsing = None
 
 import protpy as protpy
 
-class ProtPyAutocorrelationTests(unittest.TestCase):
+class ProtpyAutocorrelationTests(unittest.TestCase):
     """
     Test suite for testing autcorrelation module and functionality 
     in protpy package, including the MoreauBroto, Moran and Geary
@@ -30,16 +30,16 @@ class ProtPyAutocorrelationTests(unittest.TestCase):
     def setUp(self):
         """ Import protein sequences from test fasta files using Biopython package. """
         #using next() to get first item (protein seq) from SeqIO Generator
-        with open(os.path.join("tests", "test_fasta1.fasta")) as pro:
+        with open(os.path.join("tests", "test_data", "test_fasta1.fasta")) as pro:
             self.protein_seq1 = str(next(SeqIO.parse(pro,'fasta')).seq)
 
-        with open(os.path.join("tests", "test_fasta2.fasta")) as pro:
+        with open(os.path.join("tests", "test_data", "test_fasta2.fasta")) as pro:
             self.protein_seq2 = str(next(SeqIO.parse(pro,'fasta')).seq)
         
-        with open(os.path.join("tests", "test_fasta3.fasta")) as pro:
+        with open(os.path.join("tests", "test_data", "test_fasta3.fasta")) as pro:
             self.protein_seq3 = str(next(SeqIO.parse(pro,'fasta')).seq)
 
-        with open(os.path.join("tests", "test_fasta4.fasta")) as pro:
+        with open(os.path.join("tests", "test_data", "test_fasta4.fasta")) as pro:
             self.protein_seq4 = str(next(SeqIO.parse(pro,'fasta')).seq)
 
         #list of canonical amino acids
@@ -48,11 +48,11 @@ class ProtPyAutocorrelationTests(unittest.TestCase):
 
     def test_moreaubroto_autocorrelation(self):
         """ Testing moreaubroto autocorrelation descriptor attributes and functionality. """
-#1.)
         moreaubroto_lag = list(range(5, 35, 5))
         properties = ["CIDH920105", "BHAR880101", "CHAM820101", "CHAM820102", 
             "CHOC760101", "BIGC670101", "CHAM810101", "DAYM780201"]
-
+#1.)
+        #testing using range of lag values
         for lag in moreaubroto_lag:
             moreaubroto_seq1 = protpy.moreaubroto_autocorrelation(self.protein_seq1, lag=lag, 
                 properties=properties, normalize=True)
@@ -71,6 +71,7 @@ class ProtPyAutocorrelationTests(unittest.TestCase):
                 self.assertTrue(bool(re.match(r"MBAuto_[A-Z0-9]{10}_[0-9]", col)), 
                     "Column name doesn't match expected regex pattern: {}.".format(col))     
 #2.)
+        #testing using range of lag values
         for lag in moreaubroto_lag:
             moreaubroto_seq2 = protpy.moreaubroto_autocorrelation(self.protein_seq2, lag=lag, 
                 properties=properties, normalize=True)
@@ -89,6 +90,7 @@ class ProtPyAutocorrelationTests(unittest.TestCase):
                 self.assertTrue(bool(re.match(r"MBAuto_[A-Z0-9]{10}_[0-9]", col)), 
                     "Column name doesn't match expected regex pattern: {}.".format(col))
 #3.)
+        #testing using range of lag values
         for lag in moreaubroto_lag:
             moreaubroto_seq3 = protpy.moreaubroto_autocorrelation(self.protein_seq3, lag=lag, 
                 properties=properties, normalize=True)
@@ -107,6 +109,7 @@ class ProtPyAutocorrelationTests(unittest.TestCase):
                 self.assertTrue(bool(re.match(r"MBAuto_[A-Z0-9]{10}_[0-9]", col)), 
                     "Column name doesn't match expected regex pattern: {}.".format(col))
 #4.)
+        #testing using range of lag values
         for lag in moreaubroto_lag:
             moreaubroto_seq4 = protpy.moreaubroto_autocorrelation(self.protein_seq4, lag=lag, 
                 properties=properties, normalize=True)
@@ -126,24 +129,24 @@ class ProtPyAutocorrelationTests(unittest.TestCase):
                     "Column name doesn't match expected regex pattern: {}.".format(col))
 #5.)
         invalid_seq5 = "ABCDEF"
-        with (self.assertRaises(ValueError)):
-            moreaubroto_seq5 = protpy.moreaubroto_autocorrelation(invalid_seq5)
-#6.)
         invalid_seq6 = "OOOOO"
         with (self.assertRaises(ValueError)):
+            moreaubroto_seq5 = protpy.moreaubroto_autocorrelation(invalid_seq5)
             moreaubroto_seq6 = protpy.moreaubroto_autocorrelation(invalid_seq6)
-#7.)
+#6.)
         invalid_seq7 = 12345
+        invalid_seq8 = False
         with (self.assertRaises(TypeError)):
             moreaubroto_seq7 = protpy.moreaubroto_autocorrelation(invalid_seq7)
+            moreaubroto_seq8 = protpy.moreaubroto_autocorrelation(invalid_seq8)
 
     def test_moran_autocorrelation(self):
         """ Testing moran autocorrelation descriptor attributes and functionality. """
-#1.)
         moran_auto_lag = list(range(5, 35, 5))
         properties = ["CIDH920105", "BHAR880101", "CHAM820101", "CHAM820102", 
             "CHOC760101", "BIGC670101", "CHAM810101", "DAYM780201"]
-
+#1.)
+        #testing using range of lag values
         for lag in moran_auto_lag:
             moran_auto_seq1 = protpy.moran_autocorrelation(self.protein_seq1, lag=lag, 
                 properties=properties, normalize=True)
@@ -162,6 +165,7 @@ class ProtPyAutocorrelationTests(unittest.TestCase):
                 self.assertTrue(bool(re.match(r"MAuto_[A-Z0-9]{10}_[0-9]", col)), 
                     "Column name doesn't match expected regex pattern: {}.".format(col))
 #2.)
+        #testing using range of lag values
         for lag in moran_auto_lag:
             moran_auto_seq2 = protpy.moran_autocorrelation(self.protein_seq2, lag=lag, 
                 properties=properties, normalize=True)
@@ -180,6 +184,7 @@ class ProtPyAutocorrelationTests(unittest.TestCase):
                 self.assertTrue(bool(re.match(r"MAuto_[A-Z0-9]{10}_[0-9]", col)), 
                     "Column name doesn't match expected regex pattern: {}.".format(col))
 #3.)
+        #testing using range of lag values
         for lag in moran_auto_lag:
             moran_auto_seq3 = protpy.moran_autocorrelation(self.protein_seq3, lag=lag, 
                 properties=properties, normalize=True)
@@ -198,6 +203,7 @@ class ProtPyAutocorrelationTests(unittest.TestCase):
                 self.assertTrue(bool(re.match(r"MAuto_[A-Z0-9]{10}_[0-9]", col)), 
                     "Column name doesn't match expected regex pattern: {}".format(col))
 #4.)
+        #testing using range of lag values
         for lag in moran_auto_lag:
             moran_auto_seq4 = protpy.moran_autocorrelation(self.protein_seq4, lag=lag, 
                 properties=properties, normalize=True)
@@ -217,24 +223,24 @@ class ProtPyAutocorrelationTests(unittest.TestCase):
                     "Column name doesn't match expected regex pattern: {}".format(col))
 #5.)
         invalid_seq5 = "ABCDEF"
-        with (self.assertRaises(ValueError)):
-            moran_auto_seq5 = protpy.moran_autocorrelation(invalid_seq5)
-#6.)
         invalid_seq6 = "OOOOO"
         with (self.assertRaises(ValueError)):
+            moran_auto_seq5 = protpy.moran_autocorrelation(invalid_seq5)
             moran_auto_seq6 = protpy.moran_autocorrelation(invalid_seq6)
-#7.)
+#6.)
         invalid_seq7 = 12345
+        invalid_seq8 = False
         with (self.assertRaises(TypeError)):
             moran_auto_seq7 = protpy.moran_autocorrelation(invalid_seq7)
+            moran_auto_seq8 = protpy.moran_autocorrelation(invalid_seq8)
 
     def test_geary_autocorrelation(self):
         """ Testing geary autocorrelation descriptor attributes and functionality. """
-#1.)
         geary_auto_lag = list(range(5, 35, 5))
         properties = ["CIDH920105", "BHAR880101", "CHAM820101", "CHAM820102", 
             "CHOC760101", "BIGC670101", "CHAM810101", "DAYM780201"]
-
+#1.)
+        #testing using range of lag values
         for lag in geary_auto_lag:
             geary_auto_seq1 = protpy.geary_autocorrelation(self.protein_seq1, lag=lag, 
                 properties=properties, normalize=True)
@@ -253,6 +259,7 @@ class ProtPyAutocorrelationTests(unittest.TestCase):
                 self.assertTrue(bool(re.match(r"GAuto_[A-Z0-9]{10}_[0-9]", col)), 
                     "Column name doesn't match expected regex pattern: {}.".format(col))
 #2.)
+        #testing using range of lag values
         for lag in geary_auto_lag:
             geary_auto_seq2 = protpy.geary_autocorrelation(self.protein_seq2, lag=lag, 
                 properties=properties, normalize=True)
@@ -271,6 +278,7 @@ class ProtPyAutocorrelationTests(unittest.TestCase):
                 self.assertTrue(bool(re.match(r"GAuto_[A-Z0-9]{10}_[0-9]", col)), 
                     "Column name doesn't match expected regex pattern: {}.".format(col))
 #3.)
+        #testing using range of lag values
         for lag in geary_auto_lag:
             geary_auto_seq3 = protpy.geary_autocorrelation(self.protein_seq3, lag=lag, 
                 properties=properties, normalize=True)
@@ -289,6 +297,7 @@ class ProtPyAutocorrelationTests(unittest.TestCase):
                 self.assertTrue(bool(re.match(r"GAuto_[A-Z0-9]{10}_[0-9]", col)), 
                     "Column name doesn't match expected regex pattern: {}".format(col))
 #4.)
+        #testing using range of lag values
         for lag in geary_auto_lag:
             geary_auto_seq4 = protpy.geary_autocorrelation(self.protein_seq4, lag=lag, 
                 properties=properties, normalize=True)
@@ -308,13 +317,13 @@ class ProtPyAutocorrelationTests(unittest.TestCase):
                     "Column name doesn't match expected regex pattern: {}".format(col))
 #5.)
         invalid_seq5 = "ABCDEF"
-        with (self.assertRaises(ValueError)):
-            geary_auto_seq5 = protpy.geary_autocorrelation(invalid_seq5)
-#6.)
         invalid_seq6 = "OOOOO"
         with (self.assertRaises(ValueError)):
+            geary_auto_seq5 = protpy.geary_autocorrelation(invalid_seq5)
             geary_auto_seq6 = protpy.geary_autocorrelation(invalid_seq6)
-#7.)
+#6.)
         invalid_seq7 = 12345
+        invalid_seq8 = True
         with (self.assertRaises(TypeError)):
             geary_auto_seq7 = protpy.geary_autocorrelation(invalid_seq7)
+            geary_auto_seq8 = protpy.geary_autocorrelation(invalid_seq8)

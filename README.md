@@ -2,15 +2,14 @@
 # protpy - Package for generating protein physiochemical, biochemical and structural descriptors using their constituent amino acids. #
 [![PyPI](https://img.shields.io/pypi/v/protpy)](https://pypi.org/project/protpy/)
 [![pytest](https://github.com/amckenna41/protpy/workflows/Building%20and%20Testing/badge.svg)](https://github.com/amckenna41/protpy/actions?query=workflowBuilding%20and%20Testing)
+[![CircleCI](https://dl.circleci.com/status-badge/img/gh/amckenna41/protPy/tree/main.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/amckenna41/protPy/tree/main)
 [![Platforms](https://img.shields.io/badge/platforms-linux%2C%20macOS%2C%20Windows-green)](https://pypi.org/project/protpy/)
 [![PythonV](https://img.shields.io/pypi/pyversions/protpy?logo=2)](https://pypi.org/project/protpy/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-red.svg)](https://opensource.org/licenses/MIT)
+[![codecov](https://codecov.io/gh/amckenna41/pySAR/branch/master/graph/badge.svg?token=4PQDVGKGYN)](https://codecov.io/gh/amckenna41/pySAR)
 [![Issues](https://img.shields.io/github/issues/amckenna41/protpy)](https://github.com/amckenna41/protpy/issues)
-[![Size](https://img.shields.io/github/repo-size/amckenna41/protpy)](https://github.com/amckenna41/protpy)
-[![Commits](https://img.shields.io/github/commit-activity/w/amckenna41/protpy)](https://github.com/amckenna41/protpy)
-<!-- [![CircleCI](https://circleci.com/gh/amckenna41/pySAR.svg?style=svg&circle-token=d860bb64668be19d44f106841b80eb47a8b7e7e8)](https://app.circleci.com/pipelines/github/amckenna41/pySAR) -->
-<!-- [![DOI](https://zenodo.org/badge/344290370.svg)](https://zenodo.org/badge/latestdoi/344290370) -->
-<!-- [![codecov](https://codecov.io/gh/amckenna41/DCBLSTM_PSP/branch/master/graph/badge.svg?token=4PQDVGKGYN)](https://codecov.io/gh/amckenna41/DCBLSTM_PSP) -->
+<!-- [![Size](https://img.shields.io/github/repo-size/amckenna41/protpy)](https://github.com/amckenna41/protpy)
+[![Commits](https://img.shields.io/github/commit-activity/w/amckenna41/protpy)](https://github.com/amckenna41/protpy) -->
 <!-- <p align="center">
 <img src="https://images.newscientist.com/wp-content/uploads/2021/07/22155326/22-july_deepmind-proteome.jpg?width=300" alt="protpyLogo" height="200"/>
 </p> -->
@@ -32,30 +31,31 @@ Introduction
 ------------
 `protpy` is a Python software package for generating a variety of physiochemical, biochemical and structural descriptors for proteins. All of these descriptors are calculated using sequence-derived or physiochemical features of the amino acids that make up the proteins. These descriptors have been highly studied and used in a series of Bioinformatic applications including protein engineering, SAR (sequence-activity-relationships), predicting protein structure & function, subcellular localization, protein-protein interactions, drug-target interactions etc. The descriptors available in `protpy` include:
 
-* **Moreaubroto Autocorrelation (MBAuto)**
-* **Moran Autocorrelation (MAuto)**
-* **Geary Autocorrelation (GAuto)**
 * **Amino Acid Composition (AAComp)**
 * **Dipeptide Composition (DPComp)**
 * **Tripeptide Composition (TPComp)**
 * **Pseudo Amino Acid Composition (PAAComp)**
 * **Amphiphilic Amino Acid Composition (APAAComp)**
+* **Moreaubroto Autocorrelation (MBAuto)**
+* **Moran Autocorrelation (MAuto)**
+* **Geary Autocorrelation (GAuto)**
 * **Conjoint Triad (CTriad)**
 * **CTD (Composition, Transition, Distribution) (CTD)**
 * **Sequence Order Coupling Number (SOCN)**
 * **Quasi Sequence Order (QSO)**
 
-This software is aimed at any researcher using protein sequence/structural data, and was mainly created to use in my own project [`pySAR`](https://github.com/amckenna41/pySAR) which uses protein sequence data to identify Sequence Activity Relationships (SAR) using Machine Learning [[1]](#references). `protpy` is built solely in Python3 and specifically developed in Python 3.10.
+This software is aimed at any researcher or developer using protein sequence/structural data, and was mainly created to use in my own project [`pySAR`](https://github.com/amckenna41/pySAR) which uses protein sequence data to identify Sequence Activity Relationships (SAR) using Machine Learning [[1]](#references). `protpy` is built solely in Python3 and specifically developed in Python 3.10.
 
-<strong>A demo of the software is available [here](https://github.com/amckenna41/protpy). </strong>
+<strong>A demo of the software is available [here](demo). </strong>
 
 Requirements
 ------------
-* [Python][python] >= 3.6
+* [Python][python] >= 3.8
 * [aaindex][aaindex] >= 1.0.4
 * [numpy][numpy] >= 1.16.0
 * [pandas][pandas] >= 1.1.0
-* [requests][requests] >= 2.24.0
+* [varname][varname] >= 0.12.0
+* [biopython][biopython] >=1.81 (only required for testing) 
 
 Installation 
 ------------
@@ -74,12 +74,12 @@ python3 setup.py install
 
 Usage
 -----
-## Import `protpy` after installation: 
+### Import `protpy` after installation: 
 ```python
 import protpy as protpy
 ```
 
-## Import protein sequence from fasta:
+### Import protein sequence from fasta:
 ```python
 from Bio import SeqIO
 
@@ -87,31 +87,31 @@ with open("test_fasta.fasta") as pro:
     protein_seq = str(next(SeqIO.parse(pro,'fasta')).seq)
 ```
 
-## Composition Descriptors
+### Composition Descriptors
 Calculate Amino Acid Composition:
 ```python
-amino_acid_comp = protpy.amino_acid_composition(protein_seq)
+amino_acid_composition = protpy.amino_acid_composition(protein_seq)
 # A      C      D      E      F ...
 # 6.693  3.108  5.817  3.347  6.614 ...
 ```
 
 Calculate Dipeptide Composition:
 ```python
-dipeptide_comp = protpy.dipeptide_composition(protein_seq)
+dipeptide_composition = protpy.dipeptide_composition(protein_seq)
 # AA    AC    AD   AE    AF ...
 # 0.72  0.16  0.48  0.4  0.24 ...
 ```
 
 Calculate Tripeptide Composition:
 ```python
-tripeptide_comp = protpy.tripeptide_composition(protein_seq)
+tripeptide_composition = protpy.tripeptide_composition(protein_seq)
 # AAA  AAC  AAD  AAE  AAF ...
 # 1    0    0    2    0 ...
 ```
 
 Calculate Pseudo Composition:
 ```python
-pseudo_comp = protpy.pseudo_amino_acid_composition(protein_seq) 
+pseudo_composition = protpy.pseudo_amino_acid_composition(protein_seq) 
 #using default parameters: lamda=30, weight=0.05, properties=[]
 
 # PAAC_1  PAAC_2  PAAC_3  PAAC_4  PAAC_5 ...
@@ -120,14 +120,14 @@ pseudo_comp = protpy.pseudo_amino_acid_composition(protein_seq)
 
 Calculate Amphiphilic Composition:
 ```python
-amphiphilic_comp = protpy.amphiphilic_amino_acid_composition(protein_seq)
+amphiphilic_composition = protpy.amphiphilic_amino_acid_composition(protein_seq)
 #using default parameters: lamda=30, weight=0.5, properties=[hydrophobicity_, hydrophilicity_]
 
 # APAAC_1  APAAC_2  APAAC_3  APAAC_4  APAAC_5 ...
 # 6.06    2.814    5.267     3.03    5.988 ...
 ```
 
-## Autocorrelation Descriptors
+### Autocorrelation Descriptors
 Calculate MoreauBroto Autocorrelation:
 ```python
 moreaubroto_autocorrelation = protpy.moreaubroto_autocorrelation(protein_seq)
@@ -155,15 +155,15 @@ geary_autocorrelation = protpy.geary_autocorrelation(protein_seq)
 # 1.057               1.077               1.04                1.02                1.013 ...
 ```
 
-## Conjoint Triad Descriptors
+### Conjoint Triad Descriptors
 Calculate Conjoint Triad:
 ```python
-conj_triad = protpy.conjoint_triad(protein_seq)
+conjoint_triad = protpy.conjoint_triad(protein_seq)
 # 111  112  113  114  115 ...
 # 7    17   11   3    6 ...
 ```
 
-## CTD Descriptors
+### CTD Descriptors
 Calculate CTD:
 ```python
 ctd = protpy.ctd(protein_seq)
@@ -173,31 +173,43 @@ ctd = protpy.ctd(protein_seq)
 # 0.279                    0.386                    0.335                    0.389 ...                   
 ```
 
-## Sequence Order Descriptors 
+### Sequence Order Descriptors 
 Calculate Sequence Order Coupling Number (SOCN):
 ```python
 socn = protpy.sequence_order_coupling_number_(protein_seq)
-#using default parameters: d=1, distance_matrix="schneider-wrede-physiochemical-distance-matrix"
+#using default parameters: d=1, distance_matrix="schneider-wrede"
 
 #401.387        
 ```
 
 Calculate all SOCN's per distance matrix:
 ```python
+#using default parameters: lag=30, distance_matrix="schneider-wrede"
 socn_all = protpy.sequence_order_coupling_number(protein_seq)
-#using default parameters: lag=30, distance_matrix="schneider-wrede-physiochemical-distance-matrix.json"
 
-# SOCN_SW_1  SOCN_SW_2  SOCN_SW_3  SOCN_SW_4  SOCN_SW_5 ...
-# 401.387    409.243    376.946    393.042    396.196 ...        
+# SOCN_SW1  SOCN_SW2  SOCN_SW3  SOCN_SW4  SOCN_SW5 ...
+# 401.387    409.243    376.946    393.042    396.196 ...  
+
+#using custom parameters: lag=10, distance_matrix="grantham"
+socn_all = protpy.sequence_order_coupling_number(protein_seq, lag=10, distance_matrix="grantham")      
+
+# SOCN_Grant1  SOCN_Grant_2  SOCN_Grant_3  SOCN_Grant_4  SOCN_Grant_5 ...
+# 399.125    402.153    387.820    393.111    409.096 ...  
 ```
 
 Calculate Quasi Sequence Order (QSO):
 ```python
+#using default parameters: lag=30, weight=0.1, distance_matrix="schneider-wrede"
 qso = protpy.quasi_sequence_order(protein_seq)
-#using default parameters: lag=30, weight=0.1, distance_matrix="schneider-wrede-physiochemical-distance-matrix.json"
 
 # QSO_SW1   QSO_SW2   QSO_SW3   QSO_SW4   QSO_SW5 ...
-# 0.005692  0.002643  0.004947  0.002846  0.005625 ...        
+# 0.005692  0.002643  0.004947  0.002846  0.005625 ...  
+
+#using custom parameters: lag=10, weight=0.2, distance_matrix="grantham"
+qso = protpy.quasi_sequence_order(protein_seq, lag=10, weight=0.2, distance_matrix="grantham")
+
+# QSO_Grant1   QSO_Grant2   QSO_Grant3   QSO_Grant4   QSO_Grant5 ...
+# 0.123287  0.079967  0.04332  0.039983  0.013332 ...  
 ```
 
 Directories
@@ -210,7 +222,8 @@ Tests
 -----
 To run all tests, from the main `protpy` folder run:
 ```
-python3 -m unittest discover tests
+python3 -m unittest discover tests -v
+-v: verbose output flag
 ```
 
 Contact
@@ -246,14 +259,21 @@ Genetics, 2001, 43: 246-255. <br>
 \[12\]: Kuo-Chen Chou. Using amphiphilic pseudo amino acid composition to predict enzyme
 subfamily classes. Bioinformatics, 2005,21,10-19.
 
+Support
+-------
+<a href="https://www.buymeacoffee.com/amckenna41" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174"></a>
+
+[Back to top](#TOP)
+
 <!-- Links -->
 [python]: https://www.python.org/downloads/release/python-360/
 [protpy]: https://github.com/amckenna41/protpy
 [aaindex]: https://github.com/amckenna41/aaindex
-[requests]: https://requests.readthedocs.io/en/latest/
+[varname]: https://pypi.org/project/varname/
+[biopython]: https://biopython.org/
 [numpy]: https://numpy.org/
 [pandas]: https://pandas.pydata.org/
 [PyPi]: https://pypi.org/project/protpy/
 [article]: https://www.sciencedirect.com/science/article/abs/pii/S1532046422000326
-<!-- [demo]: https://github.com/amckenna41/pySAR/blob/master/pySAR_tutorial.ipynb -->
+[demo]: https://colab.research.google.com/drive/12E3ayovpZOf6Gv-8ILwkN1zReKslEksB?usp=sharing
 [Issues]: https://github.com/amckenna41/protpy/issues

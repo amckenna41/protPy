@@ -4,6 +4,7 @@
 
 import os
 import json
+from difflib import get_close_matches
 import pandas as pd
 import math
 from json import JSONDecodeError
@@ -34,7 +35,7 @@ amino_acids = ["A", "C", "D", "E", "F", "G", "H", "I", "K", "L", "M", "N", "P",
 
 ############################# Sequence Order Coupling Number ##############################
 
-def sequence_order_coupling_number_(sequence, d=1, distance_matrix="schneider-wrede-physiochemical-distance-matrix"):
+def sequence_order_coupling_number_(sequence, d=1, distance_matrix="schneider-wrede"):
     """
     Calculate Sequence Order Coupling Number (SOCN) features for input protein sequence.
     SOCN computes the dissimilarity between amino acid pairs. The distance between 
@@ -49,16 +50,18 @@ def sequence_order_coupling_number_(sequence, d=1, distance_matrix="schneider-wr
 
     Parameters
     ----------
-    :sequence : str
+    :sequence: str
         protein sequence.
-    :d : int (default=1)
+    :d: int (default=1)
         gap between two amino acids.
-    :distance_matrix : str (default="schneider-wrede-physicochemical-distance-matrix")
-        path to physiochemical distance matrix for calculating quasi sequence order.
+    :distance_matrix: str (default="schneider-wrede")
+        name of physiochemical distance matrix for calculating quasi sequence order, 
+        function can accept the schneider-wrede or grantham matrix, default is
+        schneider-wrede.
 
     Returns
     -------
-    :socn : float
+    :socn: float
         calculated sequence order coupling number value from sequence.
     """
     #check input sequence is a string, if not raise type error
@@ -71,28 +74,25 @@ def sequence_order_coupling_number_(sequence, d=1, distance_matrix="schneider-wr
     #if invalid amino acids in sequence, raise value error
     for aa in sequence:
         if (aa not in amino_acids):
-            raise ValueError("Invalid amino acid in protein sequence: {}.".format(aa))
+            raise ValueError("Invalid amino acid foind in protein sequence: {}.".format(aa))
 
-    #append extension if missing from input
-    if (os.path.splitext(distance_matrix)[1] == ''):
-        distance_matrix = distance_matrix + '.json'
-    
-    #get filepath to distance matrix json
-    if not (os.path.isfile(distance_matrix)):
-        if not (os.path.isfile(os.path.join(os.path.dirname(os.path.abspath(sys.modules['protpy'].__file__)), "data", distance_matrix))):
-            raise OSError('Distance Matrix json ({}) not found.'.format(
-                os.path.join(os.path.dirname(os.path.abspath(sys.modules['protpy'].__file__)), "data", distance_matrix)))
-        else:
-            distance_matrix = os.path.join(os.path.dirname(os.path.abspath(sys.modules['protpy'].__file__)), "data", distance_matrix)
+    #validate input distance matrix is valid, get its closest match using closeness function
+    dist_matrix_matches = get_close_matches(distance_matrix, ["schneider-wrede", "grantham"], cutoff=0.6)
+    if (dist_matrix_matches != []):
+        distance_matrix = dist_matrix_matches[0]  #set desc to closest descriptor match found
     else:
-        distance_matrix = distance_matrix
+        raise ValueError("Could not find a match for the input distance matrix {} in"
+            " list of available valid distance matrices:\n{}.".format(distance_matrix, ["schneider-wrede", "grantham"]))
     
+    #get full path to selected distance matric
+    distance_matrix = os.path.join(os.path.dirname(os.path.abspath(sys.modules['protpy'].__file__)), "data", distance_matrix + "-physiochemical-distance-matrix.json")
+        
     #open distance matrix json if present
     try:
         with open(distance_matrix, "r") as f:
             distance_matrix = json.load(f)
     except:
-        raise JSONDecodeError('Error getting config JSON file: {}.'.format(distance_matrix))
+        raise JSONDecodeError('Error parsing distance matrix JSON file: {}.'.format(distance_matrix))
 
     tau = 0.0
 
@@ -106,7 +106,7 @@ def sequence_order_coupling_number_(sequence, d=1, distance_matrix="schneider-wr
     return round(tau, 3)
 
 def sequence_order_coupling_number(sequence, lag=30,
-    distance_matrix="schneider-wrede-physiochemical-distance-matrix.json"):
+    distance_matrix="schneider-wrede"):
     """
     Calculate Sequence Order Coupling Number (SOCN) features for input protein sequence.
     SOCN computes the dissimilarity between amino acid pairs. The distance between 
@@ -117,20 +117,22 @@ def sequence_order_coupling_number(sequence, lag=30,
 
     Parameters
     ----------
-    :sequence : str
+    :sequence: str
         protein sequence.
-    :lag : int (default=30)
+    :lag: int (default=30)
         maximum gap betwwen 2 amino acids; the length of the protein should be larger
         than lag. Default set to 30.
-    :distance_matrix : str (default="schneider-wrede-physicochemical-distance-matrix")
-        path to physiochemical distance matrix for calculating quasi sequence order.
+    :distance_matrix: str (default="schneider-wrede")
+        name of physiochemical distance matrix for calculating quasi sequence order, 
+        function can accept the schneider-wrede or grantham matrix, default is
+        schneider-wrede.
 
     Returns
     -------
-    :sequence_order_df : pd.Dataframe
+    :sequence_order_df: pd.Dataframe
         Dataframe of SOCN descriptor values for all protein sequences. Output
         will be of the shape 1 x N, where N is the number of features calculated 
-        from the descriptor (calculated as M where M = lag).
+        from the descriptor and N=lag.
     """
     #check input sequence is a string, if not raise type error
     if not isinstance(sequence, str):
@@ -142,27 +144,25 @@ def sequence_order_coupling_number(sequence, lag=30,
     #if invalid amino acids in sequence, raise value error
     for aa in sequence:
         if (aa not in amino_acids):
-            raise ValueError("Invalid amino acid in protein sequence: {}.".format(aa))
+            raise ValueError("Invalid amino acid found in protein sequence: {}.".format(aa))
 
     #raise value error if int cant be parsed from input lag
     try:
         lag = int(lag)
     except:
-        raise ValueError("Invalid lag value input, integer cannot be parsed: {}.".format(lag))
+        raise ValueError("Invalid lag value input: {}.".format(lag))
+
+    #set dataframe column name prefixes based on input distance matrix, raise error if invalid name input
+    col_prefix = ""
+    if (distance_matrix == "schneider-wrede"):
+        col_prefix = "SOCN_SW"
+    elif (distance_matrix == "grantham"):
+        col_prefix = "SOCN_Grant"
+    else:
+        raise ValueError("Invalid distance matrix name input {}, values can be schneider-wrede or grantham.".format(distance_matrix))
 
     #validate lag, set default lag of 30 if invalid value input
-    if (not (isinstance(lag, int) or int(lag)>=len(sequence) or (int(lag)<0))):
-        lag = 30
-
-    #set dataframe column name prefixes based on input distance matrix
-    col_prefix = ""
-    if (os.path.splitext(distance_matrix)[0] == "schneider-wrede-physiochemical-distance-matrix"):
-        col_prefix = "SOCN_SW"
-    elif (os.path.splitext(distance_matrix)[0] == "grantham-physiochemical-distance-matrix"):
-        col_prefix = "SOCN_Grant"
-
-    #set default lag of 30 if invalid value input
-    if (lag>=len(sequence) or (lag<0) or not (isinstance(lag, int))):
+    if (lag>=len(sequence) or (lag<0)):
         lag = 30
 
     seq_order = {}
@@ -185,30 +185,31 @@ def sequence_order_coupling_number_all(sequence, lag=30):
     sequence using both matrices (schneider-wrede & grantham) [3]. The distance between 
     amino acid pairs is determined by d which varies between 1 to lag. For each d, it 
     computes the sum of the dissimilarities of all amino acid pairs. Each matrix generates
-    an output of 1 x N, where N is the lag, so the concatenated output will be 1 x (N * 2).
-    With a default lag of 30, this will generate an output of 1 x 60.
+    an output of 1 x N, where N is the lag, so using the two concatenated matrices, the 
+    output will be 1 x (N * 2). With a default lag of 30, this will generate an output 
+    of 1 x 60.
 
     Parameters
     ----------
-    :sequence : str
+    :sequence: str
         protein sequence.
-    :lag : int (default=30)
+    :lag: int (default=30)
         maximum gap betwwen 2 amino acids; the length of the protein should be larger
         than lag. Default set to 30.
 
     Returns
     -------
-    :socn_all : pd.Dataframe
+    :socn_all: pd.Dataframe
         Concatenated dataframe of SOCN descriptor values of input protein sequence using
         both distance matrices. The number of output features can be calculated as N * 2, 
-        where N = lag, by default this value is 30 which generates an output of 1 x 60 
+        where N = lag, by default this value is 30 which generates an output of 1 x 30 
         for each matrix, with the two matrices the output will be 1 x (30*2), using the 
         default lag.
     """
     #check input sequence is a string, if not raise type error
     if not isinstance(sequence, str):
         raise TypeError('Input sequence must be a string, got input of type {}.'.format(type(sequence)))
-
+    
     #uppercase protein sequence 
     sequence = sequence.upper()
 
@@ -216,17 +217,17 @@ def sequence_order_coupling_number_all(sequence, lag=30):
     try:
         lag = int(lag)
     except:
-        raise TypeError("Invalid lag value input, integer cannot be parsed: {}.".format(lag))
+        raise ValueError("Invalid lag value input: {}.".format(lag))
 
     #validate lag, set default lag of 30 if invalid value input
-    if (lag>=len(sequence) or (lag<0) or not (isinstance(lag, int))):
+    if (lag>=len(sequence) or (lag<0)):
         lag = 30
 
     #calculate SOCN using schneider-wrede distance matrix
-    socn_schneider = sequence_order_coupling_number(sequence, lag, "schneider-wrede-physiochemical-distance-matrix.json")
+    socn_schneider = sequence_order_coupling_number(sequence, lag, "schneider-wrede")
     
     #calculate SOCN using grantham distance matrix
-    socn_grantham = sequence_order_coupling_number(sequence, lag, "grantham-physiochemical-distance-matrix.json")
+    socn_grantham = sequence_order_coupling_number(sequence, lag, "grantham")
 
     #merge 2 dataframes 
     socn_all = pd.concat([socn_schneider, socn_grantham], axis=1)
@@ -236,35 +237,38 @@ def sequence_order_coupling_number_all(sequence, lag=30):
 ################################## Quasi Sequence Order ###################################
 
 def quasi_sequence_order(sequence, lag=30, weight=0.1,
-    distance_matrix="schneider-wrede-physiochemical-distance-matrix.json"):
+    distance_matrix="schneider-wrede"):
     """
     Calculate Quasi Sequence Order (QSO) features for the protein sequences.
     The quasi-sequence-order descriptors were proposed by K.C. Chou, et.al. [1].
     They are derived from the distance matrix between the 20 amino acids. By default,
     the Scheider-Wrede physicochemical distance matrix was used. Also utilised in
     the descriptor calculation is the Grantham chemical distance matrix. Both of
-    these matrices are used by Grantham et. al. in the calculation
-    of the descriptor [3, 4]. N + 20 values are calculated per sequence, where N is the
-    lag, with a default lag of 30, the output will be 1 x 50.
+    these matrices are used by Grantham et. al. in the calculation of the descriptor 
+    [3, 4]. N + 20 values are calculated per sequence, where N is the lag, with a 
+    default lag of 30, the output will be 1 x 50. There is also a weighting factor
+    that can be assigned to determine that weight per amino acid.
 
     Parameters
     ----------
-    :sequence : str
+    :sequence: str
         protein sequence.
-    :lag : int (default=30)
+    :lag: int (default=30)
         maximum gap betwwen 2 amino acids; the length of the protein should be larger
         than lag. Default set to 30.
     :weight: float (default = 0.1)
         weighting factor.
-    :distance_matrix : str (default="schneider-wrede-physicochemical-distance-matrix")
-        path to physiochemical distance matrix for calculating quasi sequence order.
+    :distance_matrix: str (default="schneider-wrede")
+        name of physiochemical distance matrix for calculating quasi sequence order, 
+        function can accept the schneider-wrede or grantham matrix, default is
+        schneider-wrede.
 
     Returns
     -------
-    :quasi_sequence_order_df : pd.Dataframe
+    :quasi_sequence_order_df: pd.Dataframe
         dataframe of quasi-sequence-order descriptor values for the protein sequences, 
-        with output shape 1 x (N + 20) where N is the lag. With a default lag of 30 
-        the output will be 1 x 50.
+        with output shape 1 x (N + 20), where N is the lag. With a default 
+        lag of 30 the output will be 1 x 50 per sequence.
     """
     #check input sequence is a string, if not raise type error
     if not isinstance(sequence, str):
@@ -276,28 +280,30 @@ def quasi_sequence_order(sequence, lag=30, weight=0.1,
     #if invalid amino acids in sequence, raise value error
     for aa in sequence:
         if (aa not in amino_acids):
-            raise ValueError("Invalid amino acid in protein sequence: {}.".format(aa))
+            raise ValueError("Invalid amino acid found in protein sequence: {}.".format(aa))
 
     #raise value error if int can't be parsed from input lag
     try:
         lag = int(lag)
     except:
-        raise ValueError("Invalid lag value input, integer cannot be parsed: {}.".format(lag))
+        raise ValueError("Invalid lag value input: {}.".format(lag))
 
     #validate lag, set default lag of 30 if invalid value input
-    if (lag>=len(sequence) or (lag<0) or not (isinstance(lag, int))):
+    if (lag>=len(sequence) or (lag<0)):
         lag = 30
 
     #validate weight, set default weight of 0.1 if invalid value input
-    if ((weight<0) or not (isinstance(lag, float)) or not (isinstance(lag, int))):
+    if ((weight<0) or not (isinstance(lag, float))):
         weight = 0.1
 
-    #set dataframe column name prefixes based on input distance matrix
+    #set dataframe column name prefixes based on input distance matrix, raise error if invalid name input
     col_prefix = ""
-    if (os.path.splitext(distance_matrix)[0] == "schneider-wrede-physiochemical-distance-matrix"):
+    if (distance_matrix == "schneider-wrede"):
         col_prefix = "QSO_SW"
-    elif (os.path.splitext(distance_matrix)[0] == "grantham-physiochemical-distance-matrix"):
+    elif (distance_matrix == "grantham"):
         col_prefix = "QSO_Grant"
+    else:
+        raise ValueError("Invalid distance matrix name input {}, values can be schneider-wrede or grantham.".format(distance_matrix))
     
     quasi_sequence_order = {}
     right_part = 0.0
@@ -340,20 +346,22 @@ def quasi_sequence_order_all(sequence, lag=30, weight=0.1):
     The output will be in the shape 1 x ((N + 20)*2), where ((N + 20)*2) is the 
     quasi sequence order output from one matrix and N is the lag. The output  
     is multiplied by two to take into account the 2 matrices being concatenated. 
-
+    There is also a weighting factor that can be assigned to determine that 
+    weight per amino acid.
+    
     Parameters
     ----------
-    :sequence : str
+    :sequence: str
         protein sequence.
-    :lag : int (default=30)
+    :lag: int (default=30)
         maximum gap between 2 amino acids; the length of the protein should be larger
         than lag. Default set to 30.
-    :weight : float (default=0.1)
+    :weight: float (default=0.1)
         weighting factor.
 
     Returns
     -------
-    :quasi_sequence_order_all_df : pd.Dataframe
+    :quasi_sequence_order_all_df: pd.Dataframe
         dataframe of quasi-sequence-order descriptor values for the
         protein sequences, with output shape 1 x ((N + 20)*2) where ((N + 20)*2) is the 
         quasi sequence order output from one matrix and N is the lag. The output  
@@ -370,10 +378,10 @@ def quasi_sequence_order_all(sequence, lag=30, weight=0.1):
     try:
         lag = int(lag)
     except:
-        raise ValueError("Invalid lag value input, integer cannot be parsed: {}.".format(lag))
+        raise ValueError("Invalid lag value input: {}.".format(lag))
 
     #validate lag, set default lag of 30 if invalid value input
-    if (lag>=len(sequence) or (lag<0) or not (isinstance(lag, int))):
+    if (lag>=len(sequence) or (lag<0)):
         lag = 30
 
     #validate weight, set default weight if invalid value input
@@ -382,11 +390,11 @@ def quasi_sequence_order_all(sequence, lag=30, weight=0.1):
 
     #calculate quasi seq order using schneider distance matrix
     quasi_schneider = quasi_sequence_order(sequence, lag, weight=weight, 
-        distance_matrix="schneider-wrede-physiochemical-distance-matrix.json")
+        distance_matrix="schneider-wrede")
     
     #calculate quasi seq order using schneider distance matrix
     quasi_grantham = quasi_sequence_order(sequence, lag, weight=weight, 
-        distance_matrix="grantham-physiochemical-distance-matrix.json")
+        distance_matrix="grantham")
 
     #concat quasi sequence order dataframes
     quasi_sequence_order_all_df = pd.concat([quasi_schneider, quasi_grantham], axis=1)

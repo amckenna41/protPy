@@ -6,7 +6,7 @@ from .sequence_order import *
 
 #protPy package metadata
 __name__ = 'protpy'
-__version__ = "1.1.10"
+__version__ = "1.2.0"
 __description__ = "Python package for generating various biochemical, physiochemical and structural descriptors/features of protein sequences."
 __author__ = 'AJ McKenna, https://github.com/amckenna41'
 __authorEmail__ = 'amckenna41@qub.ac.uk'
@@ -17,7 +17,7 @@ __download_url__ = "https://github.com/amckenna41/protPy/archive/refs/heads/main
 __status__ = "Production"
 __keywords__ = ["bioinformatics", "protein engineering", "python", "pypi", "machine learning", \
                 "aaindex", "protein descriptors", "physiochemical descriptors", "biochemical descriptors"
-                "structural descriptors"]
+                "structural descriptors", "pySAR"]
 __test_suite__ = "tests"
 
 #list of all available descriptors in protPy

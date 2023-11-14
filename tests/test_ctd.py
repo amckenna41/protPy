@@ -11,7 +11,7 @@ from Bio import SeqIO
 unittest.TestLoader.sortTestMethodsUsing = None
 import protpy as protpy
 
-class ProtPyCTDTests(unittest.TestCase):
+class ProtpyCTDTests(unittest.TestCase):
     """
     Test suite for testing CTD (Composition, Transition, Distribution) 
     module and functionality in protpy package, including the CTD 
@@ -20,7 +20,7 @@ class ProtPyCTDTests(unittest.TestCase):
     Test Cases
     ----------
     test_ctd:
-        testing correct protpy CTD functionality.
+        testing correct protpy overall CTD functionality.
     test_ctd_composition:
         testing correct protpy composition functionality.
     test_ctd_transition:
@@ -31,16 +31,16 @@ class ProtPyCTDTests(unittest.TestCase):
     def setUp(self):
         """ Import protein sequences from test fasta files using Biopython package. """
         #using next() to get first item (protein seq) from SeqIO Generator
-        with open(os.path.join("tests", "test_fasta1.fasta")) as pro:
+        with open(os.path.join("tests", "test_data", "test_fasta1.fasta")) as pro:
             self.protein_seq1 = str(next(SeqIO.parse(pro,'fasta')).seq)
 
-        with open(os.path.join("tests", "test_fasta2.fasta")) as pro:
+        with open(os.path.join("tests", "test_data", "test_fasta2.fasta")) as pro:
             self.protein_seq2 = str(next(SeqIO.parse(pro,'fasta')).seq)
         
-        with open(os.path.join("tests", "test_fasta3.fasta")) as pro:
+        with open(os.path.join("tests", "test_data", "test_fasta3.fasta")) as pro:
             self.protein_seq3 = str(next(SeqIO.parse(pro,'fasta')).seq)
 
-        with open(os.path.join("tests", "test_fasta4.fasta")) as pro:
+        with open(os.path.join("tests", "test_data", "test_fasta4.fasta")) as pro:
             self.protein_seq4 = str(next(SeqIO.parse(pro,'fasta')).seq)
 
         self.all_protein_seqs = [self.protein_seq1, self.protein_seq2, self.protein_seq3, self.protein_seq4]
@@ -49,14 +49,14 @@ class ProtPyCTDTests(unittest.TestCase):
         """ Testing CTD descriptor attributes and functionality. """   
         properties = ["hydrophobicity", "normalized_vdwv", "polarity", "charge",
             "secondary_struct", "solvent_accessibility", "polarizability"]
- #1.)
+ #1.)   
         for seq in self.all_protein_seqs:
             ctd_seq1 = protpy.ctd_(seq, all_ctd=True) #using all properties
 
             self.assertIsInstance(ctd_seq1, pd.DataFrame,
                 'Expected output to be a DataFrame, got {}.'.format(type(ctd_seq1)))
             self.assertEqual(ctd_seq1.shape, (1, 147), 
-                'Expected output to be of shape {}, got {}.'.format((1, 147), ctd_seq1.shape)) 
+                'Expected output to be of shape 1 x 147, got {}.'.format(ctd_seq1.shape)) 
             self.assertTrue(ctd_seq1.any().isnull().sum()==0,
                 'Expected output to contain no null values.')        
             self.assertTrue(all(col == np.float64 for col in list(ctd_seq1.dtypes)),
@@ -81,7 +81,7 @@ class ProtPyCTDTests(unittest.TestCase):
                 self.assertIsInstance(ctd_seq2, pd.DataFrame,
                     'Expected output to be a DataFrame, got {}.'.format(type(ctd_seq2)))
                 self.assertEqual(ctd_seq2.shape, (1, 21), 
-                    'Expected output to be of shape {}, got {}.'.format((1, 21), ctd_seq2.shape))
+                    'Expected output to be of shape 1 x 21, got {}.'.format(ctd_seq2.shape))
                 self.assertTrue(ctd_seq2.any().isnull().sum()==0,
                     'Expected output to contain no null values.')        
                 self.assertTrue(all(col == np.float64 for col in list(ctd_seq2.dtypes)),
@@ -112,7 +112,7 @@ class ProtPyCTDTests(unittest.TestCase):
                 self.assertIsInstance(ctd_composition_seq1, pd.DataFrame,
                     'Expected output to be a DataFrame, got {}.'.format(type(ctd_composition_seq1)))
                 self.assertEqual(ctd_composition_seq1.shape, (1, 3), 
-                    'Expected output to be of shape {}, got {}.'.format((1, 3), ctd_composition_seq1.shape)) 
+                    'Expected output to be of shape 1 x 3, got {}.'.format(ctd_composition_seq1.shape)) 
                 self.assertTrue(ctd_composition_seq1.any().isnull().sum()==0,
                     'Expected output to contain no null values.')        
                 self.assertTrue(all(col == np.float64 for col in list(ctd_composition_seq1.dtypes)),
@@ -128,8 +128,8 @@ class ProtPyCTDTests(unittest.TestCase):
                                 (bool(re.search(r"CTD_C_[0-9]{2}_[0-9]{2}_" + prop, col))) or 
                                 (bool(re.search(r"CTD_C_[0-9]{2}_[0-9]{3}_" + prop, col)))), 
                                     "Column name does not follow expected regex format: {}.".format(col))
-                    self.assertTrue(matching_col, 
-                        "Column name {} not found in list of available properties:\n{}.".format(col, properties))
+            self.assertTrue(matching_col, 
+                "Column name {} not found in list of available properties:\n{}.".format(col, properties))
 
     def test_ctd_transition(self):
         """ Testing CTD Transition descriptor attributes and functionality. """   
@@ -143,7 +143,7 @@ class ProtPyCTDTests(unittest.TestCase):
                 self.assertIsInstance(ctd_transition_seq1, pd.DataFrame, 
                     'Expected output to be a DataFrame, got {}.'.format(type(ctd_transition_seq1)))
                 self.assertEqual(ctd_transition_seq1.shape, (1, 3), 
-                    'Expected output to be of shape {}, got {}.'.format((1, 3), ctd_transition_seq1.shape))
+                    'Expected output to be of shape 1 x 3, got {}.'.format(ctd_transition_seq1.shape))
                 self.assertTrue(ctd_transition_seq1.any().isnull().sum()==0,
                     'Expected output to contain no null values.')        
                 self.assertTrue(all(col == np.float64 for col in list(ctd_transition_seq1.dtypes)), 

@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-latest         # platform: [ubuntu-latest, macos-latest, windows-latest]
     strategy:
       matrix:
-        python-version: ["3.7", "3.8", "3.9", "3.10"]   #testing on multiple python versions
+        python-version: ["3.8", "3.9", "3.10"]   #testing on multiple python versions
     steps:
     - uses: actions/checkout@v3
     - name: Set up Python ${{ matrix.python-version }}
@@ -42,6 +42,7 @@ jobs:
         pip3 install pytest-cov
         pip3 install bandit
         pip3 install safety
+        pip3 install biopython
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
         python3 setup.py install
     
@@ -75,24 +76,18 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics >> artifacts/flake8_output.txt
       continue-on-error: true
 
-    # unit tests using pytest, unittest, flake8 and bandit frameworks
+    # unit tests using unittest framework
     - name: Testing with unittest
       run: |
         echo "Testing using unittest..."
         python3 -m unittest discover tests
-
-    - name: Test with pytest
-      run: |
-        echo "Testing using pytest..."
-        python3 -m pytest tests/
         
-    #generate coverage report, output to file 
-    - name: Generate Report
-      run: pytest --cov=protpy tests/ > artifacts/coverage.txt
-
-    #upload to Code Coverage
+    #upload to Code Coverage, only if matrix python version is 3.9
     - name: Upload Coverage Report to Codecov
       uses: codecov/codecov-action@v3
+      if: ${{ matrix.python-version == '3.9' }}
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
       with:
         flags: protpy_workflow
     
@@ -105,3 +100,4 @@ jobs:
           artifacts/package_safety_output.txt
           artifacts/bandit_output.txt
           artifacts/coverage.txt
+        if-no-files-found: error 

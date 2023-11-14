@@ -4,7 +4,7 @@
 - [X] For quasi seq order you should be able to pass in name of distance matrix file with or without .json
 - [X] For each descriptor, check valid amino acids in seq, if not then raise custom error.
 - [ ] Add dimensions of each descriptor to readme and docs.
-- [ ] Round SOCN to 3 d.p
+- [X] Round SOCN to 3 d.p
 - [X] Unit test the data type for each column in all descriptors.
 - [X] Remove .empty tests from unit tests as validating shape of DF will test for emptiness.
 - [X] Add 0 to singualr descriptor columns, e.g polarizability_CTD_C_1 -> polarizability_CTD_C_01 
@@ -18,18 +18,17 @@
 - [X] Change quasi sequence order -> sequence_order.
 - [X] Calculate all SOCN, for both matrices, append to single output df.
 - [X] SOCN done, quasi done.
-- [ ] Reread descriptor comments and explanations.
+- [X] Reread descriptor comments and explanations.
 - [X] Change SOCNUm to SOCN.
 - [X] Pseudo AAC has to explicitly use hydrophoobicity, hydrophilicity and side-chain/residue mass values. Can't find corresponding values in aaindex so just hard code them in.
 - [X] If no properties input to pseudo or amp comp funcs then use hydo, hydrophi, residue by default. Accept list of aaindex1 codes, if str input then cast to list.
 - [X] Uppercase sequence on input, remove whitespace. 
 - [X] Move references to top of each module.
-- [ ] Add the equations to comments in some of the descriptors? (https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-015-0554-8#Sec10)
 - [X] Input property in CTD funcs can be used with closeness function.
 - [X] Double check functions that use aa_composition values, aa_comp func returns series rather than dict.
 - [X] Rather than iterate over range of lags, use different lag in each sequence test.
 - [X] Change max_lag to lag 
-- [ ] Create demo on Notebook.
+- [X] Create demo on Notebook.
 - [X] Add descriptor abbreviations to each functiosn comments, change abbreviations of Pseudo AAComp -> PAAComp.
 - [X] Add references to readme text.
 - [X] In readme, add output of each function below its usage.
@@ -51,4 +50,16 @@
 - [ ] Add output dimensions to SOCN functions.
 - [X] def sequence_order_coupling_number() - dimesnion (1,lag). def sequence_order_coupling_number_all() - dimension (1,lag*2)
 - [X] def quasi_sequence_order() - dimesnion (1,lag). def quasi_sequence_order_all() - dimension (1,lag*2)
-- [X] Double check references in each descriptor comments.
+- [ ] Fix cirlceci and add circleci badge to readme, double check workflow.
+- [ ] Add codecov, use pySAR repo as an example.
+- [X] Add references to each descriptor comments.
+- [X] Change all comment underlining from "------" to "=======".
+- [X] In "Parameters' and 'returns' , remove space between colon.
+- [X] Read over code.
+- [X] Create demo
+- [ ] Add equations of descriptors to markdown file. https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-015-0554-8#Sec10
+- [X] Remove python 3.7 references, 3.8 minimum.
+- [X] In descriptor comments, dimensions of output should be 1 x N rather than N x 1 (N=# of features).
+- [X] Remove biopython from requirments & setup.py - required for testing.
+- [ ] https://github.com/gadsbyfly/PyBioMed/blob/master/PyBioMed/doc/Descriptor/PyBioMed%20Protein.pdf
+- [X] Sequence order can accept just schenider-wrede or grantham.

@@ -4,11 +4,6 @@
 
 import pathlib
 from setuptools import setup, find_packages
-import sys
-
-#ensure python version is greater than 3
-if (sys.version_info[0] < 3):
-    sys.exit('Python 3 is the minimum version requirement.')
 
 #get path to README file
 HERE = pathlib.Path(__file__).parent
@@ -16,7 +11,7 @@ README = (HERE / 'README.md').read_text()
 
 #protPy package metadata
 __name__ = 'protpy'
-__version__ = "1.1.10"
+__version__ = "1.2.0"
 __description__ = "Python package for generating various biochemical, physiochemical and structural descriptors/features of protein sequences."
 __author__ = 'AJ McKenna, https://github.com/amckenna41'
 __authorEmail__ = 'amckenna41@qub.ac.uk'
@@ -27,7 +22,7 @@ __download_url__ = "https://github.com/amckenna41/protPy/archive/refs/heads/main
 __status__ = "Production"
 __keywords__ = ["bioinformatics", "protein engineering", "python", "pypi", "machine learning", \
                 "aaindex", "protein descriptors", "physiochemical descriptors", "biochemical descriptors"
-                "structural descriptors"]
+                "structural descriptors", "pySAR"]
 __test_suite__ = "tests"
 
 setup(name=__name__,
@@ -51,7 +46,6 @@ setup(name=__name__,
         'Intended Audience :: Information Technology',
         'License :: OSI Approved :: MIT License',
         'Natural Language :: English',
-        'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
@@ -67,7 +61,6 @@ setup(name=__name__,
         "numpy",
         "pandas",
         "varname",
-        "biopython"
       ],
       test_suite=__test_suite__,
       # packages=find_packages(), #create Manifest file to ignore results folder in dist

@@ -54,7 +54,7 @@ ctd_properties = {
     nameof(secondary_struct): secondary_struct,
     nameof(solvent_accessibility): solvent_accessibility,
     nameof(polarizability): polarizability
-}
+    }
 
 def str_to_num(sequence, property):
     """
@@ -62,9 +62,9 @@ def str_to_num(sequence, property):
 
     Parameters
     ----------
-    :sequence : str
+    :sequence: str
         protein sequence.
-    :property : str
+    :property: str
         physiochemical property name to use when calculating descriptor.
 
     Returns
@@ -79,7 +79,7 @@ def str_to_num(sequence, property):
     #if invalid amino acids in sequence, raise value error
     for aa in sequence:
         if (aa not in amino_acids):
-            raise ValueError("Invalid amino acid in protein sequence: {}".format(aa))
+            raise ValueError("Invalid amino acid found in protein sequence: {}".format(aa))
 
     #create deep copy of sequence
     sequence_converted = copy.deepcopy(sequence)
@@ -97,19 +97,21 @@ def str_to_num(sequence, property):
 
 def ctd_composition(sequence, property="hydrophobicity"):
     """
-    Calculate composition physiochemical/structural descriptor. The shape of the
-    output will be 1 x 3, with 3 features being generated per sequence.
+    Calculate composition physiochemical/structural descriptor. Composition 
+    is determined as the number of amino acids of a particular property 
+    divided by the total number of amino acids. The shape of the output will be 
+    1 x 3, with 3 features being generated per sequence.
 
     Parameters
     ----------
-    :sequence : str
+    :sequence: str
         protein sequence.
-    :property : str (default="hydrophocity")
+    :property: str (default="hydrophocity")
         physiochemical property name to use when calculating descriptor.
 
     Returns
     -------
-    :ctd_composition_df : pd.DataFrame
+    :ctd_composition_df: pd.DataFrame
         dataframe of calculated composition values for sequence using
         selected physiochemical property. Output will be of shape 1 x 3,
         with 3 features being generated per sequence.
@@ -124,9 +126,9 @@ def ctd_composition(sequence, property="hydrophobicity"):
     #if invalid amino acids in sequence, raise value error
     for aa in sequence:
         if (aa not in amino_acids):
-            raise ValueError("Invalid amino acid in protein sequence: {}.".format(aa))
+            raise ValueError("Invalid amino acid found in protein sequence: {}.".format(aa))
 
-    #get closest matched CTD property 
+    #get closest matched CTD property - using cutoff of 0.8
     property_matches = get_close_matches(property, ctd_properties.keys(), cutoff=0.8)
 
     #get CTD property values from dict, if no similar match found set to default of hydrophobicity
@@ -154,19 +156,22 @@ def ctd_composition(sequence, property="hydrophobicity"):
 
 def ctd_transition(sequence, property="hydrophobicity"):
     """
-    Calculate transition physiochemical/structural descriptor. The shape of the
-    output will be 1 x 3, with 3 features being generated per sequence.
+    Calculate transition physiochemical/structural descriptor. Transition 
+    is determined as the number of transitions from a particular property 
+    to different property divided by (total number of amino acids − 1). 
+    The shape of the output will be 1 x 3, with 3 features being generated 
+    per sequence.
 
     Parameters
     ----------
-    :sequence : str
+    :sequence: str
         protein sequence.
-    :property : str (default="hydrophocity")
+    :property: str (default="hydrophocity")
         physiochemical property name to use when calculating descriptor.
 
     Returns
     -------
-    :ctd_transition_df : pd.DataFrame
+    :ctd_transition_df: pd.DataFrame
         dataframe of calculated transition values for sequence using
         selected physiochemical property. Output will be of shape 1 x 3,
         with 3 features being generated per sequence.
@@ -181,9 +186,9 @@ def ctd_transition(sequence, property="hydrophobicity"):
     #if invalid amino acids in sequence, raise value error
     for aa in sequence:
         if (aa not in amino_acids):
-            raise ValueError("Invalid amino acid in protein sequence: {}.".format(aa))
+            raise ValueError("Invalid amino acid found in protein sequence: {}.".format(aa))
 
-    #get closest matched CTD property 
+    #get closest matched CTD property  - using cutoff of 0.8
     property_matches = get_close_matches(property, ctd_properties.keys(), cutoff=0.8)
 
     #get CTD property values from dict, if no similar match found set to default of hydrophobicity
@@ -212,21 +217,23 @@ def ctd_transition(sequence, property="hydrophobicity"):
 
 #################################### CTD Distribution #####################################
 
-def ctd_distribution(sequence, property="hydrophobicity"):
+def ctd_distribution(sequence, property="hydrophobicity"): 
     """
-    Calculate distribution physiochemical/structural descriptor. The shape of the
-    output will be 1 x 15, with 15 features being generated per sequence.
+    Calculate distribution physiochemical/structural descriptor. Distribution 
+    is the chain length within which the first, 25%, 50%, 75% and 100% of the 
+    amino acids of a particular property are located. The shape of the output 
+    will be 1 x 15, with 15 features being generated per sequence.
 
     Parameters
     ----------
-    :sequence : str
+    :sequence: str
         protein sequence.
-    :property : str (default="hydrophocity")
+    :property: str (default="hydrophocity")
         physiochemical property name to use when calculating descriptor.
 
     Returns
     -------
-    :ctd_distribution_df : pd.DataFrame
+    :ctd_distribution_df: pd.DataFrame
         dataframe of calculated distribution values for sequence using
         selected physiochemical property. Output will be of shape 1 x 15,
         with 15 features being generated per sequence.
@@ -238,9 +245,9 @@ def ctd_distribution(sequence, property="hydrophobicity"):
     #if invalid amino acids in sequence, raise value error
     for aa in sequence:
         if (aa not in amino_acids):
-            raise ValueError("Invalid amino acid in protein sequence: {}.".format(aa))
+            raise ValueError("Invalid amino acid found in protein sequence: {}.".format(aa))
 
-    #get closest matched CTD property 
+    #get closest matched CTD property - using cutoff of 0.8
     property_matches = get_close_matches(property, ctd_properties.keys(), cutoff=0.8)
 
     #get CTD property values from dict, if no similar match found set to default of hydrophobicity
@@ -302,6 +309,7 @@ def ctd_(sequence, property="hydrophobicity", all_ctd=True):
     property is followed by amino acids of a different property. Distribution
     measures the chain length within which the first, 25%, 50%, 75%, and 100% of
     the amino acids of a particular property are located, respectively [1, 2].
+
     CTD properties available are: Polarizability, Solvent Accessibility, Secondary 
     Structure, Charge, Polarity, Normalized VDWV, Hydrophobicity. Each property generates an 
     output of shape 1 x 21, 3/21 will be Composition, 3/21 will be Transition, 15/21 will be
@@ -311,19 +319,19 @@ def ctd_(sequence, property="hydrophobicity", all_ctd=True):
     
     Parameters
     ----------
-    :sequence : str
+    :sequence: str
         protein sequence.
-    :property : str (default="hydrophocity")
+    :property: str (default="hydrophocity")
         physiochemical property name to use when calculating descriptor.
-    :ctd : bool
+    :ctd: bool
         calculate all CTD descriptors and concatenate together.
 
     Returns
     -------
-    :ctd_df : pd.DataFrame
+    :ctd_df: pd.DataFrame
         dataframe of CTD descriptor values for all protein sequences. DataFrame will
         be of the shape 1 x 147, where 147 is the total number of features calculated from
-        the CTD descriptors, with each property generating an output of 1 x 21.
+        the CTD descriptors per sequence, with each property generating an output of 1 x 21.
     """
     #check input sequence is a string, if not raise type error
     if not isinstance(sequence, str):
@@ -332,7 +340,7 @@ def ctd_(sequence, property="hydrophobicity", all_ctd=True):
     #if invalid amino acids in sequence, raise value error
     for aa in sequence:
         if (aa not in amino_acids):
-            raise ValueError("Invalid amino acid in protein sequence: {}.".format(aa))
+            raise ValueError("Invalid amino acid found in protein sequence: {}.".format(aa))
     
     #initialise ctd dataframes
     comp_df = pd.DataFrame()

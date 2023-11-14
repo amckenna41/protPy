@@ -32,7 +32,7 @@ amino_acids = ["A", "C", "D", "E", "F", "G", "H", "I", "K", "L", "M", "N", "P",
 
 #physiochemical values for all amino acids for hydrophobicity, hydrophilicty and residue mass
 #values taken from http://www.csbio.sjtu.edu.cn/bioinf/PseAAC/ParaValue.htm
-#property values differ from their equivalent in the aaindex so hard-coding them below
+#property values differ from their equivalent in the aaindex therefore hard-coding them below
 hydrophobicity_ = {
         "A": 0.62, "C": 0.29, "D": -0.90, "E": -0.74, "F": 1.19, "G": 0.48, 
         "H": -0.40, "I": 1.38, "K": -1.50, "L": 1.06, "M": 0.64, "N": -0.78,
@@ -45,15 +45,14 @@ hydrophilicity_ = {
         "H": -0.5, "I": -1.8, "K": 3.0, "L": -1.8, "M": -1.3, "N": 0.2, 
         "P": 0.0, "Q": 0.2, "R": 3.0, "S": 0.3, "T": -0.4, "V": -1.5, 
         "W": -3.4, "Y": -2.3
-   
-}
+        }
 
 residue_mass_ = {
         "A": 15.0, "C": 47.0, "D": 59.0, "E": 73.0, "F": 91.0, "G": 1.000, 
         "H": 82.0, "I": 57.0, "K": 73.0, "L": 57.0,  "M": 75.0, "N": 58.0, 
         "P": 42.0, "Q": 72.0, "R": 101.0, "S": 31.0, "T": 45.0, "V": 43.0, 
         "W": 130.0, "Y": 107.0
-}
+        }
 
 ################################# Amino Acid Composition ##################################
 
@@ -67,19 +66,20 @@ def amino_acid_composition(sequence):
 
     where AA_Comp(s) is the AAComp of protein sequence s, AA(t) is the number
     of amino acid types t (where t = 1,2,..,20) and N(s) is the length of the
-    sequence s [1].
+    sequences [1].
 
     Parameters
     ----------
-    :sequence : str
+    :sequence: str
         protein sequence.
 
     Returns
     -------
-    :amino_acid_composition_df : pd.DataFrame
+    :amino_acid_composition_df: pd.DataFrame
         pandas dataframe of AAComp for protein sequence. Dataframe will
-        be of the shape 20 x 1, where 20 is the number of features 
-        calculated from the descriptor (for the 20 amino acids).
+        be of the shape 1 x 20, where 20 is the number of features 
+        calculated from the descriptor (for the 20 amino acids) and 1 is 
+        the input sequence.
     """
     #check input sequence is a string, if not raise type error
     if not isinstance(sequence, str):
@@ -91,7 +91,7 @@ def amino_acid_composition(sequence):
     #if invalid amino acids in sequence, raise value error
     for aa in sequence:
         if (aa not in amino_acids):
-            raise ValueError("Invalid amino acid in protein sequence: {}.".format(aa))
+            raise ValueError("Invalid amino acid found in protein sequence: {}.".format(aa))
 
     amino_acid_composition = {}
 
@@ -124,15 +124,16 @@ def dipeptide_composition(sequence):
 
     Parameters
     ----------
-    :sequence : str
+    :sequence: str
         protein sequence.
 
     Returns
     -------
-    :dipeptide_composition_df : pd.DataFrame
+    :dipeptide_composition_df: pd.DataFrame
         pandas dataframe of dipeptide composition for protein sequence. Dataframe will
-        be of the shape 400 x 1, where 400 is the number of features calculated 
-        from the descriptor (20^2 for the 20 canonical amino acids).
+        be of the shape 1 x 400, where 400 is the number of features calculated 
+        from the descriptor (20^2 for the 20 canonical amino acids) and 1 is the 
+        input sequence.
     """
     #check input sequence is a string, if not raise type error
     if not isinstance(sequence, str):
@@ -144,7 +145,7 @@ def dipeptide_composition(sequence):
     #if invalid amino acids in sequence, raise value error
     for aa in sequence:
         if (aa not in amino_acids):
-            raise ValueError("Invalid amino acid in protein sequence: {}.".format(aa))
+            raise ValueError("Invalid amino acid found in protein sequence: {}.".format(aa))
 
     dipeptide_composition = {}
 
@@ -171,7 +172,7 @@ def tripeptide_composition(sequence):
     canonical amino acids this creates 20^3 different combinations, thus a
     8000-Dimensional vector will be produced such that:
 
-    TPComp(s,t,u) = AA(s,t,u) / N -1
+    TPComp(s,t,u) = AA(s,t,u) / N - 1
 
     where TPComp(s,t,u) is the tripeptide composition of the protein sequence
     for amino acid type s, t and u (where s, t and u = 1,2,..,20), AA(s,t,u) is
@@ -180,15 +181,16 @@ def tripeptide_composition(sequence):
 
     Parameters
     ----------
-    :sequence : str
+    :sequence: str
         protein sequence in str form.
 
     Returns
     -------
-    :tripeptide_composition_df : pd.DataFrame
+    :tripeptide_composition_df: pd.DataFrame
         pandas DataFrame of tripeptide composition for protein sequence. Dataframe will
-        be of the shape 8000 x 1, where 8000 is the number of features calculated 
-        from the descriptor (20^3 for the 20 canonical amino acids).
+        be of the shape 1 x 8000, where 8000 is the number of features calculated 
+        from the descriptor (20^3 for the 20 canonical amino acids) and 1 is the 
+        input sequence.
     """
     #check input sequence is a string, if not raise type error
     if not isinstance(sequence, str):
@@ -200,7 +202,7 @@ def tripeptide_composition(sequence):
     #if invalid amino acids in sequence, raise value error
     for aa in sequence:
         if (aa not in amino_acids):
-            raise ValueError("Invalid amino acid in protein sequence: {}.".format(aa))
+            raise ValueError("Invalid amino acid found in protein sequence: {}.".format(aa))
 
     tripeptide_composition = {}
     tripeptides = []    
@@ -225,15 +227,17 @@ def tripeptide_composition(sequence):
 
 def pseudo_amino_acid_composition(sequence, lamda=30, weight=0.05, properties=[]):
     """
-    Pseudo amino acid composition (PAAComp) combines the vanilla amino acid composition descriptor with 
-    additional local features, such as correlation between residues of a certain distance, as
-    amino acid composition doesn't take into account sequence order info. The pseudo 
-    components of the descriptor are a series rank-different correlation factors [5].
+    Pseudo amino acid composition (PAAComp) combines the vanilla amino acid composition 
+    descriptor with additional local features, such as correlation between residues of 
+    a certain distance, as amino acid composition doesn't take into account sequence 
+    order info. The pseudo components of the descriptor are a series rank-different 
+    correlation factors [4]. 
+    
     The first 20 components are a weighted sum of the amino acid composition and 30 are 
-    physiochemical square correlations as dictated by the lamda and properties parameters.
-    This generates an output of [1, (20 + lamda)] = 1 x 50 when using the default lamda of 30. 
-    By default, the physiochemical properties used are hydrophobicity and hydrophillicity, with 
-    a lamda of 30 and weight of 0.05.
+    physiochemical square correlations as dictated by the lamda and properties parameters. 
+    This generates an output of [1, (20 + lamda)] = 1 x 50 when using the default lamda 
+    of 30. By default, the physiochemical properties used are hydrophobicity and 
+    hydrophillicity, with a lamda of 30 and weight of 0.05.
 
     Parameters
     ----------
@@ -241,14 +245,16 @@ def pseudo_amino_acid_composition(sequence, lamda=30, weight=0.05, properties=[]
         rank of correlation. Number of calculable descriptors depends on lamda value.
     :weight: float
         weighting factor.
-    :properties : list 
+    :properties: list 
         list of dicts of physiochemical/structural property values for amino acids.
 
     Returns
     -------
     :pseudo_amino_acid_composition_df: pd.Dataframe
         output dataframe of calculated pseudo amino acid composition descriptors 
-        for input sequence.
+        for input sequence. Dataframe will be of the shape 1 x N, where N is the 
+        number of features calculated from the descriptor (20 + lamda) and 1 is 
+        the input sequence. By default, the shape will be 1 x 50 (using default lamda=30).
     """
     #check input sequence is a string, if not raise type error
     if not isinstance(sequence, str):
@@ -260,7 +266,7 @@ def pseudo_amino_acid_composition(sequence, lamda=30, weight=0.05, properties=[]
     #if invalid amino acids in sequence, raise value error
     for aa in sequence:
         if (aa not in amino_acids):
-            raise ValueError("Invalid amino acid in protein sequence: {}.".format(aa))
+            raise ValueError("Invalid amino acid found in protein sequence: {}.".format(aa))
 
     #set lamda to its default value of 30 if <0, or > sequence len or not an int
     if ((lamda < 0) or (lamda > len(sequence)) or not isinstance(lamda, int)):
@@ -327,14 +333,14 @@ def sequence_order_correlation_factor(sequence, k=1, properties=[]):
 
     Parameters
     ----------
-    :k : int
+    :k: int
         gap between amino acids in the sequence.
     :properties : list
         list of dicts of physiochemical/structural property values for amino acids.
 
     Returns
     -------
-    :result : float
+    :result: float
         correlation factor value for the sequence using the correlation function
         for the particular sequence.
     """
@@ -359,16 +365,16 @@ def correlation_function(Ri="S", Rj="D", properties=[]):
 
     Parameters
     ----------
-    :Ri : str
+    :Ri: str
         1st amino acid.
-    :Rj : str
+    :Rj: str
         2nd amino acid.
     :properties : list 
         list of dicts of physiochemical/structural property values for amino acids.
 
     Returns
     -------
-    :correlation : float
+    :correlation: float
         correlation value for the two input amino acids based on input properties.
     """
     theta = 0.0
@@ -390,12 +396,12 @@ def normalize_property(properties):
     
     Parameters
     ----------
-    :properties : dict
+    :properties: dict
         dictionary of amino acid values for a physiochemical property. 
         
     Returns
     -------
-    :normalized_vals : dict
+    :normalized_vals: dict
         dict of normalized property values.
     """
     normalized_vals = {}
@@ -414,16 +420,16 @@ def _std(prop, mean, ddof=1):
 
     Parameters
     ----------
-    :prop : dict
+    :prop: dict
         dictionary of property values for each amino acid.
-    :mean : float
+    :mean: float
         mean of physiochemical property values.
-    :ddof : int (default=1)
+    :ddof: int (default=1)
         delta degrees of freedom.
         
     Returns
     -------
-    :std_ : float
+    :std_: float
         calculated standard deviation. 
     """
     temp = [math.pow(i - mean, 2) for i in prop]
@@ -438,27 +444,31 @@ def amphiphilic_pseudo_amino_acid_composition(sequence, lamda=30, weight=0.5,
     Amphiphillic pseudo amino acid composition (APAAComp) has the same form as the amino
     acid composition, but contains much more information that is related to the 
     sequence order of a protein and the distribution of the hydrophobic and 
-    hydrophilic amino acids along its chain. The first 20 numbers in the 
-    descriptor are the components of the conventional amino acid composition; 
-    the next 2*λ numbers are a set of correlation factors that reflect different 
-    hydrophobicity and hydrophilicity distribution patterns along a protein chain [5].
+    hydrophilic amino acids along its chain [5].
+    
+    The first 20 numbers in the descriptor are the components of the conventional amino 
+    acid composition; the next 2*λ numbers are a set of correlation factors that reflect
+    different hydrophobicity and hydrophilicity distribution patterns along a protein chain.
 
     Parameters
     ----------
-    :sequence : str
+    :sequence: str
         protein sequence.
     :lamda: int
         rank of correlation. Number of calculable descriptors depends on lambda value.
     :weight: float
         weighting factor.
-    :properties : list (default=[hydrophobicity_, hydrophilicity_])
+    :properties: list (default=[hydrophobicity_, hydrophilicity_])
         list of dicts of physiochemical/structural property values for amino acids.
 
     Returns
     -------    
     :amp_pseudo_amino_acid_composition_df: pd.Dataframe
-        output dataframe of calculated amphiphilic pseudo amino acid composition descriptors 
-        for input sequence.
+        output dataframe of calculated amphiphilic pseudo amino acid composition 
+        descriptors for input sequence. Dataframe will be of the shape 1 x N, where 
+        N is the number of features calculated from the descriptor (20 + 2*lambda) 
+        and 1 is the input sequence. By default, the shape will be 1 x 80 
+        (using default lamda=30).
     """
     #check input sequence is a string, if not raise type error
     if not isinstance(sequence, str):
@@ -470,7 +480,7 @@ def amphiphilic_pseudo_amino_acid_composition(sequence, lamda=30, weight=0.5,
     #if invalid amino acids in sequence, raise value error
     for aa in sequence:
         if (aa not in amino_acids):
-            raise ValueError("Invalid amino acid in protein sequence: {}.".format(aa))
+            raise ValueError("Invalid amino acid found in protein sequence: {}.".format(aa))
 
     #set lamda to its default value of 30 if <0, or > sequence len or not an int
     if ((lamda < 0) or (lamda > len(sequence)) or not isinstance(lamda, int)):
@@ -526,14 +536,14 @@ def amphiphilic_sequence_order_correllation_factor(sequence, k=1):
 
     Parameters
     ----------
-    :sequence : str
+    :sequence: str
         protein sequence.
-    :k : int (default=1)
+    :k: int (default=1)
         gap between amino acids in the sequence.
 
     Returns
     -------
-    :correlation_factor : list
+    :correlation_factor: list
         list of correlation factors for both hydrophobicity and hydrophillicty.
     """
     correlation_factor_hydrophobicity = []
@@ -561,14 +571,14 @@ def amphiphilic_correllation_function(Ri="S", Rj="D"):
 
     Parameters
     ----------
-    :Ri : str
+    :Ri: str
         1st amino acid.
-    :Rj : str
+    :Rj: str
         2nd amino acid.
 
     Returns
     -------
-    :theta1, theta2 : float
+    :theta1, theta2: float
         correlation values for input property values.
     """
     #normalize properties

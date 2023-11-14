@@ -23,7 +23,7 @@ aa_triads = {
     5: ["R", "K"],
     6: ["D", "E"],
     7: ["C"],
-}
+    }
 
 def conjoint_triad(sequence):
     """
@@ -36,15 +36,15 @@ def conjoint_triad(sequence):
 
     Parameters
     ----------
-    :sequence : str
+    :sequence: str
         protein sequence.
 
     Returns
     -------
-    :conjoint_triad_df : pd.Dataframe
+    :conjoint_triad_df: pd.Dataframe
         pandas Dataframe of CTriad descriptor values for all protein sequences. Dataframe
         will be of the shape 1 x 343, where 343 is the number of features calculated 
-        from the descriptor for a sequence.
+        from the descriptor and 1 is the input sequence.
     """
     #check input sequence is a string, if not raise type error
     if not isinstance(sequence, str):
@@ -56,7 +56,7 @@ def conjoint_triad(sequence):
     #if invalid amino acids in sequence, raise value error
     for aa in sequence:
         if (aa not in amino_acids):
-            raise ValueError("Invalid amino acid in protein sequence: {}.".format(aa))
+            raise ValueError("Invalid amino acid found in protein sequence: {}.".format(aa))
 
     conjoint_triad = {}
     _aa_triads = {}
