@@ -63,3 +63,4 @@
 - [X] Remove biopython from requirments & setup.py - required for testing.
 - [ ] https://github.com/gadsbyfly/PyBioMed/blob/master/PyBioMed/doc/Descriptor/PyBioMed%20Protein.pdf
 - [X] Sequence order can accept just schenider-wrede or grantham.
+- [ ] Add link to medium article.

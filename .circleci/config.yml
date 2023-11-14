@@ -43,9 +43,7 @@ jobs:
             pip install codecov
             pip install pytest
             pip install pytest-cov
-        # pytest --cov-report term --cov=test_protpy tests/ > /tmp/coverage_report.txt || true
-        # coverage run 
-        # coverage report > /tmp/coverage_report.txt || true
+            pip install biopython
       #store linter and coverage artifacts in tmp folder
       - store_artifacts:
           path: /tmp/coverage_report.txt
