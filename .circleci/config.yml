@@ -15,6 +15,7 @@ jobs:
           name: Run tests
           command: |
             if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+            pip3 install biopython
             python -m unittest discover tests/
       - persist_to_workspace:
           root: ~/project
@@ -43,7 +44,6 @@ jobs:
             pip install codecov
             pip install pytest
             pip install pytest-cov
-            pip install biopython
       #store linter and coverage artifacts in tmp folder
       - store_artifacts:
           path: /tmp/coverage_report.txt
