@@ -14,6 +14,9 @@
 <img src="https://images.newscientist.com/wp-content/uploads/2021/07/22155326/22-july_deepmind-proteome.jpg?width=300" alt="protpyLogo" height="200"/>
 </p> -->
 
+* A <b>demo</b> of the software is available [here][demo]
+* A <b>Medium</b> article about `protPy` and its background etc is available [here][article]
+
 Table of Contents
 -----------------
 
@@ -45,9 +48,6 @@ Introduction
 * **Quasi Sequence Order (QSO)**
 
 This software is aimed at any researcher or developer using protein sequence/structural data, and was mainly created to use in my own project [`pySAR`](https://github.com/amckenna41/pySAR) which uses protein sequence data to identify Sequence Activity Relationships (SAR) using Machine Learning [[1]](#references). `protpy` is built and developed in Python 3.10.
-
-<strong>A demo of the software is available [here][demo].</strong>
-<strong>A Medium article about protPy and its background etc is available [here][article].</strong>
 
 Requirements
 ------------
@@ -275,7 +275,6 @@ Support
 [numpy]: https://numpy.org/
 [pandas]: https://pandas.pydata.org/
 [PyPi]: https://pypi.org/project/protpy/
-[article]: https://www.sciencedirect.com/science/article/abs/pii/S1532046422000326
 [demo]: https://colab.research.google.com/drive/12E3ayovpZOf6Gv-8ILwkN1zReKslEksB?usp=sharing
 [article]: https://medium.com/@ajmckenna69/protpy-05f02f821baa
 [Issues]: https://github.com/amckenna41/protpy/issues
