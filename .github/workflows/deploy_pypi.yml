@@ -32,15 +32,16 @@ jobs:
         python3 -m pip install setuptools wheel twine
         python3 setup.py install
 
-    # Build package and upload to PyPI 
+    # Build package and upload to PyPI - python3 setup.py sdist bdist_wheel
     - name: Build and upload to PyPI
       run: |
         python3 setup.py sdist bdist_wheel
         twine check dist/*
-        twine upload dist/*
+        twine upload dist/* --verbose
       env:
         TWINE_USERNAME: __token__
         TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
+        TWINE_REPOSITORY: pypi
 
      # sleep for 30 seconds to ensure that distribution package has successfully been uploaded to PyPI
     - name: Wait / Sleep

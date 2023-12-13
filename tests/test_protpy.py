@@ -22,27 +22,27 @@ class ProtpyTests(unittest.TestCase):
     """
     def test_protpy_metadata(self):
         """ Testing correct protpy version and metadata. """
-        self.assertEqual(protpy.__version__, "1.2.0", 
-            "protpy version is not correct, got version {}.".format(protpy.__version__))
+        self.assertEqual(protpy.__version__, "1.2.1", 
+            "protpy version is not correct, expected version 1.2.1, got version {}.".format(protpy.__version__))
         self.assertEqual(protpy.__name__, "protpy", 
-            "protpy software name is not correct, got {}.".format(protpy.__name__))
-        self.assertEqual(protpy.__author__, "AJ McKenna, https://github.com/amckenna41", 
-            "protpy author is not correct, got {}.".format(protpy.__author__))
+            "protpy software name is not correct, expected protpy, got {}.".format(protpy.__name__))
+        self.assertEqual(protpy.__author__, "AJ McKenna: https://github.com/amckenna41", 
+            "protpy author is not correct, expected AJ McKenna, got {}.".format(protpy.__author__))
         self.assertEqual(protpy.__authorEmail__, "amckenna41@qub.ac.uk", 
-            "protpy author email is not correct, got {}.".format(protpy.__authorEmail__))
+            "protpy author email is not correct, expected amckenna41@qub.ac.uk, got {}.".format(protpy.__authorEmail__))
         self.assertEqual(protpy.__url__, "https://github.com/amckenna41/protPy", 
-            "protpy repo URL is not correct, got {}.".format(protpy.__url__))
+            "protpy repo URL is not correct, expected https://github.com/amckenna41/protPy, got {}.".format(protpy.__url__))
         self.assertEqual(protpy.__download_url__, "https://github.com/amckenna41/protPy/archive/refs/heads/main.zip", 
-            "protpy repo download URL is not correct, got {}.".format(protpy.__download_url__))
+            "protpy repo download URL is not correct, expected https://github.com/amckenna41/protPy/archive/refs/heads/main.zip, got {}.".format(protpy.__download_url__))
         self.assertEqual(protpy.__status__, "Production", 
-            "protpy status is not correct, got {}.".format(protpy.__status__))
+            "protpy status is not correct, expected Production got {}.".format(protpy.__status__))
         self.assertEqual(protpy.__license__, "MIT", 
-            "protpy license type is not correct, got {}.".format(protpy.__license__))
+            "protpy license type is not correct, expected MIT, got {}.".format(protpy.__license__))
         self.assertEqual(protpy.__maintainer__, "AJ McKenna", 
-            "protpy maintainer is not correct, got {}.".format(protpy.__license__))
+            "protpy maintainer is not correct, expected AJ McKenna, got {}.".format(protpy.__license__))
         self.assertEqual(protpy.__keywords__, ["bioinformatics", "protein engineering", 
             "python", "pypi", "machine learning", "aaindex", "protein descriptors", 
-            "physiochemical descriptors", "biochemical descriptors" "structural descriptors", "pySAR"], 
+            "physicochemical descriptors", "biochemical descriptors" "structural descriptors", "pySAR"], 
             "protpy keywords is not correct, got\n{}.".format(protpy.__keywords__))
 
     def test_valid_descriptors(self):

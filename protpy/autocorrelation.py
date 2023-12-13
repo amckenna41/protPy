@@ -67,7 +67,7 @@ def moreaubroto_autocorrelation(sequence, lag=30,
         A value for a lag, the max value is equal to the length of the shortest peptide minus one.
     :properties: list (default=["CIDH920105", "BHAR880101", "CHAM820101", "CHAM820102",
             "CHOC760101", "BIGC670101", "CHAM810101", "DAYM780201"])
-        list of AAI index record codes/accession numbers for the physiochemical properties to 
+        list of AAI index record codes/accession numbers for the physicochemical properties to 
         use in the calculation of the descriptor.
     :normalize: bool (default=True)
         rescale/normalize MoreauBroto Autocorrelation values into range of 0-1.
@@ -172,7 +172,7 @@ def moran_autocorrelation(sequence, lag=30,
         A value for a lag, the max value is equal to the length of the shortest peptide minus one.
     :properties: list (default=["CIDH920105", "BHAR880101", "CHAM820101", "CHAM820102",
             "CHOC760101", "BIGC670101", "CHAM810101", "DAYM780201"])
-        list of AAI index record codes/accession numbers for the physiochemical properties to 
+        list of AAI index record codes/accession numbers for the physicochemical properties to 
         use in the calculation of the descriptor.
     :normalize: bool (default=True)
         rescale/normalize MoreauBroto Autocorrelation values into range of 0-1.
@@ -287,7 +287,7 @@ def geary_autocorrelation(sequence, lag=30,
         A value for a lag, the max value is equal to the length of the shortest peptide minus one.
     :properties: list (default=["CIDH920105", "BHAR880101", "CHAM820101", "CHAM820102",
             "CHOC760101", "BIGC670101", "CHAM810101", "DAYM780201"])
-        list of AAI index record codes/accession numbers for the physiochemical properties to 
+        list of AAI index record codes/accession numbers for the physicochemical properties to 
         use in the calculation of the descriptor.
     :normalize: bool (default=True)
         rescale/normalize MoreauBroto Autocorrelation values into range of 0-1.

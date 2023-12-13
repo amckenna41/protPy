@@ -20,8 +20,9 @@ References
     acid sequence. Proc.Natl. Acad.Sci.USA, 1995, 92, 8700-8704.
 [2] Inna Dubchak, Ilya Muchink, Christopher Mayor, Igor Dralyuk and Sung-Hou
     Kim. Recognition of a Protein Fold in the Context of the SCOP
-    classification. Proteins: Structure, Function and
-    Genetics, 1999, 35, 401-407.
+    classification. Proteins: Structure, Function and Genetics, 1999, 35, 401-407.
+[3] Gromiha, M. M. (2010). Protein Sequence Analysis. In M. M. Gromiha (Ed.), 
+    Protein Bioinformatics (pp. 29–62). Elsevier.
 """
 
 hydrophobicity = {"name": "hydrophobicity", "1": "RKEDQN", "2": "GASTPHY", "3": "CLVIMFW"}
@@ -45,7 +46,7 @@ solvent_accessibility = {"name": "solvent_accessibility", "1": "ALFCGIVW", "2": 
 polarizability = {"name": "polarizability", "1": "GASDT", "2": "CPNVEQIL", "3": "KMHFRYW"}
 # '1' -> (0-0.108); '2' -> (0.128-0.186), '3' -> (0.219-0.409)
 
-#object of physiochemical properties to use for calculating CTD descriptors 
+#object of physicochemical properties to use for calculating CTD descriptors 
 ctd_properties = {
     nameof(hydrophobicity): hydrophobicity,
     nameof(normalized_vdwv): normalized_vdwv,
@@ -58,14 +59,14 @@ ctd_properties = {
 
 def str_to_num(sequence, property):
     """
-    Convert sequences str to number from input physiochemical property.
+    Convert sequences str to number from input physicochemical property.
 
     Parameters
     ----------
     :sequence: str
         protein sequence.
     :property: str
-        physiochemical property name to use when calculating descriptor.
+        physicochemical property name to use when calculating descriptor.
 
     Returns
     -------
@@ -97,7 +98,7 @@ def str_to_num(sequence, property):
 
 def ctd_composition(sequence, property="hydrophobicity"):
     """
-    Calculate composition physiochemical/structural descriptor. Composition 
+    Calculate composition physicochemical/structural descriptor. Composition 
     is determined as the number of amino acids of a particular property 
     divided by the total number of amino acids. The shape of the output will be 
     1 x 3, with 3 features being generated per sequence.
@@ -107,13 +108,13 @@ def ctd_composition(sequence, property="hydrophobicity"):
     :sequence: str
         protein sequence.
     :property: str (default="hydrophocity")
-        physiochemical property name to use when calculating descriptor.
+        physicochemical property name to use when calculating descriptor.
 
     Returns
     -------
     :ctd_composition_df: pd.DataFrame
         dataframe of calculated composition values for sequence using
-        selected physiochemical property. Output will be of shape 1 x 3,
+        selected physicochemical property. Output will be of shape 1 x 3,
         with 3 features being generated per sequence.
     """
     #check input sequence is a string, if not raise type error
@@ -156,7 +157,7 @@ def ctd_composition(sequence, property="hydrophobicity"):
 
 def ctd_transition(sequence, property="hydrophobicity"):
     """
-    Calculate transition physiochemical/structural descriptor. Transition 
+    Calculate transition physicochemical/structural descriptor. Transition 
     is determined as the number of transitions from a particular property 
     to different property divided by (total number of amino acids − 1). 
     The shape of the output will be 1 x 3, with 3 features being generated 
@@ -167,13 +168,13 @@ def ctd_transition(sequence, property="hydrophobicity"):
     :sequence: str
         protein sequence.
     :property: str (default="hydrophocity")
-        physiochemical property name to use when calculating descriptor.
+        physicochemical property name to use when calculating descriptor.
 
     Returns
     -------
     :ctd_transition_df: pd.DataFrame
         dataframe of calculated transition values for sequence using
-        selected physiochemical property. Output will be of shape 1 x 3,
+        selected physicochemical property. Output will be of shape 1 x 3,
         with 3 features being generated per sequence.
     """
     #check input sequence is a string, if not raise type error
@@ -219,7 +220,7 @@ def ctd_transition(sequence, property="hydrophobicity"):
 
 def ctd_distribution(sequence, property="hydrophobicity"): 
     """
-    Calculate distribution physiochemical/structural descriptor. Distribution 
+    Calculate distribution physicochemical/structural descriptor. Distribution 
     is the chain length within which the first, 25%, 50%, 75% and 100% of the 
     amino acids of a particular property are located. The shape of the output 
     will be 1 x 15, with 15 features being generated per sequence.
@@ -229,13 +230,13 @@ def ctd_distribution(sequence, property="hydrophobicity"):
     :sequence: str
         protein sequence.
     :property: str (default="hydrophocity")
-        physiochemical property name to use when calculating descriptor.
+        physicochemical property name to use when calculating descriptor.
 
     Returns
     -------
     :ctd_distribution_df: pd.DataFrame
         dataframe of calculated distribution values for sequence using
-        selected physiochemical property. Output will be of shape 1 x 15,
+        selected physicochemical property. Output will be of shape 1 x 15,
         with 15 features being generated per sequence.
     """
     #check input sequence is a string, if not raise type error
@@ -322,7 +323,7 @@ def ctd_(sequence, property="hydrophobicity", all_ctd=True):
     :sequence: str
         protein sequence.
     :property: str (default="hydrophocity")
-        physiochemical property name to use when calculating descriptor.
+        physicochemical property name to use when calculating descriptor.
     :ctd: bool
         calculate all CTD descriptors and concatenate together.
 

@@ -57,10 +57,13 @@
 - [X] In "Parameters' and 'returns' , remove space between colon.
 - [X] Read over code.
 - [X] Create demo
-- [ ] Add equations of descriptors to markdown file. https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-015-0554-8#Sec10
+- [ ] Add equations of descriptors to markdown file. https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-015-0554-8#Sec10 - https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-8-300
 - [X] Remove python 3.7 references, 3.8 minimum.
 - [X] In descriptor comments, dimensions of output should be 1 x N rather than N x 1 (N=# of features).
 - [X] Remove biopython from requirments & setup.py - required for testing.
 - [ ] https://github.com/gadsbyfly/PyBioMed/blob/master/PyBioMed/doc/Descriptor/PyBioMed%20Protein.pdf
 - [X] Sequence order can accept just schenider-wrede or grantham.
 - [ ] Add link to medium article.
+- [ ] readthedocs(https://github.com/MartinThoma/propy3/tree/master).
+- [ ] https://www.google.com/url?sa=i&url=https%3A%2F%2Fchem.libretexts.org%2FBookshelves%2FOrganic_Chemistry%2FOrganic_Chemistry_%2528OpenStax%2529%2F26%253A_Biomolecules-_Amino_Acids_Peptides_and_Proteins%2F26.10%253A_Protein_Structure&psig=AOvVaw0Qo-k6BzbFLhPNHLlzBkIL&ust=1700267570233000&source=images&cd=vfe&opi=89978449&ved=0CBIQjRxqFwoTCNiBtLbkyYIDFQAAAAAdAAAAABAE
+- [X] Change physiochemical to physicochemical. 

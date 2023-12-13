@@ -1,7 +1,7 @@
 # Data required for protPy sequence order descriptors
 
-* `grantham-physiochemical-distance-matrix.json` - grantham distance score for each amino acid combination, used in the calculation of the sequence-order related protein descriptors [[1]](#references).
-* `schneider-werde-physiochemical-distance-matrix.json` - schneider-werde distance score for each amino acid combination, used in the calculation of the sequence-order related protein descriptors [[2]](#references).
+* `grantham-physicochemical-distance-matrix.json` - grantham distance score for each amino acid combination, used in the calculation of the sequence-order related protein descriptors [[1]](#references).
+* `schneider-werde-physicochemical-distance-matrix.json` - schneider-werde distance score for each amino acid combination, used in the calculation of the sequence-order related protein descriptors [[2]](#references).
 
 References
 ----------

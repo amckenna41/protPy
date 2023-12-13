@@ -1,12 +1,12 @@
 
-# protpy - Package for generating protein physiochemical, biochemical and structural descriptors using their constituent amino acids. #
+# protpy - Package for generating protein physicochemical, biochemical and structural descriptors using their constituent amino acids. #
 [![PyPI](https://img.shields.io/pypi/v/protpy)](https://pypi.org/project/protpy/)
 [![pytest](https://github.com/amckenna41/protpy/workflows/Building%20and%20Testing/badge.svg)](https://github.com/amckenna41/protpy/actions?query=workflowBuilding%20and%20Testing)
 [![CircleCI](https://dl.circleci.com/status-badge/img/gh/amckenna41/protPy/tree/main.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/amckenna41/protPy/tree/main)
 [![Platforms](https://img.shields.io/badge/platforms-linux%2C%20macOS%2C%20Windows-green)](https://pypi.org/project/protpy/)
 [![PythonV](https://img.shields.io/pypi/pyversions/protpy?logo=2)](https://pypi.org/project/protpy/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-red.svg)](https://opensource.org/licenses/MIT)
 [![codecov](https://codecov.io/gh/amckenna41/protPy/graph/badge.svg?token=H508M9J13W)](https://codecov.io/gh/amckenna41/protPy)
+[![License: MIT](https://img.shields.io/badge/License-MIT-red.svg)](https://opensource.org/licenses/MIT)
 [![Issues](https://img.shields.io/github/issues/amckenna41/protpy)](https://github.com/amckenna41/protpy/issues)
 <!-- [![Size](https://img.shields.io/github/repo-size/amckenna41/protpy)](https://github.com/amckenna41/protpy)
 [![Commits](https://img.shields.io/github/commit-activity/w/amckenna41/protpy)](https://github.com/amckenna41/protpy) -->
@@ -29,7 +29,7 @@ Table of Contents
 
 Introduction
 ------------
-`protpy` is a Python software package for generating a variety of physiochemical, biochemical and structural descriptors for proteins. All of these descriptors are calculated using sequence-derived or physiochemical features of the amino acids that make up the proteins. These descriptors have been highly studied and used in a series of Bioinformatic applications including protein engineering, SAR (sequence-activity-relationships), predicting protein structure & function, subcellular localization, protein-protein interactions, drug-target interactions etc. The descriptors available in `protpy` include:
+`protpy` is a Python software package for generating a variety of physicochemical, biochemical and structural descriptors for proteins. All of these descriptors are calculated using sequence-derived or physicochemical features of the amino acids that make up the proteins. These descriptors have been highly studied and used in a series of Bioinformatic applications including protein engineering, SAR (sequence-activity-relationships), predicting protein structure & function, subcellular localization, protein-protein interactions, drug-target interactions etc. The descriptors available in `protpy` include:
 
 * **Amino Acid Composition (AAComp)**
 * **Dipeptide Composition (DPComp)**
@@ -44,18 +44,19 @@ Introduction
 * **Sequence Order Coupling Number (SOCN)**
 * **Quasi Sequence Order (QSO)**
 
-This software is aimed at any researcher or developer using protein sequence/structural data, and was mainly created to use in my own project [`pySAR`](https://github.com/amckenna41/pySAR) which uses protein sequence data to identify Sequence Activity Relationships (SAR) using Machine Learning [[1]](#references). `protpy` is built solely in Python3 and specifically developed in Python 3.10.
+This software is aimed at any researcher or developer using protein sequence/structural data, and was mainly created to use in my own project [`pySAR`](https://github.com/amckenna41/pySAR) which uses protein sequence data to identify Sequence Activity Relationships (SAR) using Machine Learning [[1]](#references). `protpy` is built and developed in Python 3.10.
 
-<strong>A demo of the software is available [here](demo). </strong>
+<strong>A demo of the software is available [here][demo].</strong>
+<strong>A Medium article about protPy and its background etc is available [here][article].</strong>
 
 Requirements
 ------------
 * [Python][python] >= 3.8
-* [aaindex][aaindex] >= 1.0.4
+* [aaindex][aaindex] >= 1.1.2
 * [numpy][numpy] >= 1.16.0
 * [pandas][pandas] >= 1.1.0
 * [varname][varname] >= 0.12.0
-* [biopython][biopython] >=1.81 (only required for testing) 
+* [biopython][biopython] >= 1.81 (only required for testing) 
 
 Installation 
 ------------
@@ -276,4 +277,5 @@ Support
 [PyPi]: https://pypi.org/project/protpy/
 [article]: https://www.sciencedirect.com/science/article/abs/pii/S1532046422000326
 [demo]: https://colab.research.google.com/drive/12E3ayovpZOf6Gv-8ILwkN1zReKslEksB?usp=sharing
+[article]: https://medium.com/@ajmckenna69/protpy-05f02f821baa
 [Issues]: https://github.com/amckenna41/protpy/issues

@@ -14,11 +14,10 @@ from . import composition
 """
 References
 ----------
-
 [1] Kuo-Chen Chou. Prediction of Protein Subcellar Locations by Incorporating
     Quasi-Sequence-Order Effect. Biochemical and Biophysical Research Communications,
     2000, 278, 477-483.
-[2] Kuo-Chen Chou and Yu-Dong Cai. Prediction of Protein Sucellular Locations by
+[2] Kuo-Chen Chou and Yu-Dong Cai. Prediction of Protein Subcellular Locations by
     GO-FunD-PseAA Predictor. Biochemical and Biophysical Research Communications,
     2004, 320, 1236-1239.
 [3] Gisbert Schneider and Paul Wrede. The Rational Design of Amino Acid Sequences
@@ -55,7 +54,7 @@ def sequence_order_coupling_number_(sequence, d=1, distance_matrix="schneider-wr
     :d: int (default=1)
         gap between two amino acids.
     :distance_matrix: str (default="schneider-wrede")
-        name of physiochemical distance matrix for calculating quasi sequence order, 
+        name of physicochemical distance matrix for calculating quasi sequence order, 
         function can accept the schneider-wrede or grantham matrix, default is
         schneider-wrede.
 
@@ -85,7 +84,7 @@ def sequence_order_coupling_number_(sequence, d=1, distance_matrix="schneider-wr
             " list of available valid distance matrices:\n{}.".format(distance_matrix, ["schneider-wrede", "grantham"]))
     
     #get full path to selected distance matric
-    distance_matrix = os.path.join(os.path.dirname(os.path.abspath(sys.modules['protpy'].__file__)), "data", distance_matrix + "-physiochemical-distance-matrix.json")
+    distance_matrix = os.path.join(os.path.dirname(os.path.abspath(sys.modules['protpy'].__file__)), "data", distance_matrix + "-physicochemical-distance-matrix.json")
         
     #open distance matrix json if present
     try:
@@ -123,7 +122,7 @@ def sequence_order_coupling_number(sequence, lag=30,
         maximum gap betwwen 2 amino acids; the length of the protein should be larger
         than lag. Default set to 30.
     :distance_matrix: str (default="schneider-wrede")
-        name of physiochemical distance matrix for calculating quasi sequence order, 
+        name of physicochemical distance matrix for calculating quasi sequence order, 
         function can accept the schneider-wrede or grantham matrix, default is
         schneider-wrede.
 
@@ -259,7 +258,7 @@ def quasi_sequence_order(sequence, lag=30, weight=0.1,
     :weight: float (default = 0.1)
         weighting factor.
     :distance_matrix: str (default="schneider-wrede")
-        name of physiochemical distance matrix for calculating quasi sequence order, 
+        name of physicochemical distance matrix for calculating quasi sequence order, 
         function can accept the schneider-wrede or grantham matrix, default is
         schneider-wrede.
 
@@ -309,7 +308,7 @@ def quasi_sequence_order(sequence, lag=30, weight=0.1,
     right_part = 0.0
 
     #calculate first 20 quasi sequence order using sequence order coupling number for
-    #proteins using lag and specificed physiochemical distance matrix
+    #proteins using lag and specificed physicochemical distance matrix
     for aa in range(lag):
         right_part = right_part + sequence_order_coupling_number_(sequence, aa+1, distance_matrix)
 
@@ -342,7 +341,7 @@ def quasi_sequence_order(sequence, lag=30, weight=0.1,
 def quasi_sequence_order_all(sequence, lag=30, weight=0.1):
     """
     Calculate Quasi Sequence Order features for input protein sequence using 
-    both physiochemical distance matrices. Concatenate into one output dataframe. 
+    both physicochemical distance matrices. Concatenate into one output dataframe. 
     The output will be in the shape 1 x ((N + 20)*2), where ((N + 20)*2) is the 
     quasi sequence order output from one matrix and N is the lag. The output  
     is multiplied by two to take into account the 2 matrices being concatenated. 

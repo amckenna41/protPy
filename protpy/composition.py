@@ -30,7 +30,7 @@ References
 amino_acids = ["A", "C", "D", "E", "F", "G", "H", "I", "K", "L", "M", "N", "P", 
     "Q", "R", "S", "T", "V", "W", "Y"]
 
-#physiochemical values for all amino acids for hydrophobicity, hydrophilicty and residue mass
+#physicochemical values for all amino acids for hydrophobicity, hydrophilicty and residue mass
 #values taken from http://www.csbio.sjtu.edu.cn/bioinf/PseAAC/ParaValue.htm
 #property values differ from their equivalent in the aaindex therefore hard-coding them below
 hydrophobicity_ = {
@@ -231,12 +231,12 @@ def pseudo_amino_acid_composition(sequence, lamda=30, weight=0.05, properties=[]
     descriptor with additional local features, such as correlation between residues of 
     a certain distance, as amino acid composition doesn't take into account sequence 
     order info. The pseudo components of the descriptor are a series rank-different 
-    correlation factors [4]. 
+    correlation factors [4, 5]. 
     
     The first 20 components are a weighted sum of the amino acid composition and 30 are 
-    physiochemical square correlations as dictated by the lamda and properties parameters. 
+    physicochemical square correlations as dictated by the lamda and properties parameters. 
     This generates an output of [1, (20 + lamda)] = 1 x 50 when using the default lamda 
-    of 30. By default, the physiochemical properties used are hydrophobicity and 
+    of 30. By default, the physicochemical properties used are hydrophobicity and 
     hydrophillicity, with a lamda of 30 and weight of 0.05.
 
     Parameters
@@ -246,7 +246,7 @@ def pseudo_amino_acid_composition(sequence, lamda=30, weight=0.05, properties=[]
     :weight: float
         weighting factor.
     :properties: list 
-        list of dicts of physiochemical/structural property values for amino acids.
+        list of dicts of physicochemical/structural property values for amino acids.
 
     Returns
     -------
@@ -336,7 +336,7 @@ def sequence_order_correlation_factor(sequence, k=1, properties=[]):
     :k: int
         gap between amino acids in the sequence.
     :properties : list
-        list of dicts of physiochemical/structural property values for amino acids.
+        list of dicts of physicochemical/structural property values for amino acids.
 
     Returns
     -------
@@ -361,7 +361,7 @@ def sequence_order_correlation_factor(sequence, k=1, properties=[]):
 def correlation_function(Ri="S", Rj="D", properties=[]):
     """
     Calculate the correlation between 2 input amino acids based on the 
-    physiochemical/structural properties from the protein sequence.
+    physicochemical/structural properties from the protein sequence.
 
     Parameters
     ----------
@@ -370,7 +370,7 @@ def correlation_function(Ri="S", Rj="D", properties=[]):
     :Rj: str
         2nd amino acid.
     :properties : list 
-        list of dicts of physiochemical/structural property values for amino acids.
+        list of dicts of physicochemical/structural property values for amino acids.
 
     Returns
     -------
@@ -391,13 +391,13 @@ def correlation_function(Ri="S", Rj="D", properties=[]):
 
 def normalize_property(properties):
     """
-    Normalize physiochemical/structural property values using
+    Normalize physicochemical/structural property values using
     their mean and standard deviation.
     
     Parameters
     ----------
     :properties: dict
-        dictionary of amino acid values for a physiochemical property. 
+        dictionary of amino acid values for a physicochemical property. 
         
     Returns
     -------
@@ -415,7 +415,7 @@ def normalize_property(properties):
 
 def _std(prop, mean, ddof=1):
     """
-    Calculate standard deviation from list of physiochemical values using
+    Calculate standard deviation from list of physicochemical values using
     the mean of their values.
 
     Parameters
@@ -423,7 +423,7 @@ def _std(prop, mean, ddof=1):
     :prop: dict
         dictionary of property values for each amino acid.
     :mean: float
-        mean of physiochemical property values.
+        mean of physicochemical property values.
     :ddof: int (default=1)
         delta degrees of freedom.
         
@@ -459,7 +459,7 @@ def amphiphilic_pseudo_amino_acid_composition(sequence, lamda=30, weight=0.5,
     :weight: float
         weighting factor.
     :properties: list (default=[hydrophobicity_, hydrophilicity_])
-        list of dicts of physiochemical/structural property values for amino acids.
+        list of dicts of physicochemical/structural property values for amino acids.
 
     Returns
     -------    
