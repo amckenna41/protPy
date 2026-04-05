@@ -1,4 +1,6 @@
 
+<a id="TOP"></a>
+
 # protpy - Package for generating protein physicochemical, biochemical and structural descriptors using their constituent amino acids. #
 [![PyPI](https://img.shields.io/pypi/v/protpy)](https://pypi.org/project/protpy/)
 [![pytest](https://github.com/amckenna41/protpy/workflows/Building%20and%20Testing/badge.svg)](https://github.com/amckenna41/protpy/actions?query=workflowBuilding%20and%20Testing)
@@ -17,7 +19,7 @@
 * 📝 A <b>Medium</b> article about `protPy` and its background is available [here][article]
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/amckenna41/protpy/main/images/protpy.png" alt="protpy" width="600"/>
+  <img src="https://raw.githubusercontent.com/amckenna41/protpy/main/images/protpy.png" alt="protpy" width="500"/>
 </p>
 
 Table of Contents
@@ -108,7 +110,7 @@ The descriptors available in `protpy` include:
 
 </details>
 
-More detail of each descriptor is listed in the markdown file: [`DESCRIPTORS.md`](https://github.com/amckenna41/protpy/DESCRIPTORS.md)
+More detail of each descriptor is listed in the markdown file: [`DESCRIPTORS.md`](https://github.com/amckenna41/protPy/blob/main/DESCRIPTORS.md)
 
 
 Requirements
@@ -432,13 +434,14 @@ qso = protpy.quasi_sequence_order(protein_seq, lag=10, weight=0.2, distance_matr
 
 Documentation
 -------------
-The documentation for `protpy` is hosted on **ReadTheDocs** and is available [here][readthedocs]. It is automatically built and published from the repository and includes full API reference, usage examples, and a changelog.
+The documentation for `protpy` is hosted on **ReadTheDocs** and is available [here][readthedocs].
 
 Directories
 -----------
 * `/tests` - unit and integration tests for `protpy` package.
 * `/protpy` - source code and all required external data files for package.
 * `/docs` - `protpy` documentation.
+* `/examples` - example notebook for protpy
 
 Tests
 -----

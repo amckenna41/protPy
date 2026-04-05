@@ -25,7 +25,9 @@ Test Files
 * `test_data/test_fasta3.fasta` - Envelope small membrane protein (P59637 · VEMP_SARS) [[3]](#references).
 * `test_data/test_fasta4.fasta` - Nucleoprotein (P0DTC9 · NCAP_SARS2) [[4]](#references).
 
-\[1\]: https://www.uniprot.org/uniprotkb/P59594/entry
-\[2\]: https://www.uniprot.org/uniprotkb/P59595/entry
-\[3\]: https://www.uniprot.org/uniprotkb/P59637/entry
-\[4\]: https://www.uniprot.org/uniprotkb/P0DTC9/entry
+References
+----------
+\[1\]: https://www.uniprot.org/uniprotkb/P59594/entry <br>
+\[2\]: https://www.uniprot.org/uniprotkb/P59595/entry <br>
+\[3\]: https://www.uniprot.org/uniprotkb/P59637/entry <br>
+\[4\]: https://www.uniprot.org/uniprotkb/P0DTC9/entry 
