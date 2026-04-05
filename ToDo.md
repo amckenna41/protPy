@@ -1,4 +1,4 @@
-- [ ] Remove all camel casing function names/vars, change to underscores and lowercase.
+- [X] Remove all camel casing function names/vars, change to underscores and lowercase.
 - [X] Reorder amino acids alphabetically.
 - [X] Add normalize to moran and geary auto
 - [X] For quasi seq order you should be able to pass in name of distance matrix file with or without .json
@@ -50,7 +50,6 @@
 - [ ] Add output dimensions to SOCN functions.
 - [X] def sequence_order_coupling_number() - dimesnion (1,lag). def sequence_order_coupling_number_all() - dimension (1,lag*2)
 - [X] def quasi_sequence_order() - dimesnion (1,lag). def quasi_sequence_order_all() - dimension (1,lag*2)
-- [ ] Fix cirlceci and add circleci badge to readme, double check workflow.
 - [ ] Add codecov, use pySAR repo as an example.
 - [X] Add references to each descriptor comments.
 - [X] Change all comment underlining from "------" to "=======".
@@ -63,7 +62,56 @@
 - [X] Remove biopython from requirments & setup.py - required for testing.
 - [ ] https://github.com/gadsbyfly/PyBioMed/blob/master/PyBioMed/doc/Descriptor/PyBioMed%20Protein.pdf
 - [X] Sequence order can accept just schenider-wrede or grantham.
-- [ ] Add link to medium article.
+- [X] Add link to medium article.
 - [ ] readthedocs(https://github.com/MartinThoma/propy3/tree/master).
 - [ ] https://www.google.com/url?sa=i&url=https%3A%2F%2Fchem.libretexts.org%2FBookshelves%2FOrganic_Chemistry%2FOrganic_Chemistry_%2528OpenStax%2529%2F26%253A_Biomolecules-_Amino_Acids_Peptides_and_Proteins%2F26.10%253A_Protein_Structure&psig=AOvVaw0Qo-k6BzbFLhPNHLlzBkIL&ust=1700267570233000&source=images&cd=vfe&opi=89978449&ved=0CBIQjRxqFwoTCNiBtLbkyYIDFQAAAAAdAAAAABAE
 - [X] Change physiochemical to physicochemical. 
+- [X] Change ---- to ==== in comments.
+- [ ] Parameter typing https://docs.python.org/3/library/typing.html
+- [ ] Update workflows
+- [ ] Double check spelling using code-spell-checker extension
+- [ ] Import hundreds/thousands of sequences, FASTA sequencec concurrently.
+- [ ] Create pdf of all descriptors adnd what they are etc
+- [ ] Look into some new descriptiors
+
+Additional Sequence-Based Descriptors for pySAR
+Here are descriptors that can be calculated directly from primary sequence (no 3D structure needed):
+
+Composition-Based Descriptors
+GRAVY (Grand Average of Hydropathy) - Overall hydrophobicity of sequence
+Aromaticity - Fraction of aromatic amino acids (Phe, Trp, Tyr)
+Instability Index - Protein stability prediction from sequence
+Isoelectric Point (pI) - Theoretical pH at zero net charge
+Molecular Weight - Total mass from amino acid composition
+Charge Distribution - Positive/negative charge patterns along sequence
+Amino Acid Grouping Descriptors
+Hydrophobic/Polar/Charged Composition - Grouped property frequencies
+Reduced Alphabet Composition - 2-6 letter reduced AA alphabets
+Secondary Structure Propensity - Helix/Sheet/Coil tendency from properties
+k-mer & Motif Descriptors
+k-mer Composition - Frequency of all k-length subsequences (flexible k value)
+Motif-based Features - Presence/absence of known functional motifs (regex patterns)
+Amino Acid Pair Composition - Extended dipeptide analysis with physicochemical grouping
+
+Entropy & Information-Based Descriptors
+Shannon Entropy - Sequence complexity/information content
+Renyi Entropy - Alternative complexity measure
+Relative Entropy - Comparison to background amino acid frequencies
+Position-Specific Entropy - Entropy at each residue position
+Advanced Sequence Order Descriptors
+Wavelet Coefficients - Discrete wavelet transform of hydropathy profile
+Fourier Descriptors - Frequency-domain features from sequence properties
+Autocorrelation with Custom Properties - Correlation of custom AA properties
+Gap-distance dependent features - Residue properties at varying distances
+Signal Processing Descriptors
+Hydropathy Profile Analysis - Kyte-Doolittle plot features
+Secondary Structure Prediction (SSP) - Propensity scores (DSSP/STRIDE rules)
+Disorder Propensity - Prediction of intrinsically disordered regions
+Classification-Focused Descriptors
+Grouped Composition Features - Hydrophobic/Hydrophilic/Aromatic grouping
+Amino Acid Index Database (AAindex) - Any of 500+ published AA properties
+Custom Property Profiles - User-defined amino acid properties
+Sequence Motif & Pattern Descriptors
+Repeat Detection - Homopolymer runs, tandem repeats
+Domain-like Patterns - Zinc finger, helix-turn-helix, etc. scoring
+Post-translational Modification Sites - Phosphorylation, glycosylation, etc.

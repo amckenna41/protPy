@@ -66,14 +66,14 @@ class ProtpySequenceOrderTests(unittest.TestCase):
         socn4_expected_grantham = [138.258, 142.37, 137.803, 139.443, 148.422, 146.01, 146.63, 
             149.337, 150.478, 148.856, 149.214, 154.144, 146.718, 139.508, 149.819]
 
-        socn1_expected_sw = [401.387, 409.243, 376.946, 393.042, 396.196, 384.772, 383.711, 391.951, 
-            386.081, 386.139, 389.241, 393.244, 404.283, 385.307, 379.764]
-        socn2_expected_sw = [140.587, 142.97, 137.385, 139.629, 150.663, 145.954, 148.194, 147.217, 
-            153.02, 153.583, 148.249, 151.87, 147.762, 141.598, 148.125]
-        socn3_expected_sw = [17.252, 16.808, 17.018, 16.892, 17.204, 15.861, 16.668, 12.764, 16.279, 
-            13.025, 16.401, 14.546, 15.033, 14.816, 12.769]
-        socn4_expected_sw = [138.258, 142.37, 137.803, 139.443, 148.422, 146.01, 146.63, 149.337, 
-            150.478, 148.856, 149.214, 154.144, 146.718, 139.508, 149.819]
+        socn1_expected_sw = [5344.394, 5367.097, 5272.118, 5137.648, 5173.414, 5110.591, 4913.351,
+            5067.504, 5289.274, 5152.026, 4977.353, 5047.334, 5099.77, 5104.34, 4973.874]
+        socn2_expected_sw = [1308.473, 1322.203, 1299.052, 1348.505, 1420.659, 1372.565, 1337.65,
+            1341.655, 1351.631, 1413.607, 1385.612, 1389.521, 1293.813, 1369.834, 1346.558]
+        socn3_expected_sw = [267.635, 298.014, 266.195, 258.936, 249.322, 268.626, 277.069, 269.713,
+            286.058, 251.336, 311.798, 274.634, 255.873, 271.719, 258.437]
+        socn4_expected_sw = [1317.238, 1342.396, 1299.31, 1354.373, 1450.649, 1374.545, 1366.789,
+            1384.295, 1363.77, 1397.79, 1408.276, 1395.685, 1301.525, 1352.395, 1368.121]
 
         lag = 15
         for i in range(lag):
@@ -128,17 +128,19 @@ class ProtpySequenceOrderTests(unittest.TestCase):
 #9.)
             invalid_seq5 = "ABCDEF"
             invalid_seq6 = "OOOOO"
-            with (self.assertRaises(ValueError)):
+            with self.assertRaises(ValueError):
                 socn_seq5 = protpy.sequence_order_coupling_number_(invalid_seq5, i+1, 
                     distance_matrix=self.distance_matrix_schneider_wrede)
+            with self.assertRaises(ValueError):
                 socn_seq6 = protpy.sequence_order_coupling_number_(invalid_seq6, i+1, 
                     distance_matrix=self.distance_matrix_grantham)
 #10.)
             invalid_seq7 = 1234
             invalid_seq8 = False
-            with (self.assertRaises(TypeError)):
+            with self.assertRaises(TypeError):
                 socn_seq7 = protpy.sequence_order_coupling_number_(invalid_seq7, i+1, 
                     distance_matrix=self.distance_matrix_grantham)
+            with self.assertRaises(TypeError):
                 socn_seq8 = protpy.sequence_order_coupling_number_(invalid_seq8, i+1, 
                     distance_matrix=self.distance_matrix_grantham)
 
@@ -236,19 +238,22 @@ class ProtpySequenceOrderTests(unittest.TestCase):
         invalid_seq5 = "ABCDEF"
         invalid_seq6 = "OOOOO"
         invalid_lag = "BLAHBLAH"
-        with (self.assertRaises(ValueError)):
+        with self.assertRaises(ValueError):
             socn_seq5 = protpy.sequence_order_coupling_number(invalid_seq5, lag=10, 
                 distance_matrix=self.distance_matrix_schneider_wrede)
+        with self.assertRaises(ValueError):
             socn_seq6 = protpy.sequence_order_coupling_number(invalid_seq6, lag=10, 
                 distance_matrix=self.distance_matrix_schneider_wrede)
+        with self.assertRaises(ValueError):
             socn_seq7 = protpy.sequence_order_coupling_number(self.protein_seq4, lag=invalid_lag, 
                 distance_matrix=self.distance_matrix_schneider_wrede)
 #6.)
         invalid_seq7 = 12345
         invalid_seq8 = False
-        with (self.assertRaises(TypeError)):
+        with self.assertRaises(TypeError):
             socn_seq7 = protpy.sequence_order_coupling_number(invalid_seq7, lag=10, 
                 distance_matrix=self.distance_matrix_schneider_wrede)
+        with self.assertRaises(TypeError):
             socn_seq8 = protpy.sequence_order_coupling_number(invalid_seq8, lag=10, 
                 distance_matrix=self.distance_matrix_schneider_wrede)
 
@@ -325,7 +330,7 @@ class ProtpySequenceOrderTests(unittest.TestCase):
         socn_all_seq4 = protpy.sequence_order_coupling_number_all(self.protein_seq4, lag=lag)
         #testing first 10 columns 
         socn_all_seq4_expected_values = pd.DataFrame(columns=["SOCN_SW1", "SOCN_SW2", "SOCN_SW3", "SOCN_SW4", "SOCN_SW5", "SOCN_Grant1", "SOCN_Grant2", "SOCN_Grant3", "SOCN_Grant4", "SOCN_Grant5"])
-        socn_all_seq4_expected_values.loc[0] = [138.258, 142.37, 137.803, 139.443, 148.422, 138.258, 142.37, 137.803, 139.443, 148.422]
+        socn_all_seq4_expected_values.loc[0] = [138.258, 142.37, 137.803, 139.443, 148.422, 1317.238, 1342.396, 1299.31, 1354.373, 1450.649]
 
         self.assertIsInstance(socn_all_seq4, pd.DataFrame, 
             'Expected output to be a DataFrame, got {}.'.format(type(socn_all_seq4)))
@@ -345,15 +350,17 @@ class ProtpySequenceOrderTests(unittest.TestCase):
 #5.)
         invalid_seq5 = "ABCDEF"
         invalid_seq6 = "OOOOO"
-        with (self.assertRaises(ValueError)):
+        invalid_lag = "BLAHBLAH"
+        with self.assertRaises(ValueError):
             socn_all_seq5 = protpy.sequence_order_coupling_number_all(invalid_seq5, lag=lag)
+        with self.assertRaises(ValueError):
             socn_all_seq6 = protpy.sequence_order_coupling_number_all(invalid_seq6, lag=lag)
+        with self.assertRaises(ValueError):
+            socn_all_seq_lag = protpy.sequence_order_coupling_number_all(self.protein_seq4, lag=invalid_lag)
 #6.)
         invalid_seq7 = 1234
-        invalid_lag = "BLAHBLAH"
-        with (self.assertRaises(TypeError)):
+        with self.assertRaises(TypeError):
             socn_all_seq7 = protpy.sequence_order_coupling_number_all(invalid_seq7, lag=lag)
-            socn_all_seq8 = protpy.sequence_order_coupling_number_all(self.protein_seq4, lag=invalid_lag)
 
     def test_quasi_sequence_order(self):
         """ Testing quasi sequence order descriptor attributes and functionality. """
@@ -449,19 +456,22 @@ class ProtpySequenceOrderTests(unittest.TestCase):
         invalid_seq5 = "ABCDEF"
         invalid_seq6 = "OOOOO"
         invalid_lag = "BLAHBLAH"
-        with (self.assertRaises(ValueError)):
+        with self.assertRaises(ValueError):
             quasi_sequence_order_seq5 = protpy.quasi_sequence_order(invalid_seq5, lag=30, 
                 distance_matrix=self.distance_matrix_schneider_wrede)
+        with self.assertRaises(ValueError):
             quasi_sequence_order_seq6 = protpy.quasi_sequence_order(invalid_seq5, lag=10, 
                 distance_matrix=self.distance_matrix_schneider_wrede)
+        with self.assertRaises(ValueError):
             quasi_sequence_order_seq7 = protpy.quasi_sequence_order(self.protein_seq4, lag=invalid_lag, 
                 distance_matrix=self.distance_matrix_schneider_wrede)
 #6.)
         invalid_seq7 = 1234
         invalid_seq8 = False
-        with (self.assertRaises(TypeError)):
+        with self.assertRaises(TypeError):
             quasi_sequence_order_seq8 = protpy.quasi_sequence_order(invalid_seq7, lag=20, 
                 distance_matrix=self.distance_matrix_schneider_wrede)
+        with self.assertRaises(TypeError):
             quasi_sequence_order_seq9 = protpy.quasi_sequence_order(invalid_seq8, lag=20, 
                 distance_matrix=self.distance_matrix_schneider_wrede)
             
@@ -559,13 +569,16 @@ class ProtpySequenceOrderTests(unittest.TestCase):
         invalid_seq5 = "ABCDEF"
         invalid_seq6 = "OOOOO"
         invalid_lag = "BLAHBLAH"
-        with (self.assertRaises(ValueError)):
-            quasi_sequence_order_seq5 = protpy.quasi_sequence_order_all(invalid_seq5, lag=30) 
-            quasi_sequence_order_seq6 = protpy.quasi_sequence_order_all(invalid_seq6, lag=30) 
-            quasi_sequence_order_seq7 = protpy.quasi_sequence_order_all(self.protein_seq3, lag=invalid_lag) 
+        with self.assertRaises(ValueError):
+            quasi_sequence_order_seq5 = protpy.quasi_sequence_order_all(invalid_seq5, lag=30)
+        with self.assertRaises(ValueError):
+            quasi_sequence_order_seq6 = protpy.quasi_sequence_order_all(invalid_seq6, lag=30)
+        with self.assertRaises(ValueError):
+            quasi_sequence_order_seq7 = protpy.quasi_sequence_order_all(self.protein_seq3, lag=invalid_lag)
 #6.)
         invalid_seq7 = 1234
         invalid_seq8 = False
-        with (self.assertRaises(TypeError)):
-            quasi_sequence_order_seq8 = protpy.quasi_sequence_order_all(invalid_seq7, lag=30) 
-            quasi_sequence_order_seq9 = protpy.quasi_sequence_order_all(invalid_seq8, lag=30) 
+        with self.assertRaises(TypeError):
+            quasi_sequence_order_seq8 = protpy.quasi_sequence_order_all(invalid_seq7, lag=30)
+        with self.assertRaises(TypeError):
+            quasi_sequence_order_seq9 = protpy.quasi_sequence_order_all(invalid_seq8, lag=30)

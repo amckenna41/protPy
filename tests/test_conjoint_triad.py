@@ -122,12 +122,14 @@ class ProtpyConjointTriadTests(unittest.TestCase):
 #5.)
         invalid_seq5 = "ABCDEF"
         invalid_seq6 = ""
-        with (self.assertRaises(ValueError)):
+        with self.assertRaises(ValueError):
             conjoint_triad_seq5 = protpy.conjoint_triad(invalid_seq5)
+        with self.assertRaises(ValueError):
             conjoint_triad_seq6 = protpy.conjoint_triad(invalid_seq6)
 #6.)
         invalid_seq7 = 12345
         invalid_seq8 = False
-        with (self.assertRaises(TypeError)):
+        with self.assertRaises(TypeError):
             conjoint_triad_seq7 = protpy.conjoint_triad(invalid_seq7)
+        with self.assertRaises(TypeError):
             conjoint_triad_seq8 = protpy.conjoint_triad(invalid_seq8)

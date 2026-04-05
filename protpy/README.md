@@ -5,6 +5,7 @@ Modules
 * `conjoint_triad.py` - Conjoint Triad descriptor.
 * `ctd.py` - Composition, Transition and Distribution (CTD) descriptors.
 * `sequence_order.py` - Sequence Order related descriptors including Quasi Sequence Order and Sequence Order Coupling Number.
+* `_constants_.py` - Constants and global vars/functions used by multiple descriptor modules.
 
 Usage
 -----
@@ -21,7 +22,9 @@ with open("test_fasta.fasta") as pro:
     protein_seq = str(next(SeqIO.parse(pro,'fasta')).seq)
 ```
 
-### Composition Descriptors
+
+### Composition Descriptors Usage Examples
+
 Calculate Amino Acid Composition:
 ```python
 amino_acid_composition = protpy.amino_acid_composition(protein_seq)
@@ -43,25 +46,161 @@ tripeptide_composition = protpy.tripeptide_composition(protein_seq)
 # 1    0    0    2    0 ...
 ```
 
+Calculate GRAVY (Grand Average of Hydropathy):
+```python
+gravy = protpy.gravy(protein_seq)
+# GRAVY
+# -0.045
+```
+
+Calculate Aromaticity:
+```python
+aromaticity = protpy.aromaticity(protein_seq)
+# Aromaticity
+# 0.118
+```
+
+Calculate Instability Index:
+```python
+instability = protpy.instability_index(protein_seq)
+# InstabilityIndex
+# 31.836
+```
+
+Calculate Isoelectric Point:
+```python
+pi = protpy.isoelectric_point(protein_seq)
+# IsoelectricPoint
+# 5.412
+```
+
+Calculate Molecular Weight:
+```python
+mw = protpy.molecular_weight(protein_seq)
+# MolecularWeight (Da)
+# 139122.355
+```
+
+Calculate Charge Distribution:
+```python
+charge = protpy.charge_distribution(protein_seq)
+#using default parameters: ph=7.4
+
+# PositiveCharge  NegativeCharge  NetCharge
+# 99.526          114.956         -15.43
+```
+
+Calculate Hydrophobic/Polar/Charged Composition:
+```python
+hpc = protpy.hydrophobic_polar_charged_composition(protein_seq)
+# Hydrophobic  Polar   Charged
+# 44.542       32.669  18.247
+```
+
+Calculate Secondary Structure Propensity:
+```python
+ssp = protpy.secondary_structure_propensity(protein_seq)
+# Helix  Sheet  Coil
+# 0.983  1.05   1.043
+```
+
+Calculate k-mer Composition:
+```python
+kmer = protpy.kmer_composition(protein_seq)
+#using default parameters: k=2
+
+# AA     AC     AD  ...
+# 0.797  0.159  ... ...
+```
+
+Calculate Reduced Alphabet Composition:
+```python
+reduced = protpy.reduced_alphabet_composition(protein_seq)
+#using default parameters: alphabet_size=6
+
+# Group_1  Group_2  Group_3  Group_4  Group_5  Group_6
+# 25.339   34.741   9.163    9.084    10.837   10.837
+```
+
+Calculate Motif Composition:
+```python
+motif = protpy.motif_composition(protein_seq)
+# NxST_glycosylation  RGD_integrin  KDEL_retention  ...
+# 23                  0             0               ...
+```
+
+Calculate Amino Acid Pair Composition:
+```python
+aapair = protpy.amino_acid_pair_composition(protein_seq)
+# AA_Hydrophobic-Hydrophobic  AA_Hydrophobic-Polar  ...
+# 0.797                       0.159                 ...
+```
+
+Calculate Aliphatic Index:
+```python
+aliphatic = protpy.aliphatic_index(protein_seq)
+# AliphaticIndex
+# 82.725
+```
+
+Calculate Extinction Coefficient:
+```python
+extinction = protpy.extinction_coefficient(protein_seq)
+# ExtCoeff_Reduced  ExtCoeff_Oxidized
+# 140960            143335
+```
+
+Calculate Boman Index:
+```python
+boman = protpy.boman_index(protein_seq)
+# BomanIndex
+# 0.119
+```
+
+Calculate Aggregation Propensity:
+```python
+aggregation = protpy.aggregation_propensity(protein_seq)
+# AggregProneRegions  AggregProneFraction
+# 58                  11.793
+```
+
+Calculate Hydrophobic Moment:
+```python
+hm = protpy.hydrophobic_moment(protein_seq)
+#using default parameters: window=11, angle=100
+
+# HydrophobicMoment_Mean  HydrophobicMoment_Max
+# 0.272                   0.813
+```
+
+Calculate Shannon Entropy:
+```python
+se = protpy.shannon_entropy(protein_seq)
+# ShannonEntropy
+# 4.163
+```
+
 Calculate Pseudo Composition:
 ```python
-pseudo_composition = protpy.pseudo_amino_acid_composition(protein_seq) 
+pseudo_composition = protpy.pseudo_amino_acid_composition(protein_seq)
 #using default parameters: lamda=30, weight=0.05, properties=[]
 
 # PAAC_1  PAAC_2  PAAC_3  PAAC_4  PAAC_5 ...
-# 0.127        0.059        0.111        0.064        0.126 ...
+# 0.127   0.059   0.111   0.064   0.126 ...
 ```
 
 Calculate Amphiphilic Composition:
 ```python
-amphiphilic_composition = protpy.amphiphilic_amino_acid_composition(protein_seq)
+amphiphilic_composition = protpy.amphiphilic_pseudo_amino_acid_composition(protein_seq)
 #using default parameters: lamda=30, weight=0.5, properties=[hydrophobicity_, hydrophilicity_]
 
 # APAAC_1  APAAC_2  APAAC_3  APAAC_4  APAAC_5 ...
-# 6.06    2.814    5.267     3.03    5.988 ...
+# 6.624    3.076    5.757    3.032    5.988 ...
 ```
 
-### Autocorrelation Descriptors
+
+### Autocorrelation Descriptors Usage Examples
+
 Calculate MoreauBroto Autocorrelation:
 ```python
 moreaubroto_autocorrelation = protpy.moreaubroto_autocorrelation(protein_seq)
@@ -89,7 +228,9 @@ geary_autocorrelation = protpy.geary_autocorrelation(protein_seq)
 # 1.057               1.077               1.04                1.02                1.013 ...
 ```
 
-### Conjoint Triad Descriptors
+
+### Conjoint Triad Descriptors Usage Examples
+
 Calculate Conjoint Triad:
 ```python
 conjoint_triad = protpy.conjoint_triad(protein_seq)
@@ -97,7 +238,8 @@ conjoint_triad = protpy.conjoint_triad(protein_seq)
 # 7    17   11   3    6 ...
 ```
 
-### CTD Descriptors
+### CTD Descriptors Usage Examples
+
 Calculate CTD:
 ```python
 ctd = protpy.ctd(protein_seq)
@@ -107,7 +249,9 @@ ctd = protpy.ctd(protein_seq)
 # 0.279                    0.386                    0.335                    0.389 ...                   
 ```
 
-### Sequence Order Descriptors 
+
+### Sequence Order Descriptors Usage Examples
+
 Calculate Sequence Order Coupling Number (SOCN):
 ```python
 socn = protpy.sequence_order_coupling_number_(protein_seq)

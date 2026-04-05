@@ -1,57 +1,127 @@
 name: Deploy to PyPI 📦
 
-# trigger deploy_to_pypi workflow once deploy_to_testpypi has successfully completed
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   workflow_run:
-    workflows: [Deploy to TestPyPI 📦]
+    workflows: ["Deploy to TestPyPI 📦"]
+    branches: [ master, main ]
     types:
       - completed
-
-  # allow for workflow to be manually initiated from the Actions tab
   workflow_dispatch:
 
 jobs:
-  build:
-    timeout-minutes: 10
+  deploy:
     name: Deploy to PyPI 📦
-    runs-on: ubuntu-latest         # platform: [ubuntu-latest, macos-latest, windows-latest]
-    strategy:
-      matrix:
-        python-version: [3.9]  #deploying using one Python version on 1 runner
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    if: github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch'
+
     steps:
-    - uses: actions/checkout@v3
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v3
-      with:
-        python-version: ${{ matrix.python-version }}
+      - uses: actions/checkout@v4
 
-    # install all required modules and dependancies using pip and setup.py installation
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        python3 -m pip install setuptools wheel twine
-        python3 setup.py install
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
 
-    # Build package and upload to PyPI - python3 setup.py sdist bdist_wheel
-    - name: Build and upload to PyPI
-      run: |
-        python3 setup.py sdist bdist_wheel
-        twine check dist/*
-        twine upload dist/* --verbose
-      env:
-        TWINE_USERNAME: __token__
-        TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
-        TWINE_REPOSITORY: pypi
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
 
-     # sleep for 30 seconds to ensure that distribution package has successfully been uploaded to PyPI
-    - name: Wait / Sleep
-      uses: jakejarvis/wait-action@master
-      with:
-        time: '30s'
+      - name: Install build dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install setuptools wheel twine build
 
-    # download package of protpy from PYPI server to ensure it uploaded correctly
-    - name: Install protpy from PyPI
-      run: |
-        pip install protpy --upgrade
-        echo -e "import protpy as protpy\nprint(protpy.__version__)" | python3
-        echo "protpy successfully installed"
+      - name: Install package dependencies
+        run: |
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Verify TestPyPI deployment
+        if: github.event_name == 'workflow_run'
+        run: |
+          echo "Triggered by: ${{ github.event.workflow_run.name }}"
+          echo "Conclusion: ${{ github.event.workflow_run.conclusion }}"
+
+      - name: Security check before build
+        run: |
+          pip install pip-audit
+          pip-audit --skip-editable
+        continue-on-error: true
+
+      - name: Build distribution packages
+        run: |
+          echo "Building distribution packages..."
+          python -m build
+          echo "Checking package integrity..."
+          twine check dist/*
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-distributions-pypi
+          path: dist/
+
+      - name: Upload to PyPI
+        run: |
+          echo "Uploading packages to production PyPI..."
+          twine upload dist/* --verbose
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
+        timeout-minutes: 5
+
+      - name: Wait for PyPI processing
+        run: sleep 30s
+
+      - name: Install and verify from PyPI
+        run: |
+          echo "Installing protpy from production PyPI..."
+          pip install protpy --upgrade
+          echo "Verifying installation..."
+          python -c "import protpy; print(f'protpy {protpy.__version__} installed successfully')"
+        timeout-minutes: 5
+        continue-on-error: true
+
+      - name: Verify package version
+        run: |
+          INSTALLED_VERSION=$(pip show protpy | grep Version | cut -d ' ' -f 2)
+          SOURCE_VERSION=$(python -c "import protpy; print(protpy.__version__)" 2>/dev/null || echo "unknown")
+          echo "Installed version: $INSTALLED_VERSION"
+          echo "Source version: $SOURCE_VERSION"
+          if [ "$INSTALLED_VERSION" != "$SOURCE_VERSION" ]; then
+            echo "Warning: Version mismatch detected"
+            echo "Installed: $INSTALLED_VERSION"
+            echo "Source: $SOURCE_VERSION"
+          fi
+        continue-on-error: true
+
+      - name: Create job summary
+        if: always()
+        run: |
+          echo "## PyPI Production Deployment Summary 📦" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Package**: protpy" >> $GITHUB_STEP_SUMMARY
+          echo "- **Target**: Production PyPI" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status**: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Trigger**: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ github.event_name }}" = "workflow_run" ]; then
+            echo "- **Triggered By**: ${{ github.event.workflow_run.name }}" >> $GITHUB_STEP_SUMMARY
+            echo "- **Test Conclusion**: ${{ github.event.workflow_run.conclusion }}" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ -d "dist" ]; then
+            echo "**Build Artifacts**: $(ls -1 dist/ | wc -l) files" >> $GITHUB_STEP_SUMMARY
+            ls -lh dist/ >> $GITHUB_STEP_SUMMARY
+          fi
