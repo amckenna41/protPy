@@ -86,12 +86,12 @@ class ProtpyUtilsTests(unittest.TestCase):
 
     def test_registry_completeness(self):
         """All 36 descriptor names exported by protpy appear in _DESCRIPTOR_REGISTRY."""
-        missing = [n for n in protpy.all_descriptors if n not in _DESCRIPTOR_REGISTRY]
+        missing = [n for n in protpy.descriptor_names if n not in _DESCRIPTOR_REGISTRY]
         self.assertEqual(
             missing, [],
             f"Descriptors in all_descriptors but missing from registry: {missing}",
         )
-        self.assertEqual(len(_DESCRIPTOR_REGISTRY), len(protpy.all_descriptors),
+        self.assertEqual(len(_DESCRIPTOR_REGISTRY), len(protpy.descriptor_names),
             "Registry length doesn't match len(all_descriptors).")
 
     def test_registry_schema(self):
@@ -204,7 +204,7 @@ class ProtpyUtilsTests(unittest.TestCase):
         # Result is sorted
         self.assertEqual(descriptors, sorted(descriptors))
         # Every name in all_descriptors appears in the result
-        for name in protpy.all_descriptors:
+        for name in protpy.descriptor_names:
             self.assertIn(name, descriptors)
 
     def test_list_descriptors_by_category(self):

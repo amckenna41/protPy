@@ -9,15 +9,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [1.4.0] - 2026-06-14
+
 ### Added
+- `protpy/encode.py` — new module with a single public function `all_descriptors(sequence, params=None)` that computes all 30 descriptor groups and returns a single concatenated `DataFrame` of shape `1 × 10,757` with default parameters. Combined variants are used to avoid redundancy: `ctd_` with `all_ctd=True` covers all 7 CTD properties; `sequence_order_coupling_number_all` and `quasi_sequence_order_all` cover both physicochemical distance matrices.
+  - Accepts an optional `params: dict[str, dict]` argument for per-descriptor keyword overrides. Keys are descriptor function names; values are dicts of kwargs forwarded directly to that descriptor. Descriptors absent from `params` use their defaults unchanged.
+  - Validates `params` upfront: unknown or non-parameterisable descriptor names raise `ValueError` with the full list of valid keys; a non-dict `params` raises `TypeError`.
+  - Parameterisable descriptors: `charge_distribution` (`ph`), `kmer_composition` (`k`), `reduced_alphabet_composition` (`alphabet_size`), `motif_composition` (`motifs`), `aggregation_propensity` (`window`, `hydrophobicity_threshold`, `charge_threshold`), `hydrophobic_moment` (`window`, `angle`), `pseudo_amino_acid_composition` (`lamda`, `weight`, `properties`), `amphiphilic_pseudo_amino_acid_composition` (`lamda`, `weight`, `properties`), `moreaubroto_autocorrelation` (`lag`, `properties`, `normalize`), `moran_autocorrelation` (`lag`, `properties`, `normalize`), `geary_autocorrelation` (`lag`, `properties`, `normalize`), `ctd_` (`all_ctd`), `sequence_order_coupling_number_all` (`lag`), `quasi_sequence_order_all` (`lag`, `weight`).
+- `tests/test_encode.py` — new test module with four test cases: `test_all_descriptors_default` (output type, shape, column names, spot-check values for all four test sequences); `test_all_descriptors_custom_params` (shape and value changes for `k`, `ph`, `lag`, `alphabet_size`, and combined multi-param calls); `test_all_descriptors_params_validation` (unknown keys, non-parameterisable descriptors, wrong `params` types, misspelled names); `test_all_descriptors_invalid_sequence` (non-canonical amino acids, empty string, non-string types, combined with custom params).
+- `all_descriptors` callable exported from top-level `protpy` namespace.
 - `descriptors.pdf` — PDF version of `DESCRIPTORS.md`, providing a printable/downloadable reference for all 36 descriptors.
 
 ### Changed
+- `all_descriptors` name-list in `protpy/__init__.py` renamed to `descriptor_names` to free the name for the new `all_descriptors()` function. References updated in `tests/test_protpy.py` and `tests/test_utils.py`. Users who accessed `protpy.all_descriptors` as a list should switch to `protpy.descriptor_names` or `protpy.list_descriptors()`.
 - `aaindex` dependency version floor raised to `>=1.2.0` to pick up the new `aaindex2` and `aaindex3` modules, `pyproject.toml` migration, and all associated bug fixes in that release.
+- Version bumped to `1.4.0` across `pyproject.toml`, `protpy/__init__.py`, `docs/conf.py`, and `tests/test_protpy.py`.
 
 ---
 
-## [1.4.0] - 2026-04-04
+## [1.3.1] - 2026-04-04
 
 ### Added
 - `protpy/utils.py` — new utility module with three public functions:
@@ -32,7 +44,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - **Type hints** — all five descriptor modules (`autocorrelation.py`, `composition.py`, `ctd.py`, `sequence_order.py`, `_constants.py`) upgraded from bare `list`/`dict` annotations to subscripted generics (`list[str]`, `list[float]`, `dict[str, float]`, `dict[str, str]`, `tuple[float, float]`). Compatible with Python 3.9+ via `from __future__ import annotations`.
 - **F-strings** — all `.format()` calls across all modules replaced with f-string equivalents (20 call sites updated).
-- Version bumped to `1.4.0` across `pyproject.toml`, `protpy/__init__.py`, `docs/conf.py`, and `tests/test_protpy.py`.
+- Version bumped to `1.3.1` across `pyproject.toml`, `protpy/__init__.py`, `docs/conf.py`, and `tests/test_protpy.py`.
 
 ---
 
@@ -154,7 +166,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-[Unreleased]: https://github.com/amckenna41/protPy/compare/v1.3.0...HEAD
+[Unreleased]: https://github.com/amckenna41/protPy/compare/v1.4.0...HEAD
+[1.4.0]: https://github.com/amckenna41/protPy/compare/v1.3.1...v1.4.0
+[1.3.1]: https://github.com/amckenna41/protPy/compare/v1.3.0...v1.3.1
 [1.3.0]: https://github.com/amckenna41/protPy/compare/v1.2.1...v1.3.0
 [1.2.1]: https://github.com/amckenna41/protPy/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/amckenna41/protPy/compare/v1.1.0...v1.2.0

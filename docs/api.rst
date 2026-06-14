@@ -82,5 +82,13 @@ Sequence Order
    :undoc-members:
    :show-inheritance:
 
+Encode
+------
+
+.. automodule:: protpy.encode
+   :members: all_descriptors
+   :undoc-members:
+   :show-inheritance:
+
 .. note::
     A demo of the software and API is available `here <https://colab.research.google.com/drive/1btfEx23bgWdkUPiwdwlDqKkmUp1S-_7U?usp=sharing/>`_.

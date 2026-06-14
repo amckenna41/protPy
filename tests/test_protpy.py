@@ -22,8 +22,8 @@ class ProtpyTests(unittest.TestCase):
     """
     def test_protpy_metadata(self):
         """ Testing correct protpy version and metadata. """
-        self.assertEqual(protpy.__version__, "1.3.0", 
-            "protpy version is not correct, expected version 1.3.0, got version {}".format(protpy.__version__))
+        self.assertEqual(protpy.__version__, "1.4.0",
+            "protpy version is not correct, expected version 1.4.0, got version {}".format(protpy.__version__))
         self.assertEqual(protpy.__name__, "protpy", 
             "protpy software name is not correct, expected protpy, got {}.".format(protpy.__name__))
         self.assertEqual(protpy.__author__, "AJ McKenna: https://github.com/amckenna41", 
@@ -47,84 +47,84 @@ class ProtpyTests(unittest.TestCase):
 
     def test_valid_descriptors(self):
         """ Testing correct list of available descriptors is included in package attribute. """
-        self.assertEqual(len(protpy.all_descriptors), 36, 
-            "Expected there to be 36 total descriptors, got {}.".format(len(protpy.all_descriptors)))
-        self.assertIsInstance(protpy.all_descriptors, list, 
-            "all_descriptors should be of type list, got {}.".format(type(protpy.all_descriptors)))
+        self.assertEqual(len(protpy.descriptor_names), 36, 
+            "Expected there to be 36 total descriptors, got {}.".format(len(protpy.descriptor_names)))
+        self.assertIsInstance(protpy.descriptor_names, list, 
+            "all_descriptors should be of type list, got {}.".format(type(protpy.descriptor_names)))
         # composition descriptors
-        self.assertIn('amino_acid_composition', protpy.all_descriptors, 
+        self.assertIn('amino_acid_composition', protpy.descriptor_names, 
             "amino_acid_composition should be in available descriptors list.")
-        self.assertIn('dipeptide_composition', protpy.all_descriptors, 
+        self.assertIn('dipeptide_composition', protpy.descriptor_names, 
             "dipeptide_composition should be in available descriptors list.")
-        self.assertIn('tripeptide_composition', protpy.all_descriptors,
+        self.assertIn('tripeptide_composition', protpy.descriptor_names,
             "tripeptide_composition should be in available descriptors list.")
-        self.assertIn('gravy', protpy.all_descriptors,
+        self.assertIn('gravy', protpy.descriptor_names,
             "gravy should be in available descriptors list.")
-        self.assertIn('aromaticity', protpy.all_descriptors,
+        self.assertIn('aromaticity', protpy.descriptor_names,
             "aromaticity should be in available descriptors list.")
-        self.assertIn('instability_index', protpy.all_descriptors,
+        self.assertIn('instability_index', protpy.descriptor_names,
             "instability_index should be in available descriptors list.")
-        self.assertIn('isoelectric_point', protpy.all_descriptors,
+        self.assertIn('isoelectric_point', protpy.descriptor_names,
             "isoelectric_point should be in available descriptors list.")
-        self.assertIn('molecular_weight', protpy.all_descriptors,
+        self.assertIn('molecular_weight', protpy.descriptor_names,
             "molecular_weight should be in available descriptors list.")
-        self.assertIn('charge_distribution', protpy.all_descriptors,
+        self.assertIn('charge_distribution', protpy.descriptor_names,
             "charge_distribution should be in available descriptors list.")
-        self.assertIn('hydrophobic_polar_charged_composition', protpy.all_descriptors,
+        self.assertIn('hydrophobic_polar_charged_composition', protpy.descriptor_names,
             "hydrophobic_polar_charged_composition should be in available descriptors list.")
-        self.assertIn('secondary_structure_propensity', protpy.all_descriptors,
+        self.assertIn('secondary_structure_propensity', protpy.descriptor_names,
             "secondary_structure_propensity should be in available descriptors list.")
-        self.assertIn('kmer_composition', protpy.all_descriptors,
+        self.assertIn('kmer_composition', protpy.descriptor_names,
             "kmer_composition should be in available descriptors list.")
-        self.assertIn('reduced_alphabet_composition', protpy.all_descriptors,
+        self.assertIn('reduced_alphabet_composition', protpy.descriptor_names,
             "reduced_alphabet_composition should be in available descriptors list.")
-        self.assertIn('motif_composition', protpy.all_descriptors,
+        self.assertIn('motif_composition', protpy.descriptor_names,
             "motif_composition should be in available descriptors list.")
-        self.assertIn('amino_acid_pair_composition', protpy.all_descriptors,
+        self.assertIn('amino_acid_pair_composition', protpy.descriptor_names,
             "amino_acid_pair_composition should be in available descriptors list.")
-        self.assertIn('aliphatic_index', protpy.all_descriptors,
+        self.assertIn('aliphatic_index', protpy.descriptor_names,
             "aliphatic_index should be in available descriptors list.")
-        self.assertIn('extinction_coefficient', protpy.all_descriptors,
+        self.assertIn('extinction_coefficient', protpy.descriptor_names,
             "extinction_coefficient should be in available descriptors list.")
-        self.assertIn('boman_index', protpy.all_descriptors,
+        self.assertIn('boman_index', protpy.descriptor_names,
             "boman_index should be in available descriptors list.")
-        self.assertIn('aggregation_propensity', protpy.all_descriptors,
+        self.assertIn('aggregation_propensity', protpy.descriptor_names,
             "aggregation_propensity should be in available descriptors list.")
-        self.assertIn('hydrophobic_moment', protpy.all_descriptors,
+        self.assertIn('hydrophobic_moment', protpy.descriptor_names,
             "hydrophobic_moment should be in available descriptors list.")
-        self.assertIn('pseudo_amino_acid_composition', protpy.all_descriptors,
+        self.assertIn('pseudo_amino_acid_composition', protpy.descriptor_names,
             "pseudo_amino_acid_composition should be in available descriptors list.")
-        self.assertIn('amphiphilic_pseudo_amino_acid_composition', protpy.all_descriptors, 
+        self.assertIn('amphiphilic_pseudo_amino_acid_composition', protpy.descriptor_names, 
             "amphiphilic_pseudo_amino_acid_composition should be in available descriptors list.")
         # autocorrelation descriptors
-        self.assertIn('moreaubroto_autocorrelation', protpy.all_descriptors,
+        self.assertIn('moreaubroto_autocorrelation', protpy.descriptor_names,
             "moreaubroto_autocorrelation should be in available descriptors list.")
-        self.assertIn('moran_autocorrelation', protpy.all_descriptors, 
+        self.assertIn('moran_autocorrelation', protpy.descriptor_names, 
             "moran_autocorrelation should be in available descriptors list.")
-        self.assertIn('geary_autocorrelation', protpy.all_descriptors,
+        self.assertIn('geary_autocorrelation', protpy.descriptor_names,
             "geary_autocorrelation should be in available descriptors list.")
         # conjoint triad descriptor
-        self.assertIn('conjoint_triad', protpy.all_descriptors,
+        self.assertIn('conjoint_triad', protpy.descriptor_names,
             "conjoint_triad should be in available descriptors list.")
         # CTD descriptors
-        self.assertIn('ctd_composition', protpy.all_descriptors,
+        self.assertIn('ctd_composition', protpy.descriptor_names,
             "ctd_composition should be in available descriptors list.")
-        self.assertIn('ctd_transition', protpy.all_descriptors,
+        self.assertIn('ctd_transition', protpy.descriptor_names,
             "ctd_transition should be in available descriptors list.")
-        self.assertIn('ctd_distribution', protpy.all_descriptors,
+        self.assertIn('ctd_distribution', protpy.descriptor_names,
             "ctd_distribution should be in available descriptors list.")
-        self.assertIn('ctd_', protpy.all_descriptors,
+        self.assertIn('ctd_', protpy.descriptor_names,
             "ctd_ should be in available descriptors list.")
         # sequence order descriptors
-        self.assertIn('sequence_order_coupling_number_', protpy.all_descriptors,
+        self.assertIn('sequence_order_coupling_number_', protpy.descriptor_names,
             "sequence_order_coupling_number_ should be in available descriptors list.")
-        self.assertIn('sequence_order_coupling_number', protpy.all_descriptors,
+        self.assertIn('sequence_order_coupling_number', protpy.descriptor_names,
             "sequence_order_coupling_number should be in available descriptors list.")
-        self.assertIn('sequence_order_coupling_number_all', protpy.all_descriptors,
+        self.assertIn('sequence_order_coupling_number_all', protpy.descriptor_names,
             "sequence_order_coupling_number_all should be in available descriptors list.")
-        self.assertIn('quasi_sequence_order', protpy.all_descriptors,
+        self.assertIn('quasi_sequence_order', protpy.descriptor_names,
             "quasi_sequence_order should be in available descriptors list.")
-        self.assertIn('quasi_sequence_order_all', protpy.all_descriptors,
+        self.assertIn('quasi_sequence_order_all', protpy.descriptor_names,
             "quasi_sequence_order_all should be in available descriptors list.")
-        self.assertIn('shannon_entropy', protpy.all_descriptors,
+        self.assertIn('shannon_entropy', protpy.descriptor_names,
             "shannon_entropy should be in available descriptors list.")

@@ -71,7 +71,7 @@ Sequence Order Descriptors (5)
 .. note::
 
    A demo of the software is available `on Colab <https://colab.research.google.com/drive/12E3ayovpZOf6Gv-8ILwkN1zReKslEksB?usp=sharing>`_
-   and a Medium article covering the background of ``protpy`` is available `on Medium <https://medium.com/@ajmckenna69/protpy-05f02f821baa>`_.
+   and a Medium article covering the background of ``protpy`` is available on `Medium <https://medium.com/@ajmckenna69/protpy-05f02f821baa>`_.
 
 License
 =======
@@ -84,5 +84,4 @@ License
    usage
    api
    descriptors
-   changelog
    contributing

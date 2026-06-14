@@ -338,5 +338,75 @@ Calculate **Quasi Sequence Order (QSO)**:
    # QSO_Grant1  QSO_Grant2  QSO_Grant3 ...
    # 0.123287    0.079967    0.04332 ...
 
+Encoding All Descriptors at Once
+---------------------------------
+
+Calculate **all descriptors** in a single call using ``all_descriptors()``. This returns a
+single ``DataFrame`` of shape ``1 × 10,757`` (with default parameters), concatenating every
+descriptor group in order. Combined variants are used to avoid redundancy: ``ctd_`` covers
+all 7 CTD properties; ``sequence_order_coupling_number_all`` and ``quasi_sequence_order_all``
+cover both physicochemical distance matrices.
+
+.. code-block:: python
+
+   # default parameters — 10,757 features
+   df = protpy.all_descriptors(protein_seq)
+   # A      C      D      ...  QSO_Grant49  QSO_Grant50
+   # 6.693  3.108  5.817  ...  0.034891     0.034943
+
+Custom per-descriptor parameters can be passed via the ``params`` argument — a dict keyed by
+descriptor name, whose values are dicts of keyword arguments forwarded to that descriptor.
+Descriptors absent from ``params`` use their defaults.
+
+.. code-block:: python
+
+   df = protpy.all_descriptors(protein_seq, params={
+       'charge_distribution':            {'ph': 5.5},
+       'kmer_composition':               {'k': 3},
+       'pseudo_amino_acid_composition':  {'lamda': 10, 'weight': 0.1},
+       'moreaubroto_autocorrelation':    {'lag': 15, 'normalize': False},
+       'quasi_sequence_order_all':       {'lag': 20, 'weight': 0.2},
+   })
+
+The descriptors that accept custom parameters and their available keyword arguments are:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 40 60
+
+   * - Descriptor
+     - Parameters
+   * - ``charge_distribution``
+     - ``ph`` (float, default 7.4)
+   * - ``kmer_composition``
+     - ``k`` (int, default 2)
+   * - ``reduced_alphabet_composition``
+     - ``alphabet_size`` (int, default 6; options: 2, 3, 4, 6)
+   * - ``motif_composition``
+     - ``motifs`` (dict[str, str] | None, default None)
+   * - ``aggregation_propensity``
+     - ``window`` (int, default 5), ``hydrophobicity_threshold`` (float, default 2.0), ``charge_threshold`` (int, default 1)
+   * - ``hydrophobic_moment``
+     - ``window`` (int, default 11), ``angle`` (float, default 100)
+   * - ``pseudo_amino_acid_composition``
+     - ``lamda`` (int, default 30), ``weight`` (float, default 0.05), ``properties`` (list[str] | None)
+   * - ``amphiphilic_pseudo_amino_acid_composition``
+     - ``lamda`` (int, default 30), ``weight`` (float, default 0.5), ``properties`` (list[dict] | None)
+   * - ``moreaubroto_autocorrelation``
+     - ``lag`` (int, default 30), ``properties`` (list[str] | None), ``normalize`` (bool, default True)
+   * - ``moran_autocorrelation``
+     - ``lag`` (int, default 30), ``properties`` (list[str] | None), ``normalize`` (bool, default True)
+   * - ``geary_autocorrelation``
+     - ``lag`` (int, default 30), ``properties`` (list[str] | None), ``normalize`` (bool, default True)
+   * - ``ctd_``
+     - ``all_ctd`` (bool, default True)
+   * - ``sequence_order_coupling_number_all``
+     - ``lag`` (int, default 30)
+   * - ``quasi_sequence_order_all``
+     - ``lag`` (int, default 30), ``weight`` (float, default 0.1)
+
+Passing an unrecognised descriptor name or a descriptor that takes no extra parameters will
+raise a ``ValueError``. Passing a non-dict value for ``params`` will raise a ``TypeError``.
+
 .. note::
    A demo of the software is available `here <https://colab.research.google.com/drive/12E3ayovpZOf6Gv-8ILwkN1zReKslEksB?usp=sharing>`_.

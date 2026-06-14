@@ -4,6 +4,7 @@ from .conjoint_triad import *
 from .ctd import *
 from .sequence_order import *
 from .utils import get_descriptor_info, list_descriptors, print_descriptor_info
+from .encode import all_descriptors
 
 #canonical amino acids available in the package
 amino_acids = ["A", "C", "D", "E", "F", "G", "H", "I", "K", "L", "M", "N", "P",
@@ -11,7 +12,7 @@ amino_acids = ["A", "C", "D", "E", "F", "G", "H", "I", "K", "L", "M", "N", "P",
 
 #protPy package metadata
 __name__ = 'protpy'
-__version__ = "1.3.0"
+__version__ = "1.4.0"
 __description__ = "Python package for generating various biochemical, physicochemical and structural descriptors/features of protein sequences."
 __author__ = 'AJ McKenna: https://github.com/amckenna41'
 __authorEmail__ = 'amckenna41@qub.ac.uk'
@@ -25,8 +26,8 @@ __keywords__ = ["bioinformatics", "protein engineering", "python", "pypi", "mach
                 "structural descriptors", "pySAR"]
 __test_suite__ = "tests"
 
-#list of all available descriptors in protPy
-all_descriptors = ["amino_acid_composition", "dipeptide_composition", "tripeptide_composition",
+#list of all available descriptor names in protPy
+descriptor_names = ["amino_acid_composition", "dipeptide_composition", "tripeptide_composition",
     "gravy", "aromaticity", "instability_index", "isoelectric_point", "molecular_weight",
     "charge_distribution", "hydrophobic_polar_charged_composition", "secondary_structure_propensity",
     "kmer_composition", "reduced_alphabet_composition", "motif_composition",
