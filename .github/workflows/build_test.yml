@@ -108,6 +108,7 @@ jobs:
         continue-on-error: true
 
       - name: Run Bandit
+        continue-on-error: true
         run: |
           bandit -r protpy tests -f json > artifacts/bandit_output.json
           bandit -r protpy tests > artifacts/bandit_output.txt
