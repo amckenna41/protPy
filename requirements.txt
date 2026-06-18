@@ -1,4 +1,5 @@
-aaindex>=1.2.0
+aaindex>=1.3.0
 numpy
 pandas
+tqdm
 varname

@@ -700,6 +700,142 @@ result = protpy.quasi_sequence_order_all(protein_seq, lag=15, weight=0.05)
 
 ---
 
+---
+
+## Utility Functions
+
+### `all_descriptors`
+
+Compute all available descriptors for a single protein sequence and return them concatenated into a single DataFrame.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `sequence` | str | — | Protein sequence |
+| `params` | dict or None | `None` | Per-descriptor keyword arguments keyed by descriptor name |
+| `show_progress` | bool | `False` | Display a `tqdm` progress bar naming each descriptor as it is computed |
+| `output_file` | str or None | `"descriptors.csv"` | Path to save results; `None` disables file output |
+| `save_each_sequence` | bool | `True` | Append this row to the output CSV immediately after computation; useful when calling in a loop |
+
+```python
+import protpy
+
+seq = "MKTAYIAKQRQISFVKSHFSRQLEERLGLIEVQAPILSRVGDISIQEFKD"
+
+# Basic usage
+df = protpy.all_descriptors(seq)
+# Shape: 1 x 10757 (all descriptor features concatenated)
+
+# With progress bar
+df = protpy.all_descriptors(seq, show_progress=True)
+# [Composition]    Amino acid composition  10%|███     |  3/30 [00:00<00:02]
+# ...
+
+# Save to file
+df = protpy.all_descriptors(seq, output_file="out.csv")
+
+# No file output
+df = protpy.all_descriptors(seq, output_file=None)
+```
+
+---
+
+### `encode_dataset`
+
+Compute all available descriptors for every sequence in a dataset (list or DataFrame) and return a DataFrame whose first column is a unique sequence identifier.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `sequences` | list[str] or pd.DataFrame | — | Sequences as a plain list or a two-column DataFrame from `read_sequences_from_file(..., id_col=...)` |
+| `seq_col` | str | `"sequence"` | Column name containing sequences when input is a DataFrame |
+| `params` | dict or None | `None` | Per-descriptor keyword arguments forwarded to each `all_descriptors` call |
+| `show_progress` | bool | `False` | Show a per-descriptor `tqdm` bar for each individual sequence |
+| `output_file` | str or None | `"descriptors.csv"` | CSV path; each completed row is flushed immediately so interrupted runs preserve progress |
+| `save_each_sequence` | bool | `True` | Flush the CSV after each sequence; set `False` to skip all file output within this call |
+| `strip_gaps` | bool | `False` | Remove gap characters (`-`) before encoding; useful for MSA-derived sequences |
+
+```python
+import protpy
+
+# Plain list — identifiers auto-generated as seq1, seq2, …
+seqs = [
+    "MKTAYIAKQRQISFVKSHFSRQLEERLGLIEVQAPILSRVGD",
+    "ACDEFGHIKLMNPQRSTVWYACDEFGHIKLMNPQRSTVWY",
+]
+df = protpy.encode_dataset(seqs)
+# df.columns[0] == "sequence_id"
+# df["sequence_id"].tolist() == ["seq1", "seq2"]
+# Shape: 2 x (1 + 10757)
+
+# Named identifiers from a multi-column file
+data = protpy.read_sequences_from_file(
+    "thermostability.txt", seq_col="sequence", id_col="name"
+)
+df = protpy.encode_dataset(data, seq_col="sequence")
+# df.columns[0] == "name"
+# Shape: n_sequences x (1 + 10757)
+
+# MSA sequences with gap characters
+df = protpy.encode_dataset(seqs, strip_gaps=True)
+```
+
+---
+
+### `read_sequences_from_file`
+
+Parse protein sequences from a FASTA, TXT, CSV, or TSV file. The format is inferred from the file extension.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `filepath` | str or os.PathLike | — | Path to the input file |
+| `seq_col` | str, int, or None | `None` | Column containing sequences (name or zero-based index); ignored for plain FASTA and plain TXT |
+| `id_col` | str, int, or None | `None` | Identifier column; when provided returns a DataFrame instead of a list |
+| `has_header` | bool | `True` | Whether the first row of a delimited file is a header; columns must be selected by integer index when `False` |
+
+**Supported formats:**
+
+| Extension | Behaviour |
+|-----------|-----------|
+| `.fasta` / `.fa` | Standard FASTA; multi-line sequences joined; returns `list[str]` |
+| `.txt` (no `seq_col`) | One raw sequence per non-blank line; returns `list[str]` |
+| `.txt` (with `seq_col`) | Treated as delimited; separator auto-detected from first line |
+| `.csv` | Comma-separated values |
+| `.tsv` | Tab-separated values |
+
+When `id_col` is provided the function returns a `pd.DataFrame` with only the identifier and sequence columns; all other columns are dropped and rows with blank sequences are excluded. When `id_col` is omitted the function returns a plain `list[str]`.
+
+**Raises:** `FileNotFoundError` if the file does not exist; `ValueError` for unsupported extensions or missing columns; `TypeError` if `seq_col` or `id_col` is not a str, int, or None.
+
+```python
+import protpy
+
+# FASTA
+seqs = protpy.read_sequences_from_file("proteins.fasta")
+# ['MKTAYIAKQRQISFVKSHFS...', 'ACDEFGHIKLM...', ...]
+
+# Plain TXT (one sequence per line)
+seqs = protpy.read_sequences_from_file("sequences.txt")
+
+# CSV / TSV — by column name
+seqs = protpy.read_sequences_from_file("data.csv", seq_col="sequence")
+
+# CSV / TSV — by column index
+seqs = protpy.read_sequences_from_file("data.tsv", seq_col=1)
+
+# Multi-column file — keep id + sequence, drop everything else
+df = protpy.read_sequences_from_file(
+    "thermostability.txt", seq_col="sequence", id_col="name"
+)
+# Returns DataFrame:
+#        name                           sequence
+# 0  00000000  MTIKEMPQPKTFGELKNLPLLNTD...
+# 1  11111111  KETSPIPQPKTFGPLGNLPLIDKD...
+
+# Headerless file — select by index
+seqs = protpy.read_sequences_from_file("seqs.csv", has_header=False, seq_col=0)
+```
+
+---
+
 ## Descriptor Summary
 
 Speed ratings reflect typical computation time for a single average-length protein (~500 residues) on a standard CPU:

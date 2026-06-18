@@ -11,6 +11,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.4.1] - 2026-06-18
+
+### Added
+- `encode_dataset(sequences, seq_col, params, show_progress, output_file, save_each_sequence, strip_gaps)` — new public function in `protpy/encode.py` that computes all descriptors for every sequence in a dataset (plain `list[str]` or `pd.DataFrame`) and returns a single DataFrame whose first column is a unique sequence identifier. Auto-generates `seq1, seq2, …` identifiers for list input; uses the first column of the DataFrame as the identifier when a DataFrame is supplied. Each completed row is flushed to the output CSV immediately so that interrupted runs preserve progress. Raises `ValueError` for gap characters unless `strip_gaps=True`.
+- `read_sequences_from_file(filepath, seq_col, id_col, has_header)` — new public function in `protpy/encode.py` for parsing protein sequences from FASTA (`.fasta` / `.fa`), plain TXT, CSV, and TSV files. Format is inferred from the file extension. Returns `list[str]` when `id_col` is omitted; returns a two-column `pd.DataFrame` (identifier + sequence) when `id_col` is provided. Handles multi-line FASTA records, blank-line skipping, uppercase normalisation, headerless files, column selection by name or zero-based integer index, and auto-detection of the delimiter (`,` vs `\t`) for TXT files with `seq_col`.
+- `all_descriptors` new parameters:
+  - `show_progress: bool` (default `False`) — displays a live `tqdm` progress bar naming the descriptor currently being computed and tracking progress across all steps.
+  - `output_file: str | None` (default `"descriptors.csv"`) — path to a CSV file where results are written; pass `None` to disable all file output.
+  - `save_each_sequence: bool` (default `True`) — flushes the output CSV after each sequence completes, preserving progress across interrupted multi-sequence loops.
+  - `_show_descriptor_list: bool` (internal, default `True`) — suppresses the descriptor name print when called from `encode_dataset` for sequences after the first.
+- `encode_dataset` and `read_sequences_from_file` exported from the top-level `protpy` namespace.
+- `tqdm>=4.0.0` added as a runtime dependency in `pyproject.toml` and `requirements.txt`.
+- `tests/test_encode.py` — extended with three new test classes:
+  - `ProtpyEncodeTests` (existing): two new test cases added — `test_all_descriptors_show_progress` (verifies `tqdm` is instantiated with correct arguments and all bar lifecycle methods are called) and `test_all_descriptors_no_progress_by_default` (verifies `tqdm` is never called when `show_progress` defaults to `False` or is set explicitly).
+  - `ProtpyReadSequencesTests` (new) — 18 test cases covering all supported file formats (FASTA single/multi-record, `.fa` extension, plain TXT, multi-column TXT, CSV by name and index, TSV, headerless files), uppercase normalisation, blank-entry exclusion, `FileNotFoundError`, unsupported extension, bad column name/index/type errors.
+  - `ProtpyEncodeDatasetTests` (new) — 11 test cases covering list and DataFrame inputs, auto-generated vs named identifiers, first-column guarantee, empty inputs, gap detection and stripping, bad `seq_col`, bad input type, and CSV output file correctness.
+- `DESCRIPTORS.md` and `descriptors.pdf` — new "Utility Functions" section documenting `all_descriptors` (updated parameters), `encode_dataset`, and `read_sequences_from_file` with parameter tables and code examples.
+
+### Changed
+- Version bumped to `1.4.1` across `pyproject.toml`, `protpy/__init__.py`, `docs/conf.py`, and `tests/test_protpy.py`.
+
+---
+
 ## [1.4.0] - 2026-06-14
 
 ### Added
@@ -166,7 +189,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-[Unreleased]: https://github.com/amckenna41/protPy/compare/v1.4.0...HEAD
+[Unreleased]: https://github.com/amckenna41/protPy/compare/v1.4.1...HEAD
+[1.4.1]: https://github.com/amckenna41/protPy/compare/v1.4.0...v1.4.1
 [1.4.0]: https://github.com/amckenna41/protPy/compare/v1.3.1...v1.4.0
 [1.3.1]: https://github.com/amckenna41/protPy/compare/v1.3.0...v1.3.1
 [1.3.0]: https://github.com/amckenna41/protPy/compare/v1.2.1...v1.3.0

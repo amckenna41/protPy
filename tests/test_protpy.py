@@ -22,8 +22,8 @@ class ProtpyTests(unittest.TestCase):
     """
     def test_protpy_metadata(self):
         """ Testing correct protpy version and metadata. """
-        self.assertEqual(protpy.__version__, "1.4.0",
-            "protpy version is not correct, expected version 1.4.0, got version {}".format(protpy.__version__))
+        self.assertEqual(protpy.__version__, "1.4.1",
+            "protpy version is not correct, expected version 1.4.1, got version {}".format(protpy.__version__))
         self.assertEqual(protpy.__name__, "protpy", 
             "protpy software name is not correct, expected protpy, got {}.".format(protpy.__name__))
         self.assertEqual(protpy.__author__, "AJ McKenna: https://github.com/amckenna41", 

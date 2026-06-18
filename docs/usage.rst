@@ -27,15 +27,87 @@ Importing protpy
 
    import protpy as protpy
 
-Loading a protein sequence from a FASTA file
---------------------------------------------
+Loading Sequences from Files
+----------------------------
+
+Use ``read_sequences_from_file()`` to parse sequences from a file. The format
+is detected automatically from the extension (``.fasta`` / ``.fa``, ``.txt``,
+``.csv``, ``.tsv``).
+
+**FASTA** — returns every record as a ``list[str]``:
 
 .. code-block:: python
 
-   from Bio import SeqIO
+   seqs = protpy.read_sequences_from_file("proteins.fasta")
+   # ['MKTAYIAKQRQISFVKSHFS...', 'ACDEFGHIKLM...', ...]
 
-   with open("protein.fasta") as f:
-       protein_seq = str(next(SeqIO.parse(f, "fasta")).seq)
+**Plain TXT** — one sequence per non-blank line:
+
+.. code-block:: python
+
+   seqs = protpy.read_sequences_from_file("sequences.txt")
+
+**CSV / TSV** — specify which column holds the sequences:
+
+.. code-block:: python
+
+   # select by column name
+   seqs = protpy.read_sequences_from_file("data.csv", seq_col="sequence")
+
+   # select by zero-based column index
+   seqs = protpy.read_sequences_from_file("data.tsv", seq_col=1)
+
+**Multi-column files (e.g. thermostability datasets)** — pass ``id_col`` to
+retain the identifier column and drop everything else. The function returns a
+``pd.DataFrame`` with exactly two columns instead of a plain list:
+
+.. code-block:: python
+
+   # thermostability.txt has columns: name, sequence, T50, is_train, m
+   df = protpy.read_sequences_from_file(
+       "thermostability.txt",
+       seq_col="sequence",
+       id_col="name",
+   )
+   # returns a DataFrame with only ['name', 'sequence'] — all other columns dropped
+   #        name                           sequence
+   # 0  00000000  MTIKEMPQPKTFGELKNLPLLNTD...
+   # 1  11111111  KETSPIPQPKTFGPLGNLPLIDKD...
+   # ...
+
+For headerless files set ``has_header=False``; columns can then only be
+selected by integer index:
+
+.. code-block:: python
+
+   seqs = protpy.read_sequences_from_file("seqs.csv", has_header=False)
+
+All returned sequences are uppercased and blank entries are excluded.
+
+**Encoding all sequences from a file** — use ``encode_dataset()`` to compute
+all descriptors for every sequence in one call.  The first column of the
+result is always a unique sequence identifier:
+
+.. code-block:: python
+
+   # Named identifiers from a multi-column file (e.g. thermostability.txt)
+   dataset = protpy.read_sequences_from_file(
+       "thermostability.txt", seq_col="sequence", id_col="name"
+   )
+   result = protpy.encode_dataset(dataset, seq_col="sequence")
+   # result is (n_sequences × 10 758):
+   #        name     A      C      D  ...  QSO_Grant50
+   # 0  00000000  6.693  3.108  5.817 ...  0.034943
+   # 1  11111111  8.057  ...
+
+   # Plain list — identifiers are auto-generated as seq1, seq2, …
+   seqs = ["MKTAYIAKQRQISFVKSHFSRQLEERLGLIEVQAPILSRVGD", "ACDEFGHIKLM..."]
+   result = protpy.encode_dataset(seqs)
+   # result first column is "sequence_id" with values ["seq1", "seq2", …]
+
+Each completed row (with its identifier) is flushed to the output CSV
+immediately, so progress is preserved if the process is interrupted.  Pass
+``output_file=None`` to suppress file output.
 
 Composition Descriptors
 -----------------------
@@ -353,6 +425,19 @@ cover both physicochemical distance matrices.
    df = protpy.all_descriptors(protein_seq)
    # A      C      D      ...  QSO_Grant49  QSO_Grant50
    # 6.693  3.108  5.817  ...  0.034891     0.034943
+
+**Progress bar** — pass ``show_progress=True`` to display a live ``tqdm`` progress bar
+that names the descriptor currently being computed and tracks overall progress across
+all 30 descriptor steps. The bar is suppressed automatically in non-interactive
+environments (e.g. CI pipelines):
+
+.. code-block:: python
+
+   df = protpy.all_descriptors(protein_seq, show_progress=True)
+   # [Composition]    Amino acid composition  10%|███               |  3/30 [00:00<00:02]
+   # [Composition]    Dipeptide composition   17%|█████             |  5/30 [00:00<00:01]
+   # ...
+   # [Done]           All 30 descriptors computed  100%|████████████| 30/30 [00:02<00:00]
 
 Custom per-descriptor parameters can be passed via the ``params`` argument — a dict keyed by
 descriptor name, whose values are dicts of keyword arguments forwarded to that descriptor.
