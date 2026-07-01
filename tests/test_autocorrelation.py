@@ -148,7 +148,7 @@ class ProtpyAutocorrelationTests(unittest.TestCase):
             properties=["CIDH920105"], normalize=False)
         moreaubroto_nf_expected = pd.DataFrame(columns=["MBAuto_CIDH920105_1", "MBAuto_CIDH920105_2",
             "MBAuto_CIDH920105_3", "MBAuto_CIDH920105_4", "MBAuto_CIDH920105_5"])
-        moreaubroto_nf_expected.loc[0] = [-0.054, -0.107, -0.161, -0.215, -0.269]
+        moreaubroto_nf_expected.loc[0] = [-0.054, -0.074, -0.038, -0.018, -0.05]
         self.assertIsInstance(moreaubroto_nf_seq1, pd.DataFrame,
             'Expected output to be of type DataFrame, got {}.'.format(type(moreaubroto_nf_seq1)))
         self.assertEqual(moreaubroto_nf_seq1.shape, (1, lag),

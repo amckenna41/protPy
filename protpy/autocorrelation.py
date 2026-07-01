@@ -131,10 +131,10 @@ def moreaubroto_autocorrelation(sequence: str, lag: int = 30,
 
     #iterate through list of properties, calculating autocorrelation values for the sequence, append to results dict
     for key in aai_properties:
-        temp = 0
         for i in range(1, lag+1):
+            temp = 0  # reset per lag
             for j in range(len(sequence)-i):
-                temp = temp + aai_properties[key][sequence[j]] * aai_properties[key][sequence[j+1]]
+                temp = temp + aai_properties[key][sequence[j]] * aai_properties[key][sequence[j+i]]
             if (len(sequence) - i == 0):
                 moreaubroto_autocorrelation["MBAuto_" + key + "_" + str(i)] = round(
                     temp / (len(sequence)), 3)
@@ -362,7 +362,7 @@ def geary_autocorrelation(sequence: str, lag: int = 30,
 
 def _std(array: list[float], ddof: int = 1) -> float:
     """
-    Calculate the standard deviation of the array data, with associated means Delta Degrees 
+    Calculate the standard deviation of the array data, with associated means Delta Degrees
     of Freedom (ddof).
 
     Parameters
@@ -377,5 +377,5 @@ def _std(array: list[float], ddof: int = 1) -> float:
     :result: np.array
         input array after standard deviation transformation.
     """
-    return math.sqrt(sum([math.pow(i - sum(array) / len(array), 2) for i in array]) 
-        / (len(array) - ddof))
+    mean = sum(array) / len(array)
+    return math.sqrt(sum(math.pow(v - mean, 2) for v in array) / (len(array) - ddof))

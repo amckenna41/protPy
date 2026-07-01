@@ -205,9 +205,10 @@ def tripeptide_composition(sequence: str) -> pd.DataFrame:
     =======
     :tripeptide_composition_df: pd.DataFrame
         pandas DataFrame of tripeptide composition for protein sequence. Dataframe will
-        be of the shape 1 x 8000, where 8000 is the number of features calculated 
-        from the descriptor (20^3 for the 20 canonical amino acids) and 1 is the 
-        input sequence.
+        be of the shape 1 x 8000, where 8000 is the number of features calculated
+        from the descriptor (20^3 for the 20 canonical amino acids) and 1 is the
+        input sequence. Values are percentages (0–100), consistent with
+        dipeptide_composition.
     """
     #validate input protein sequence
     sequence = _validate_sequence(sequence)
@@ -221,9 +222,10 @@ def tripeptide_composition(sequence: str) -> pd.DataFrame:
             for k in amino_acids:
                 tripeptides.append(i + j + k)
 
-    #get frequency of each tripeptide in the sequence
+    #get fractional frequency of each tripeptide (percentage), consistent with dipeptide_composition
+    total_tripeptides = len(sequence) - 2
     for i in tripeptides:
-        tripeptide_composition[i] = len(re.findall(i, sequence))
+        tripeptide_composition[i] = round(sequence.count(i) / total_tripeptides * 100, 3) if total_tripeptides > 0 else 0.0
 
     #transform values and columns to DataFrame
     tripeptide_composition_df = pd.DataFrame([list(tripeptide_composition.values())], 
@@ -1185,30 +1187,23 @@ def pseudo_amino_acid_composition(sequence: str, lamda: int = 30, weight: float 
                 raise ValueError(f"Accession number not found in aaindex1: {prop}.")
             property_values.append(aaindex1[prop].values)
 
-    right_part = 0.0
     psuedo_aac = {}
-    rightpart = []
-
-    #calculate correlation factor for protein sequence using propeties
-    for i in range(lamda):
-        right_part = right_part + sequence_order_correlation_factor(sequence, i+1, property_values)
 
     #calculate amino acid composition
     aa_comp = amino_acid_composition(sequence)
-    
-    #compute first 20 pseudo amino acid descriptor components based on property_values,
-    #append descriptor values to dict
-    temp = 1 + weight + right_part
+
+    #compute correlation factors once; reuse for both the first-20 and last-lamda features
+    rightpart = [sequence_order_correlation_factor(sequence, i + 1, property_values)
+                 for i in range(lamda)]
+
+    #shared normalization denominator: 1 + w * Σθ_k  (Chou 2001)
+    temp = 1 + weight * sum(rightpart)
+
+    #compute first 20 pseudo amino acid descriptor components (weighted AAComp)
     for index, i in enumerate(amino_acids):
         psuedo_aac["PAAC_" + str(index + 1)] = round(aa_comp[i].values[0] / temp, 3)
 
-    #calculate correlation factor for protein sequence using propeties
-    for i in range(lamda):
-        rightpart.append(sequence_order_correlation_factor(sequence, i + 1, property_values))
-
-    #compute last 20+lambda pseudo amino acid descriptor components based on property_values,
-    #append descriptor values to dict
-    temp = 1 + weight * sum(rightpart)
+    #compute last lamda pseudo amino acid descriptor components (sequence-order correlations)
     for index in range(20, 20 + lamda):
         psuedo_aac["PAAC_" + str(index + 1)] = round(
             weight * rightpart[index - 20] / temp * 100, 3)
@@ -1293,25 +1288,21 @@ def normalize_property(properties: dict[str, float]) -> dict[str, float]:
     """
     Normalize physicochemical/structural property values using
     their mean and standard deviation.
-    
+
     Parameters
     ==========
     :properties: dict
-        dictionary of amino acid values for a physicochemical property. 
-        
+        dictionary of amino acid values for a physicochemical property.
+
     Returns
     =======
     :normalized_vals: dict
         dict of normalized property values.
     """
-    normalized_vals = {}
-
-    #iterate over all property values, calculate their mean and standard dev
-    for i, j in properties.items():
-        mean = sum(properties.values()) / len(properties.values())
-        normalized_vals[i] = (j - mean) / _std(properties.values(), mean, ddof=0)
-
-    return normalized_vals
+    vals = list(properties.values())
+    mean = sum(vals) / len(vals)
+    std = _std(vals, mean, ddof=0)
+    return {aa: (v - mean) / std for aa, v in properties.items()}
 
 def _std(prop: list[float], mean: float, ddof: int = 1) -> float:
     """
@@ -1339,7 +1330,7 @@ def _std(prop: list[float], mean: float, ddof: int = 1) -> float:
 ######################## Amphiphilic Pseudo Amino Acid Composition ########################
 
 def amphiphilic_pseudo_amino_acid_composition(sequence: str, lamda: int = 30, weight: float = 0.5,
-    properties: list[dict[str, float]] = [hydrophobicity_, hydrophilicity_]) -> pd.DataFrame:
+    properties: list[dict[str, float]] | None = None) -> pd.DataFrame:
     """
     Amphiphillic pseudo amino acid composition (APAAComp) has the same form as the amino
     acid composition, but contains much more information that is related to the 
@@ -1358,59 +1349,59 @@ def amphiphilic_pseudo_amino_acid_composition(sequence: str, lamda: int = 30, we
         rank of correlation. Number of calculable descriptors depends on lambda value.
     :weight: float
         weighting factor.
-    :properties: list (default=[hydrophobicity, hydrophilicity])
-        list of dicts of physicochemical/structural property values for amino acids.
+    :properties: list[dict] | None (default=None → [hydrophobicity_, hydrophilicity_])
+        list of property dicts mapping each amino acid to a float value.
+        When None the default hydrophobicity and hydrophilicity scales are used.
 
     Returns
-    =======    
+    =======
     :amp_pseudo_amino_acid_composition_df: pd.Dataframe
-        output dataframe of calculated amphiphilic pseudo amino acid composition 
-        descriptors for input sequence. Dataframe will be of the shape 1 x N, where 
-        N is the number of features calculated from the descriptor (20 + 2*lambda) 
-        and 1 is the input sequence. By default, the shape will be 1 x 80 
-        (using default lamda=30).
+        output dataframe of calculated amphiphilic pseudo amino acid composition
+        descriptors for input sequence. Dataframe will be of the shape 1 x N, where
+        N is 20 + n_props * lamda (n_props = number of properties supplied).
+        With the default two properties and lamda=30 the shape is 1 x 80.
     """
+    if properties is None:
+        properties = [hydrophobicity_, hydrophilicity_]
+
     #validate input protein sequence
     sequence = _validate_sequence(sequence)
 
     #set lamda to its default value of 30 if <0, or > sequence len or not an int
     if ((lamda < 0) or (lamda > len(sequence)) or not isinstance(lamda, int)):
-        lamda = 30  
+        lamda = 30
 
     #validate weight, set default weight of 0.5 if invalid value input
     if ((weight < 0) or not (isinstance(weight, (float, int)))):
         weight = 0.5
 
-    #cast properties to list 
-    if not (isinstance(properties, list)):
+    #cast properties to list
+    if not isinstance(properties, list):
         properties = [properties]
 
+    n_props = len(properties)
     amp_pseudo_amino_acid_composition = {}
 
-    #calculate correlation factor in protein sequence
-    rightpart = 0.0
+    #compute all per-lag correlation factors in a single pass:
+    #rightpart = [p0_lag1, p1_lag1, p0_lag2, p1_lag2, ..., p{n-1}_lag{lamda}]
+    rightpart: list[float] = []
     for i in range(lamda):
-        rightpart = rightpart + sum(
-            amphiphilic_sequence_order_correlation_factor(sequence, k=i + 1))
-    
+        rightpart.extend(
+            amphiphilic_sequence_order_correlation_factor(sequence, k=i + 1, properties=properties))
+
     #calculate amino acid composition
     aa_composition = amino_acid_composition(sequence)
 
-    #compute first 20 pseudo amino acid descriptor components based on properties
-    temp = 1 + weight * rightpart
-    for index, i in enumerate(amino_acids):
-        amp_pseudo_amino_acid_composition["APAAC_" + str(index + 1)] = round(aa_composition[i].values[0] / temp, 3)
-
-    #calculate correlation factor in protein sequence
-    rightpart = []
-    for i in range(lamda):
-        temp = amphiphilic_sequence_order_correlation_factor(sequence, k=i + 1)
-        rightpart.append(temp[0])
-        rightpart.append(temp[1])
-
-    #compute remaining (20 + 2 * lamda) amphiphillic composition values
+    #shared normalization denominator: 1 + w * Σ(all correlation factors)
     temp = 1 + weight * sum(rightpart)
-    for index in range(20, 20 + 2 * lamda):
+
+    #compute first 20 pseudo amino acid descriptor components (weighted AAComp)
+    for index, i in enumerate(amino_acids):
+        amp_pseudo_amino_acid_composition["APAAC_" + str(index + 1)] = round(
+            aa_composition[i].values[0] / temp, 3)
+
+    #compute remaining n_props * lamda amphiphilic composition values
+    for index in range(20, 20 + n_props * lamda):
         amp_pseudo_amino_acid_composition["APAAC_" + str(index + 1)] = round(
             weight * rightpart[index - 20] / temp * 100, 3)
 
@@ -1420,9 +1411,10 @@ def amphiphilic_pseudo_amino_acid_composition(sequence: str, lamda: int = 30, we
 
     return amp_pseudo_amino_acid_composition_df
 
-def amphiphilic_sequence_order_correlation_factor(sequence: str, k: int = 1) -> list[float]:
-    """ 
-    Calculate Amphipillic sequence order correlation factor for sequence
+def amphiphilic_sequence_order_correlation_factor(sequence: str, k: int = 1,
+    properties: list[dict[str, float]] | None = None) -> list[float]:
+    """
+    Calculate Amphiphilic sequence order correlation factor for sequence
     with gap=k.
 
     Parameters
@@ -1431,34 +1423,36 @@ def amphiphilic_sequence_order_correlation_factor(sequence: str, k: int = 1) -> 
         protein sequence.
     :k: int (default=1)
         gap between amino acids in the sequence.
+    :properties: list[dict] | None (default=None → [hydrophobicity_, hydrophilicity_])
+        list of property dicts. Pre-normalized once per call.
 
     Returns
     =======
-    :correlation_factor: list
-        list of correlation factors for both hydrophobicity and hydrophillicty.
+    :correlation_factor: list[float]
+        one correlation factor per property.
     """
-    correlation_factor_hydrophobicity = []
-    correlation_factor_hydrophilicity = []
+    if properties is None:
+        properties = [hydrophobicity_, hydrophilicity_]
 
-    #iterate over sequence, calculating correlation factors using both properties
+    #pre-normalize all properties once rather than inside every pair evaluation
+    normalized_props = [normalize_property(prop) for prop in properties]
+    n_props = len(properties)
+    accumulators: list[list[float]] = [[] for _ in range(n_props)]
+
+    #iterate over sequence pairs with the given gap k
     for i in range(len(sequence) - k):
-        aa1 = sequence[i]
-        aa2 = sequence[i + k]
-        corelation_function = amphiphilic_correllation_function(aa1, aa2)
-        correlation_factor_hydrophobicity.append(corelation_function[0])
-        correlation_factor_hydrophilicity.append(corelation_function[1])
+        aa1, aa2 = sequence[i], sequence[i + k]
+        for p_idx, norm in enumerate(normalized_props):
+            accumulators[p_idx].append(round(norm[aa1] * norm[aa2], 3))
 
-    #append hydrophobicity and hydrophilicity values to array
-    correlation_factor = []
-    correlation_factor.append(round(sum(correlation_factor_hydrophobicity) / (len(sequence) - k), 3))
-    correlation_factor.append(round(sum(correlation_factor_hydrophilicity) / (len(sequence) - k), 3))
+    denom = len(sequence) - k
+    return [round(sum(acc) / denom, 3) for acc in accumulators]
 
-    return correlation_factor
-
-def amphiphilic_correllation_function(Ri: str = "S", Rj: str = "D") -> tuple[float, float]:
+def amphiphilic_correllation_function(Ri: str = "S", Rj: str = "D",
+    normalized_props: list[dict[str, float]] | None = None) -> list[float]:
     """
-    Calculate correlation value based on hydrophobicity and hydrophillicity
-    property values for input amino acids Ri and Rj in sequence.
+    Calculate correlation value based on physicochemical property values
+    for input amino acids Ri and Rj.
 
     Parameters
     ==========
@@ -1466,18 +1460,16 @@ def amphiphilic_correllation_function(Ri: str = "S", Rj: str = "D") -> tuple[flo
         1st amino acid.
     :Rj: str
         2nd amino acid.
+    :normalized_props: list[dict] | None
+        pre-normalized property dicts. Defaults to normalized hydrophobicity
+        and hydrophilicity when None.
 
     Returns
     =======
-    :theta1, theta2: float
-        correlation values for input property values.
+    :thetas: list[float]
+        one correlation value per property.
     """
-    #normalize properties
-    _hydrophobicity = normalize_property(hydrophobicity_)
-    _hydrophilicity = normalize_property(hydrophilicity_)
-
-    #calculate correlation using hydrophobicity & hydrophilicty properties
-    theta1 = round(_hydrophobicity[Ri] * _hydrophobicity[Rj], 3)
-    theta2 = round(_hydrophilicity[Ri] * _hydrophilicity[Rj], 3)
-
-    return theta1, theta2
+    if normalized_props is None:
+        normalized_props = [normalize_property(hydrophobicity_),
+                            normalize_property(hydrophilicity_)]
+    return [round(prop[Ri] * prop[Rj], 3) for prop in normalized_props]

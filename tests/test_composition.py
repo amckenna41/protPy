@@ -345,7 +345,7 @@ class ProtpyCompositionTests(unittest.TestCase):
         tripeptide_comp_seq1 = protpy.tripeptide_composition(self.protein_seq1)
         #testing first 10 columns 
         tripeptide_comp_seq1_expected_values = pd.DataFrame(columns=["AAA", "AAC", "AAD", "AAE", "AAF", "AAG", "AAH", "AAI", "AAK", "AAL"])
-        tripeptide_comp_seq1_expected_values.loc[0] = [1, 0, 0, 2, 0, 0, 0, 0, 0, 2]
+        tripeptide_comp_seq1_expected_values.loc[0] = [0.08, 0.0, 0.0, 0.16, 0.0, 0.0, 0.0, 0.0, 0.0, 0.16]
 
         self.assertIsInstance(tripeptide_comp_seq1, pd.DataFrame,
             'Expected output to be of type DataFrame, got {}.'.format(type(tripeptide_comp_seq1)))
@@ -365,13 +365,13 @@ class ProtpyCompositionTests(unittest.TestCase):
                 "Amino acid {} not found in list of amino acids:\n{}.".format(col[2], self.amino_acids))
         self.assertTrue(tripeptide_comp_seq1.any().isnull().sum()==0,
             'Expected output to contain no null values.')        
-        self.assertTrue(all(col == np.int64 for col in list(tripeptide_comp_seq1.dtypes)),
+        self.assertTrue(all(col == np.float64 for col in list(tripeptide_comp_seq1.dtypes)),
             "Expected output values to be of datatype np.float64, got {}.".format(list(tripeptide_comp_seq1.dtypes)))
 #2.)
         tripeptide_comp_seq2 = protpy.tripeptide_composition(self.protein_seq2)
         #testing first 10 columns 
         tripeptide_comp_seq2_expected_values = pd.DataFrame(columns=["AAA", "AAC", "AAD", "AAE", "AAF", "AAG", "AAH", "AAI", "AAK", "AAL"])
-        tripeptide_comp_seq2_expected_values.loc[0] = [0, 0, 1, 1, 0, 0, 0, 0, 0, 0]
+        tripeptide_comp_seq2_expected_values.loc[0] = [0.0, 0.0, 0.238, 0.238, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 
         self.assertIsInstance(tripeptide_comp_seq2, pd.DataFrame,
             'Expected output to be of type DataFrame, got {}.'.format(type(tripeptide_comp_seq2)))
@@ -391,13 +391,13 @@ class ProtpyCompositionTests(unittest.TestCase):
                 "Amino acid {} not found in list of amino acids:\n{}.".format(col[2], self.amino_acids))
         self.assertTrue(tripeptide_comp_seq2.any().isnull().sum()==0,
             'Expected output to contain no null values.')        
-        self.assertTrue(all(col == np.int64 for col in list(tripeptide_comp_seq2.dtypes)),
+        self.assertTrue(all(col == np.float64 for col in list(tripeptide_comp_seq2.dtypes)),
             "Expected output values to be of datatype np.float64, got {}.".format(list(tripeptide_comp_seq2.dtypes)))
 #3.)
         tripeptide_comp_seq3 = protpy.tripeptide_composition(self.protein_seq3)
         #testing first 10 columns 
         tripeptide_comp_seq3_expected_values = pd.DataFrame(columns=["AAA", "AAC", "AAD", "AAE", "AAF", "AAG", "AAH", "AAI", "AAK", "AAL"])
-        tripeptide_comp_seq3_expected_values.loc[0] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        tripeptide_comp_seq3_expected_values.loc[0] = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 
         self.assertIsInstance(tripeptide_comp_seq3, pd.DataFrame,
             'Expected output to be of type DataFrame, got {}.'.format(type(tripeptide_comp_seq3)))
@@ -417,13 +417,13 @@ class ProtpyCompositionTests(unittest.TestCase):
                 "Amino acid {} not found in list of amino acids:\n{}.".format(col[2], self.amino_acids))
         self.assertTrue(tripeptide_comp_seq3.any().isnull().sum()==0,
             'Expected output to contain no null values.')        
-        self.assertTrue(all(col == np.int64 for col in list(tripeptide_comp_seq3.dtypes)),
+        self.assertTrue(all(col == np.float64 for col in list(tripeptide_comp_seq3.dtypes)),
             "Expected output values to be of datatype np.float64, got {}.".format(list(tripeptide_comp_seq3.dtypes)))
 #4.)
         tripeptide_comp_seq4 = protpy.tripeptide_composition(self.protein_seq4)
         #testing first 10 columns 
         tripeptide_comp_seq4_expected_values = pd.DataFrame(columns=["AAA", "AAC", "AAD", "AAE", "AAF", "AAG", "AAH", "AAI", "AAK", "AAL"])
-        tripeptide_comp_seq4_expected_values.loc[0] = [0, 0, 1, 1, 0, 0, 0, 1, 0, 1]
+        tripeptide_comp_seq4_expected_values.loc[0] = [0.0, 0.0, 0.24, 0.24, 0.0, 0.0, 0.0, 0.24, 0.0, 0.24]
 
         self.assertIsInstance(tripeptide_comp_seq4, pd.DataFrame,
             'Expected output to be of type DataFrame, got {}.'.format(type(tripeptide_comp_seq4)))
@@ -443,7 +443,7 @@ class ProtpyCompositionTests(unittest.TestCase):
                 "Amino acid {} not found in list of amino acids:\n{}.".format(col[2], self.amino_acids))
         self.assertTrue(tripeptide_comp_seq4.any().isnull().sum()==0,
             'Expected output to contain no null values.')        
-        self.assertTrue(all(col == np.int64 for col in list(tripeptide_comp_seq4.dtypes)),
+        self.assertTrue(all(col == np.float64 for col in list(tripeptide_comp_seq4.dtypes)),
             "Expected output values to be of datatype np.float64, got {}.".format(list(tripeptide_comp_seq4.dtypes)))
 #5.)
         invalid_seq5 = "ABCDEF"
@@ -469,7 +469,7 @@ class ProtpyCompositionTests(unittest.TestCase):
         pseudo_amino_acid_composition_seq1 = protpy.pseudo_amino_acid_composition(self.protein_seq1, weight=weight, lamda=lamda)
         #testing first 10 columns 
         pseudo_amino_acid_composition_seq1_expected_values = pd.DataFrame(columns=["PAAC_1", "PAAC_2", "PAAC_3", "PAAC_4", "PAAC_5", "PAAC_6", "PAAC_7", "PAAC_8", "PAAC_9", "PAAC_10"])
-        pseudo_amino_acid_composition_seq1_expected_values.loc[0] = [0.127, 0.059, 0.111, 0.064, 0.126, 0.12, 0.023, 0.118, 0.091, 0.15]
+        pseudo_amino_acid_composition_seq1_expected_values.loc[0] = [1.871, 0.869, 1.626, 0.936, 1.849, 1.76, 0.334, 1.737, 1.336, 2.205]
      
         self.assertIsInstance(pseudo_amino_acid_composition_seq1, pd.DataFrame, 
             'Expected output to be of type DataFrame, got {}.'.format(type(pseudo_amino_acid_composition_seq1)))
@@ -489,7 +489,7 @@ class ProtpyCompositionTests(unittest.TestCase):
         pseudo_amino_acid_composition_seq2 = protpy.pseudo_amino_acid_composition(self.protein_seq2, weight=weight, lamda=lamda)
         #testing first 10 columns 
         pseudo_amino_acid_composition_seq2_expected_values = pd.DataFrame(columns=["PAAC_1", "PAAC_2", "PAAC_3", "PAAC_4", "PAAC_5", "PAAC_6", "PAAC_7", "PAAC_8", "PAAC_9", "PAAC_10"])
-        pseudo_amino_acid_composition_seq2_expected_values.loc[0] = [0.137, 0.0, 0.088, 0.056, 0.052, 0.181, 0.02, 0.044, 0.117, 0.105]
+        pseudo_amino_acid_composition_seq2_expected_values.loc[0] = [2.069, 0.0, 1.338, 0.852, 0.791, 2.738, 0.304, 0.669, 1.764, 1.582]
 
         self.assertIsInstance(pseudo_amino_acid_composition_seq2, pd.DataFrame, 
             'Expected output to be of type DataFrame, got {}.'.format(type(pseudo_amino_acid_composition_seq2)))
@@ -509,7 +509,7 @@ class ProtpyCompositionTests(unittest.TestCase):
         pseudo_amino_acid_composition_seq3 = protpy.pseudo_amino_acid_composition(self.protein_seq3, weight=weight, lamda=lamda)
         #testing first 10 columns 
         pseudo_amino_acid_composition_seq3_expected_values = pd.DataFrame(columns=["PAAC_1", "PAAC_2", "PAAC_3", "PAAC_4", "PAAC_5", "PAAC_6", "PAAC_7", "PAAC_8", "PAAC_9", "PAAC_10"])
-        pseudo_amino_acid_composition_seq3_expected_values.loc[0] = [0.126, 0.095, 0.032, 0.095, 0.126, 0.063, 0.0, 0.095, 0.063, 0.441]
+        pseudo_amino_acid_composition_seq3_expected_values.loc[0] = [1.735, 1.301, 0.434, 1.301, 1.735, 0.868, 0.0, 1.301, 0.868, 6.072]
 
         self.assertIsInstance(pseudo_amino_acid_composition_seq3, pd.DataFrame, 
             'Expected output to be of type DataFrame, got {}.'.format(type(pseudo_amino_acid_composition_seq3)))
@@ -529,7 +529,7 @@ class ProtpyCompositionTests(unittest.TestCase):
         pseudo_amino_acid_composition_seq4 = protpy.pseudo_amino_acid_composition(self.protein_seq4, weight=weight, lamda=lamda)
         #testing first 10 columns 
         pseudo_amino_acid_composition_seq4_expected_values = pd.DataFrame(columns=["PAAC_1", "PAAC_2", "PAAC_3", "PAAC_4", "PAAC_5", "PAAC_6", "PAAC_7", "PAAC_8", "PAAC_9", "PAAC_10"])
-        pseudo_amino_acid_composition_seq4_expected_values.loc[0] = [0.15, 0.0, 0.097, 0.048, 0.053, 0.174, 0.016, 0.057, 0.125, 0.109]
+        pseudo_amino_acid_composition_seq4_expected_values.loc[0] = [2.264, 0.0, 1.468, 0.734, 0.795, 2.631, 0.245, 0.856, 1.897, 1.652]
 
         self.assertIsInstance(pseudo_amino_acid_composition_seq4, pd.DataFrame, 
             'Expected output to be of type DataFrame, got {}.'.format(type(pseudo_amino_acid_composition_seq4)))

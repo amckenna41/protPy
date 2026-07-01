@@ -12,7 +12,7 @@ amino_acids = ["A", "C", "D", "E", "F", "G", "H", "I", "K", "L", "M", "N", "P",
 
 #protPy package metadata
 __name__ = 'protpy'
-__version__ = "1.4.1"
+__version__ = "1.4.2"
 __description__ = "Python package for generating various biochemical, physicochemical and structural descriptors/features of protein sequences."
 __author__ = 'AJ McKenna: https://github.com/amckenna41'
 __authorEmail__ = 'amckenna41@qub.ac.uk'

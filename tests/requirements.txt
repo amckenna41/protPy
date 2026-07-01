@@ -1,0 +1,6 @@
+-r ../requirements.txt
+pytest
+pytest-cov
+pytest-flake8
+pytest-timeout
+biopython>=1.87

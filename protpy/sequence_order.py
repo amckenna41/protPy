@@ -6,10 +6,10 @@ from __future__ import annotations
 
 import os
 import json
+import functools
 from difflib import get_close_matches
 import pandas as pd
 import math
-from json import JSONDecodeError
 import sys
 from . import composition
 
@@ -32,6 +32,19 @@ References
 
 #list of amino acids
 from ._constants import amino_acids, _validate_sequence
+
+@functools.lru_cache(maxsize=2)
+def _load_distance_matrix(name: str) -> dict:
+    """Load and cache a physicochemical distance matrix JSON by name."""
+    path = os.path.join(
+        os.path.dirname(os.path.abspath(sys.modules['protpy'].__file__)),
+        "data", f"{name}-physicochemical-distance-matrix.json"
+    )
+    try:
+        with open(path) as f:
+            return json.load(f)
+    except (OSError, json.JSONDecodeError):
+        raise ValueError(f"Error parsing distance matrix file: {path}.")
 
 ############################# Sequence Order Coupling Number ##############################
 
@@ -73,24 +86,17 @@ def sequence_order_coupling_number_(sequence: str, d: int = 1, distance_matrix: 
         raise ValueError(f"Could not find a match for the input distance matrix {distance_matrix} in"
             f" list of available valid distance matrices:\n{['schneider-wrede', 'grantham']}.")
     
-    #get full path to selected distance matric
-    distance_matrix = os.path.join(os.path.dirname(os.path.abspath(sys.modules['protpy'].__file__)), "data", distance_matrix + "-physicochemical-distance-matrix.json")
-        
-    #open distance matrix json if present
-    try:
-        with open(distance_matrix, "r") as f:
-            distance_matrix = json.load(f)
-    except (OSError, json.JSONDecodeError):
-        raise JSONDecodeError(f'Error parsing distance matrix JSON file: {distance_matrix}.')
+    #load (or retrieve cached) distance matrix
+    distance_matrix_data = _load_distance_matrix(distance_matrix)
 
     tau = 0.0
 
     #iterate over length of sequence minus gap, incrementing the SOCN at each iteration using
-    #the values from the distance matrix with the current and next amino acid, round to 2 dp
+    #the values from the distance matrix with the current and next amino acid
     for aa in range(len(sequence) - d):
         current_aa = sequence[aa]
         next_aa = sequence[aa + d]
-        tau = tau + math.pow(distance_matrix[current_aa + next_aa], 2)
+        tau = tau + math.pow(distance_matrix_data[current_aa + next_aa], 2)
 
     return round(tau, 3)
 

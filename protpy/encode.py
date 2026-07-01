@@ -285,6 +285,7 @@ def encode_dataset(
     output_file: str | None = "descriptors.csv",
     save_each_sequence: bool = True,
     strip_gaps: bool = False,
+    verbose: bool = True,
 ) -> pd.DataFrame:
     """
     Compute all available descriptors for every sequence in a dataset and
@@ -333,6 +334,11 @@ def encode_dataset(
         alignments (MSAs) where ``-`` denotes an alignment gap rather than an
         amino acid.  When ``False`` (default), a ``-`` in any sequence raises
         a ``ValueError``.
+
+    :verbose: bool (default=True)
+        When ``True``, print a status line for each sequence as it is encoded
+        (``"Encoding sequence N/total: id"``).  Set to ``False`` to suppress
+        all stdout output from this function.
 
     Returns
     =======
@@ -400,7 +406,8 @@ def encode_dataset(
     total = len(seqs)
 
     for idx, (seq_id, seq) in enumerate(zip(ids, seqs), start=1):
-        print(f"Encoding sequence {idx}/{total}: {seq_id}")
+        if verbose:
+            print(f"Encoding sequence {idx}/{total}: {seq_id}")
         if strip_gaps:
             seq = seq.replace("-", "")
         elif "-" in seq:
