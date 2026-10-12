@@ -45,9 +45,9 @@ def moreaubroto_autocorrelation(sequence: str, lag: int = 30,
     The MBAuto descriptor is a type of Autocorrelation descriptor that uses the
     property values as the basis for measurement [2]. Each autocorrelation will 
     generate the number of features depending on the lag value and number of 
-    properties input with total features = lag * number of properties. The output 
-    autocorrelation can also be normalized by setting the normalize parameter to 
-    true, this occurs by default. Using the default 8 properties with default lag 
+    properties input with total features = lag * number of properties. By default
+    (normalize=True) each property is standardised over the 20 amino acids before the
+    calculation; the output itself is not bounded. Using the default 8 properties with default lag 
     value of 30, 240 features are generated, the default 8 properties are:
 
     AccNo. CIDH920105 - Normalized Average Hydrophobicity Scales
@@ -68,7 +68,8 @@ def moreaubroto_autocorrelation(sequence: str, lag: int = 30,
     :properties: list
         list of AAI index record codes/accession numbers for the physicochemical properties to use in the calculation. Defaults to the 8 standard AAIndex properties listed above.
     :normalize: bool (default=True)
-        rescale/normalize MoreauBroto Autocorrelation values into range of 0-1.
+        standardise each property (zero mean, unit standard deviation over the 20
+        amino acids) before the calculation. This does not bound the output to [0, 1].
 
     Returns
     =======
@@ -127,7 +128,8 @@ def moran_autocorrelation(sequence: str, lag: int = 30,
     :properties: list
         list of AAI index record codes/accession numbers for the physicochemical properties to use in the calculation. Defaults to the same 8 standard AAIndex properties as MBAuto.
     :normalize: bool (default=True)
-        rescale/normalize MoreauBroto Autocorrelation values into range of 0-1.
+        standardise each property (zero mean, unit standard deviation over the 20
+        amino acids) before the calculation. This does not bound the output to [0, 1].
 
     Returns
     =======
@@ -195,7 +197,8 @@ def geary_autocorrelation(sequence: str, lag: int = 30,
     :properties: list
         list of AAI index record codes/accession numbers for the physicochemical properties to use in the calculation. Defaults to the same 8 standard AAIndex properties as MBAuto.
     :normalize: bool (default=True)
-        rescale/normalize MoreauBroto Autocorrelation values into range of 0-1.
+        standardise each property (zero mean, unit standard deviation over the 20
+        amino acids) before the calculation. This does not bound the output to [0, 1].
 
     Returns
     =======

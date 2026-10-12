@@ -28,6 +28,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Documentation
 - `docs/conf.py` converts protpy's `:name: type` parameter style to numpy style before napoleon runs. Parameter names, types and defaults now render correctly throughout the API docs; previously napoleon emitted nameless `:param :` fields. The Sphinx build is now warning-free (previously 39 warnings).
 - `docs/index.rst` lists the v1.5.0 descriptor categories; `docs/api.rst` documents the new modules and `encode_dataset`; `docs/usage.rst` covers `descriptor_set` / `include` / `exclude`; `docs/descriptors.rst` and `DESCRIPTORS.md` have a v1.5.0 section generated from the registry and docstrings.
+- New "Scaling features for machine learning" section in `docs/usage.rst` and the README: fit a scikit-learn scaler on the training data rather than rescaling descriptors with fixed theoretical bounds, which compress real values into narrow bands.
+- The autocorrelation `normalize` parameter's docs now say what it does: it standardises the property values (z-score); it never rescaled the output to 0–1.
 - `tests/README.md` lists every test module and test data file; `protpy/data/README.md` describes the new data files.
 
 ### Changed

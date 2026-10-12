@@ -518,5 +518,39 @@ A few extended descriptors are ``NaN`` where their method leaves them undefined:
 ``plaac`` LLR/COREscore for sequences shorter than the core length or without a
 prion-like domain, and ``half_life`` (E. coli) for an N-terminal proline.
 
+Scaling Features for Machine Learning
+-------------------------------------
+
+protpy returns each descriptor on its natural scale: percentages, counts, indices, pH
+values, Da and so on. Many classifiers expect features on a common scale, for example
+[0, 1]. Rather than rescaling inside protpy, fit a scaler on your **training** data and
+reuse it for validation, test and new sequences. This scales every column (whatever
+descriptors you computed) to the range actually seen in your data, and it is the
+standard way to avoid leaking information from the test set:
+
+.. code-block:: python
+
+   from sklearn.preprocessing import MinMaxScaler
+
+   X_train = protpy.encode_dataset(train_seqs, output_file=None, verbose=False).set_index("sequence_id")
+   X_test = protpy.encode_dataset(test_seqs, output_file=None, verbose=False).set_index("sequence_id")
+
+   scaler = MinMaxScaler(clip=True).fit(X_train)   # fit on training data only
+   X_train_scaled = scaler.transform(X_train)      # every column in [0, 1]
+   X_test_scaled = scaler.transform(X_test)        # clip=True keeps unseen extremes in [0, 1]
+
+Notes:
+
+* ``StandardScaler`` (zero mean, unit variance) is a common alternative; tree-based models
+  (random forests, gradient boosting) do not need scaling at all.
+* Wrap the scaler and model in a scikit-learn ``Pipeline`` when cross-validating, so the
+  scaler is re-fitted on each training fold.
+* ``descriptor_set="extended"`` can produce a few ``NaN`` values (see above); impute them
+  first, e.g. with ``sklearn.impute.SimpleImputer``.
+* Scaling with each descriptor's theoretical minimum and maximum is generally a poor
+  substitute: real proteins sit far from those extremes, so values end up compressed into
+  a narrow band (e.g. instability-index bounds are roughly [-159, 583] while typical values
+  are 20-60).
+
 .. note::
    A demo of the software is available `here <https://colab.research.google.com/drive/12E3ayovpZOf6Gv-8ILwkN1zReKslEksB?usp=sharing>`_.

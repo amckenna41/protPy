@@ -451,6 +451,23 @@ qso = protpy.quasi_sequence_order(protein_seq, lag=10, weight=0.2, distance_matr
 
 </details>
 
+### Scaling features for machine learning
+
+protpy returns each descriptor on its natural scale (percentages, counts, indices, pH, Da, ...). If your classifier needs features on a common scale such as [0, 1], fit a scaler on your **training** data and reuse it for test and new sequences. This scales every column to the range seen in your data without leaking information from the test set:
+
+```python
+from sklearn.preprocessing import MinMaxScaler
+
+X_train = protpy.encode_dataset(train_seqs, output_file=None, verbose=False).set_index("sequence_id")
+X_test = protpy.encode_dataset(test_seqs, output_file=None, verbose=False).set_index("sequence_id")
+
+scaler = MinMaxScaler(clip=True).fit(X_train)   # fit on training data only
+X_train_scaled = scaler.transform(X_train)      # every column in [0, 1]
+X_test_scaled = scaler.transform(X_test)        # clip=True keeps unseen extremes in [0, 1]
+```
+
+`StandardScaler` is a common alternative, and tree-based models don't need scaling. When cross-validating, put the scaler in a scikit-learn `Pipeline` so it is re-fitted on each training fold. Impute the few `NaN` values that `descriptor_set="extended"` can produce (e.g. with `SimpleImputer`) before scaling.
+
 Documentation
 -------------
 The documentation for `protpy` is hosted on **ReadTheDocs** and is available [here][readthedocs].
