@@ -1,0 +1,178 @@
+{
+  "codon_counts": {
+    "name": "Number of sense codons per amino acid (standard genetic code)",
+    "values": {
+      "A": 4,
+      "C": 2,
+      "D": 2,
+      "E": 2,
+      "F": 2,
+      "G": 4,
+      "H": 2,
+      "I": 3,
+      "K": 2,
+      "L": 6,
+      "M": 1,
+      "N": 2,
+      "P": 4,
+      "Q": 2,
+      "R": 6,
+      "S": 6,
+      "T": 4,
+      "V": 4,
+      "W": 1,
+      "Y": 2
+    },
+    "reference": "Saravanan V. & Gautham N. (2015). Harnessing computational biology for exact linear B-cell epitope prediction: a novel amino acid composition-based feature descriptor. OMICS, 19(10), 648-658.",
+    "doi": "10.1089/omi.2015.0095",
+    "source_note": "Standard genetic code (NCBI translation table 1), 61 sense codons, as used for the DDE theoretical mean; 2026-10-12."
+  },
+  "atomic_formulas": {
+    "name": "Molecular formulas of the free amino acids",
+    "values": {
+      "A": {
+        "C": 3,
+        "H": 7,
+        "N": 1,
+        "O": 2,
+        "S": 0
+      },
+      "R": {
+        "C": 6,
+        "H": 14,
+        "N": 4,
+        "O": 2,
+        "S": 0
+      },
+      "N": {
+        "C": 4,
+        "H": 8,
+        "N": 2,
+        "O": 3,
+        "S": 0
+      },
+      "D": {
+        "C": 4,
+        "H": 7,
+        "N": 1,
+        "O": 4,
+        "S": 0
+      },
+      "C": {
+        "C": 3,
+        "H": 7,
+        "N": 1,
+        "O": 2,
+        "S": 1
+      },
+      "Q": {
+        "C": 5,
+        "H": 10,
+        "N": 2,
+        "O": 3,
+        "S": 0
+      },
+      "E": {
+        "C": 5,
+        "H": 9,
+        "N": 1,
+        "O": 4,
+        "S": 0
+      },
+      "G": {
+        "C": 2,
+        "H": 5,
+        "N": 1,
+        "O": 2,
+        "S": 0
+      },
+      "H": {
+        "C": 6,
+        "H": 9,
+        "N": 3,
+        "O": 2,
+        "S": 0
+      },
+      "I": {
+        "C": 6,
+        "H": 13,
+        "N": 1,
+        "O": 2,
+        "S": 0
+      },
+      "L": {
+        "C": 6,
+        "H": 13,
+        "N": 1,
+        "O": 2,
+        "S": 0
+      },
+      "K": {
+        "C": 6,
+        "H": 14,
+        "N": 2,
+        "O": 2,
+        "S": 0
+      },
+      "M": {
+        "C": 5,
+        "H": 11,
+        "N": 1,
+        "O": 2,
+        "S": 1
+      },
+      "F": {
+        "C": 9,
+        "H": 11,
+        "N": 1,
+        "O": 2,
+        "S": 0
+      },
+      "P": {
+        "C": 5,
+        "H": 9,
+        "N": 1,
+        "O": 2,
+        "S": 0
+      },
+      "S": {
+        "C": 3,
+        "H": 7,
+        "N": 1,
+        "O": 3,
+        "S": 0
+      },
+      "T": {
+        "C": 4,
+        "H": 9,
+        "N": 1,
+        "O": 3,
+        "S": 0
+      },
+      "W": {
+        "C": 11,
+        "H": 12,
+        "N": 2,
+        "O": 2,
+        "S": 0
+      },
+      "Y": {
+        "C": 9,
+        "H": 11,
+        "N": 1,
+        "O": 3,
+        "S": 0
+      },
+      "V": {
+        "C": 5,
+        "H": 11,
+        "N": 1,
+        "O": 2,
+        "S": 0
+      }
+    },
+    "reference": "Pande A. et al. (2023). Computing wide range of protein/peptide features from their sequence and structure. J Comput Biol, 30(2), 204-222.",
+    "doi": "10.1089/cmb.2022.0241",
+    "source_note": "Standard free amino-acid formulas; cross-checked against Pfeature's Standalone/Data/atom.csv. Pfeature sums free amino-acid formulas without removing water (protpy's default convention). Its table over-counts H by one for W (C11H13N2O2) and Y (C9H12NO3); the correct formulas C11H12N2O2 and C9H11NO3 are used here, so W/Y-containing sequences differ slightly from Pfeature output. Transcribed 2026-10-12."
+  }
+}

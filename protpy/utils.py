@@ -26,6 +26,8 @@ _DESCRIPTOR_REGISTRY: dict[str, dict] = {
         "output_shape": "1 x 20",
         "speed": "Fast",
         "reference": "[1] Gromiha, M. M. (2010). Protein Bioinformatics. Elsevier.",
+        "doi": None,
+        "in_default_set": True,
     },
     "dipeptide_composition": {
         "description": (
@@ -41,6 +43,8 @@ _DESCRIPTOR_REGISTRY: dict[str, dict] = {
         "output_shape": "1 x 400",
         "speed": "Fast",
         "reference": "[1] Gromiha, M. M. (2010). Protein Bioinformatics. Elsevier.",
+        "doi": None,
+        "in_default_set": True,
     },
     "tripeptide_composition": {
         "description": (
@@ -55,6 +59,8 @@ _DESCRIPTOR_REGISTRY: dict[str, dict] = {
         "output_shape": "1 x 8000",
         "speed": "Moderate",
         "reference": "[1] Gromiha, M. M. (2010). Protein Bioinformatics. Elsevier.",
+        "doi": None,
+        "in_default_set": True,
     },
     "gravy": {
         "description": (
@@ -70,6 +76,8 @@ _DESCRIPTOR_REGISTRY: dict[str, dict] = {
         "output_shape": "1 x 1",
         "speed": "Fast",
         "reference": "[8] Kyte & Doolittle (1982). J. Mol. Biol., 157(1), 105-132.",
+        "doi": "10.1016/0022-2836(82)90515-0",
+        "in_default_set": True,
     },
     "aromaticity": {
         "description": (
@@ -84,6 +92,8 @@ _DESCRIPTOR_REGISTRY: dict[str, dict] = {
         "output_shape": "1 x 1",
         "speed": "Fast",
         "reference": "[9] Lobry & Gautier (1994). Nucleic Acids Research, 22(15), 3174-3180.",
+        "doi": "10.1093/nar/22.15.3174",
+        "in_default_set": True,
     },
     "instability_index": {
         "description": (
@@ -99,6 +109,8 @@ _DESCRIPTOR_REGISTRY: dict[str, dict] = {
         "output_shape": "1 x 1",
         "speed": "Fast",
         "reference": "[10] Guruprasad et al. (1990). Protein Engineering, 4(2), 155-161.",
+        "doi": "10.1093/protein/4.2.155",
+        "in_default_set": True,
     },
     "isoelectric_point": {
         "description": (
@@ -114,6 +126,8 @@ _DESCRIPTOR_REGISTRY: dict[str, dict] = {
         "output_shape": "1 x 1",
         "speed": "Fast",
         "reference": "[11] Bjellqvist et al. (1993). Electrophoresis, 14(1), 1023-1031.",
+        "doi": "10.1002/elps.11501401163",
+        "in_default_set": True,
     },
     "molecular_weight": {
         "description": (
@@ -129,6 +143,8 @@ _DESCRIPTOR_REGISTRY: dict[str, dict] = {
         "output_shape": "1 x 1",
         "speed": "Fast",
         "reference": "[12] Gasteiger et al. (2005). The Proteomics Protocols Handbook.",
+        "doi": "10.1385/1-59259-890-0:571",
+        "in_default_set": True,
     },
     "charge_distribution": {
         "description": (
@@ -145,6 +161,8 @@ _DESCRIPTOR_REGISTRY: dict[str, dict] = {
         "output_shape": "1 x 3",
         "speed": "Fast",
         "reference": "[13] Cameselle-Teijeiro (1979). Biochemical Education, 7(3), 69-70.",
+        "doi": None,
+        "in_default_set": True,
     },
     "hydrophobic_polar_charged_composition": {
         "description": (
@@ -161,6 +179,8 @@ _DESCRIPTOR_REGISTRY: dict[str, dict] = {
         "output_shape": "1 x 3",
         "speed": "Fast",
         "reference": "[1] Gromiha, M. M. (2010). Protein Bioinformatics. Elsevier.",
+        "doi": None,
+        "in_default_set": True,
     },
     "secondary_structure_propensity": {
         "description": (
@@ -176,6 +196,8 @@ _DESCRIPTOR_REGISTRY: dict[str, dict] = {
         "output_shape": "1 x 3",
         "speed": "Fast",
         "reference": "[14] Chou & Fasman (1974). Biochemistry, 13(2), 211-222.",
+        "doi": "10.1021/bi00699a001",
+        "in_default_set": True,
     },
     "kmer_composition": {
         "description": (
@@ -192,6 +214,8 @@ _DESCRIPTOR_REGISTRY: dict[str, dict] = {
         "output_shape": "1 x 20^k  (e.g. 1 x 400 for k=2)",
         "speed": "Fast (k≤3) / Slow (k=4)",
         "reference": "[1] Gromiha, M. M. (2010). Protein Bioinformatics. Elsevier.",
+        "doi": None,
+        "in_default_set": True,
     },
     "reduced_alphabet_composition": {
         "description": (
@@ -208,6 +232,8 @@ _DESCRIPTOR_REGISTRY: dict[str, dict] = {
         "output_shape": "1 x alphabet_size",
         "speed": "Fast",
         "reference": "[1] Gromiha, M. M. (2010). Protein Bioinformatics. Elsevier.",
+        "doi": None,
+        "in_default_set": True,
     },
     "motif_composition": {
         "description": (
@@ -225,6 +251,8 @@ _DESCRIPTOR_REGISTRY: dict[str, dict] = {
         "output_shape": "1 x M  (M = number of motifs, default M=8)",
         "speed": "Fast",
         "reference": "[15] PROSITE: https://prosite.expasy.org/",
+        "doi": "10.1093/nar/gks1067",
+        "in_default_set": True,
     },
     "amino_acid_pair_composition": {
         "description": (
@@ -240,6 +268,8 @@ _DESCRIPTOR_REGISTRY: dict[str, dict] = {
         "output_shape": "1 x 400",
         "speed": "Moderate",
         "reference": "[1] Gromiha, M. M. (2010). Protein Bioinformatics. Elsevier.",
+        "doi": None,
+        "in_default_set": True,
     },
     "aliphatic_index": {
         "description": (
@@ -256,6 +286,8 @@ _DESCRIPTOR_REGISTRY: dict[str, dict] = {
         "output_shape": "1 x 1",
         "speed": "Fast",
         "reference": "[16] Ikai (1980). J. Biochemistry, 88(6), 1895-1898.",
+        "doi": "10.1093/oxfordjournals.jbchem.a133168",
+        "in_default_set": True,
     },
     "extinction_coefficient": {
         "description": (
@@ -271,6 +303,8 @@ _DESCRIPTOR_REGISTRY: dict[str, dict] = {
         "output_shape": "1 x 2  [ExtCoeff_Reduced, ExtCoeff_Oxidized]",
         "speed": "Fast",
         "reference": "[17] Gasteiger et al. (2005). The Proteomics Protocols Handbook.",
+        "doi": "10.1385/1-59259-890-0:571",
+        "in_default_set": True,
     },
     "boman_index": {
         "description": (
@@ -287,6 +321,8 @@ _DESCRIPTOR_REGISTRY: dict[str, dict] = {
         "output_shape": "1 x 1",
         "speed": "Fast",
         "reference": "[18] Boman (2003). J. Internal Medicine, 254(3), 197-215.",
+        "doi": "10.1046/j.1365-2796.2003.01228.x",
+        "in_default_set": True,
     },
     "aggregation_propensity": {
         "description": (
@@ -306,6 +342,8 @@ _DESCRIPTOR_REGISTRY: dict[str, dict] = {
         "output_shape": "1 x 2  [AggregProneRegions, AggregProneFraction]",
         "speed": "Fast",
         "reference": "[8] Kyte & Doolittle (1982). J. Mol. Biol., 157(1), 105-132.",
+        "doi": "10.1016/0022-2836(82)90515-0",
+        "in_default_set": True,
     },
     "hydrophobic_moment": {
         "description": (
@@ -324,6 +362,8 @@ _DESCRIPTOR_REGISTRY: dict[str, dict] = {
         "output_shape": "1 x 2  [HydrophobicMoment_Mean, HydrophobicMoment_Max]",
         "speed": "Fast",
         "reference": "[19] Eisenberg et al. (1982). Nature, 299, 371-374.",
+        "doi": "10.1038/299371a0",
+        "in_default_set": True,
     },
     "shannon_entropy": {
         "description": (
@@ -339,6 +379,8 @@ _DESCRIPTOR_REGISTRY: dict[str, dict] = {
         "output_shape": "1 x 1",
         "speed": "Fast",
         "reference": "[1] Gromiha, M. M. (2010). Protein Bioinformatics. Elsevier.",
+        "doi": None,
+        "in_default_set": True,
     },
     "pseudo_amino_acid_composition": {
         "description": (
@@ -358,6 +400,8 @@ _DESCRIPTOR_REGISTRY: dict[str, dict] = {
         "output_shape": "1 x (20 + lamda)  (default 1 x 50)",
         "speed": "Moderate",
         "reference": "[4] Chou, K-C. (2001). PROTEINS, 43, 246-255.",
+        "doi": "10.1002/prot.1035",
+        "in_default_set": True,
     },
     "amphiphilic_pseudo_amino_acid_composition": {
         "description": (
@@ -377,6 +421,8 @@ _DESCRIPTOR_REGISTRY: dict[str, dict] = {
         "output_shape": "1 x (20 + 2·lamda)  (default 1 x 80)",
         "speed": "Moderate",
         "reference": "[5] Chou, K-C. (2005). Bioinformatics, 21(1), 10-19.",
+        "doi": "10.1093/bioinformatics/bth466",
+        "in_default_set": True,
     },
     # ── Autocorrelation ────────────────────────────────────────────────────────
     "moreaubroto_autocorrelation": {
@@ -397,6 +443,8 @@ _DESCRIPTOR_REGISTRY: dict[str, dict] = {
         "output_shape": "1 x (lag × n_properties)  (default 1 x 240)",
         "speed": "Moderate",
         "reference": "[1] Hollas (2003). J. Math. Chem., 33(2), 91-101.",
+        "doi": "10.1023/A:1023247831238",
+        "in_default_set": True,
     },
     "moran_autocorrelation": {
         "description": (
@@ -416,6 +464,8 @@ _DESCRIPTOR_REGISTRY: dict[str, dict] = {
         "output_shape": "1 x (lag × n_properties)  (default 1 x 240)",
         "speed": "Moderate",
         "reference": "[2] Ong et al. (2007). BMC Bioinformatics, 8, 300.",
+        "doi": "10.1186/1471-2105-8-300",
+        "in_default_set": True,
     },
     "geary_autocorrelation": {
         "description": (
@@ -435,6 +485,8 @@ _DESCRIPTOR_REGISTRY: dict[str, dict] = {
         "output_shape": "1 x (lag × n_properties)  (default 1 x 240)",
         "speed": "Moderate",
         "reference": "[2] Ong et al. (2007). BMC Bioinformatics, 8, 300.",
+        "doi": "10.1186/1471-2105-8-300",
+        "in_default_set": True,
     },
     # ── Conjoint Triad ─────────────────────────────────────────────────────────
     "conjoint_triad": {
@@ -452,6 +504,8 @@ _DESCRIPTOR_REGISTRY: dict[str, dict] = {
         "output_shape": "1 x 343",
         "speed": "Fast",
         "reference": "[1] Shen et al. (2007). PNAS, 104(11), 4337-4341.",
+        "doi": "10.1073/pnas.0607879104",
+        "in_default_set": True,
     },
     # ── CTD ────────────────────────────────────────────────────────────────────
     "ctd_composition": {
@@ -469,6 +523,8 @@ _DESCRIPTOR_REGISTRY: dict[str, dict] = {
         "output_shape": "1 x 3  (per property)",
         "speed": "Fast",
         "reference": "[1] Dubchak et al. (1995). PNAS, 92, 8700-8704.",
+        "doi": "10.1073/pnas.92.19.8700",
+        "in_default_set": True,
     },
     "ctd_transition": {
         "description": (
@@ -485,6 +541,8 @@ _DESCRIPTOR_REGISTRY: dict[str, dict] = {
         "output_shape": "1 x 3  (per property)",
         "speed": "Fast",
         "reference": "[1] Dubchak et al. (1995). PNAS, 92, 8700-8704.",
+        "doi": "10.1073/pnas.92.19.8700",
+        "in_default_set": True,
     },
     "ctd_distribution": {
         "description": (
@@ -502,6 +560,8 @@ _DESCRIPTOR_REGISTRY: dict[str, dict] = {
         "output_shape": "1 x 15  (per property)",
         "speed": "Fast",
         "reference": "[1] Dubchak et al. (1995). PNAS, 92, 8700-8704.",
+        "doi": "10.1073/pnas.92.19.8700",
+        "in_default_set": True,
     },
     "ctd_": {
         "description": (
@@ -520,6 +580,8 @@ _DESCRIPTOR_REGISTRY: dict[str, dict] = {
         "output_shape": "1 x 21  (single property) / 1 x 147  (all 7 properties)",
         "speed": "Fast (single) / Moderate (all)",
         "reference": "[1] Dubchak et al. (1995). PNAS, 92, 8700-8704.",
+        "doi": "10.1073/pnas.92.19.8700",
+        "in_default_set": True,
     },
     # ── Sequence Order ─────────────────────────────────────────────────────────
     "sequence_order_coupling_number_": {
@@ -539,6 +601,8 @@ _DESCRIPTOR_REGISTRY: dict[str, dict] = {
         "output_shape": "scalar float",
         "speed": "Fast",
         "reference": "[1] Chou, K-C. (2000). Biochem. Biophys. Res. Commun., 278, 477-483.",
+        "doi": "10.1006/bbrc.2000.3815",
+        "in_default_set": True,
     },
     "sequence_order_coupling_number": {
         "description": (
@@ -556,6 +620,8 @@ _DESCRIPTOR_REGISTRY: dict[str, dict] = {
         "output_shape": "1 x lag  (default 1 x 30)",
         "speed": "Moderate",
         "reference": "[1] Chou, K-C. (2000). Biochem. Biophys. Res. Commun., 278, 477-483.",
+        "doi": "10.1006/bbrc.2000.3815",
+        "in_default_set": True,
     },
     "sequence_order_coupling_number_all": {
         "description": (
@@ -572,6 +638,8 @@ _DESCRIPTOR_REGISTRY: dict[str, dict] = {
         "output_shape": "1 x (lag × 2)  (default 1 x 60)",
         "speed": "Moderate",
         "reference": "[1] Chou, K-C. (2000). Biochem. Biophys. Res. Commun., 278, 477-483.",
+        "doi": "10.1006/bbrc.2000.3815",
+        "in_default_set": True,
     },
     "quasi_sequence_order": {
         "description": (
@@ -591,6 +659,8 @@ _DESCRIPTOR_REGISTRY: dict[str, dict] = {
         "output_shape": "1 x (lag + 20)  (default 1 x 50)",
         "speed": "Moderate",
         "reference": "[1] Chou, K-C. (2000). Biochem. Biophys. Res. Commun., 278, 477-483.",
+        "doi": "10.1006/bbrc.2000.3815",
+        "in_default_set": True,
     },
     "quasi_sequence_order_all": {
         "description": (
@@ -607,6 +677,8 @@ _DESCRIPTOR_REGISTRY: dict[str, dict] = {
         "output_shape": "1 x ((lag + 20) × 2)  (default 1 x 100)",
         "speed": "Moderate",
         "reference": "[1] Chou, K-C. (2000). Biochem. Biophys. Res. Commun., 278, 477-483.",
+        "doi": "10.1006/bbrc.2000.3815",
+        "in_default_set": True,
     },
 }
 
@@ -645,6 +717,8 @@ def get_descriptor_info(name: str) -> dict:
         - ``output_shape``    : string describing output DataFrame shape
         - ``speed``           : speed rating (Fast / Moderate / Slow)
         - ``reference``       : primary citation
+        - ``doi``             : DOI of the primary citation (None for textbooks / sources without one)
+        - ``in_default_set``  : whether the descriptor is part of the classic ``all_descriptors`` set
 
     Raises
     ======
@@ -683,7 +757,8 @@ def list_descriptors(category: str | None = None) -> list[str]:
     :category: str | None (default=None)
         If provided, only descriptors belonging to this category are returned.
         Available categories: "Composition", "Autocorrelation", "Conjoint Triad",
-        "CTD", "Sequence Order". Case-insensitive.
+        "CTD", "Sequence Order", "Scales", "Physicochemical", "Complexity",
+        "Signal", "Structural". Case-insensitive.
 
     Returns
     =======
@@ -737,4 +812,6 @@ def print_descriptor_info(name: str) -> None:
     for param, desc in info["parameters"].items():
         print(f"    - {param}: {desc}")
     print(f"\n  Reference: {info['reference']}")
+    if info.get("doi"):
+        print(f"  DOI      : https://doi.org/{info['doi']}")
     print(f"{'='*60}\n")
