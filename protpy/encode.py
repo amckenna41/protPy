@@ -53,15 +53,6 @@ from .utils import _DESCRIPTOR_REGISTRY
 
 #descriptors that accept extra keyword arguments beyond sequence
 _PARAMETERISED_DESCRIPTORS: frozenset[str] = frozenset({
-    "gravy",
-    "instability_index",
-    "isoelectric_point",
-    "molecular_weight",
-    "secondary_structure_propensity",
-    "aliphatic_index",
-    "extinction_coefficient",
-    "boman_index",
-    "shannon_entropy",
     "charge_distribution",
     "kmer_composition",
     "reduced_alphabet_composition",
@@ -174,18 +165,6 @@ def all_descriptors(
             sequence_order_coupling_number_all → lag
             quasi_sequence_order_all      → lag, weight
 
-        Every descriptor above, and ``gravy``, ``instability_index``,
-        ``isoelectric_point``, ``molecular_weight``,
-        ``secondary_structure_propensity``, ``aliphatic_index``,
-        ``extinction_coefficient``, ``boman_index`` and ``shannon_entropy``,
-        also accepts ``normalized=True``, which rescales its output to [0, 1]
-        and suffixes its columns with ``_norm``::
-
-            df = protpy.all_descriptors(seq, params={
-                'gravy': {'normalized': True},
-                'ctd_': {'normalized': True},
-            })
-
         plus any v1.5 descriptor with parameters (see
         ``protpy.get_descriptor_info(name)["parameters"]``), e.g.
         ``{"kappa": {"blob_sizes": (5,)}, "aggrescan": {"window": 7}}``.
@@ -290,24 +269,24 @@ def all_descriptors(
         ("[Composition]    Amino acid composition",                    "amino_acid_composition",                     lambda: amino_acid_composition(sequence)),
         ("[Composition]    Dipeptide composition",                     "dipeptide_composition",                      lambda: dipeptide_composition(sequence)),
         ("[Composition]    Tripeptide composition",                    "tripeptide_composition",                     lambda: tripeptide_composition(sequence)),
-        ("[Composition]    GRAVY index",                               "gravy",                                      lambda: gravy(sequence, **_p("gravy"))),
+        ("[Composition]    GRAVY index",                               "gravy",                                      lambda: gravy(sequence)),
         ("[Composition]    Aromaticity",                               "aromaticity",                                lambda: aromaticity(sequence)),
-        ("[Composition]    Instability index",                         "instability_index",                          lambda: instability_index(sequence, **_p("instability_index"))),
-        ("[Composition]    Isoelectric point",                         "isoelectric_point",                          lambda: isoelectric_point(sequence, **_p("isoelectric_point"))),
-        ("[Composition]    Molecular weight",                          "molecular_weight",                           lambda: molecular_weight(sequence, **_p("molecular_weight"))),
+        ("[Composition]    Instability index",                         "instability_index",                          lambda: instability_index(sequence)),
+        ("[Composition]    Isoelectric point",                         "isoelectric_point",                          lambda: isoelectric_point(sequence)),
+        ("[Composition]    Molecular weight",                          "molecular_weight",                           lambda: molecular_weight(sequence)),
         ("[Composition]    Charge distribution",                       "charge_distribution",                        lambda: charge_distribution(sequence, **_p("charge_distribution"))),
         ("[Composition]    Hydrophobic / polar / charged comp.",       "hydrophobic_polar_charged_composition",      lambda: hydrophobic_polar_charged_composition(sequence)),
-        ("[Composition]    Secondary structure propensity",            "secondary_structure_propensity",             lambda: secondary_structure_propensity(sequence, **_p("secondary_structure_propensity"))),
+        ("[Composition]    Secondary structure propensity",            "secondary_structure_propensity",             lambda: secondary_structure_propensity(sequence)),
         *([("[Composition]    K-mer composition",                         "kmer_composition",                           lambda: kmer_composition(sequence, **_p("kmer_composition")))]
           if _kmer_k not in (2, 3) else []),
         ("[Composition]    Reduced alphabet composition",              "reduced_alphabet_composition",               lambda: reduced_alphabet_composition(sequence, **_p("reduced_alphabet_composition"))),
         ("[Composition]    Motif composition",                         "motif_composition",                          lambda: motif_composition(sequence, **_p("motif_composition"))),
-        ("[Composition]    Aliphatic index",                           "aliphatic_index",                            lambda: aliphatic_index(sequence, **_p("aliphatic_index"))),
-        ("[Composition]    Extinction coefficient",                    "extinction_coefficient",                     lambda: extinction_coefficient(sequence, **_p("extinction_coefficient"))),
-        ("[Composition]    Boman index",                               "boman_index",                                lambda: boman_index(sequence, **_p("boman_index"))),
+        ("[Composition]    Aliphatic index",                           "aliphatic_index",                            lambda: aliphatic_index(sequence)),
+        ("[Composition]    Extinction coefficient",                    "extinction_coefficient",                     lambda: extinction_coefficient(sequence)),
+        ("[Composition]    Boman index",                               "boman_index",                                lambda: boman_index(sequence)),
         ("[Composition]    Aggregation propensity",                    "aggregation_propensity",                     lambda: aggregation_propensity(sequence, **_p("aggregation_propensity"))),
         ("[Composition]    Hydrophobic moment",                        "hydrophobic_moment",                         lambda: hydrophobic_moment(sequence, **_p("hydrophobic_moment"))),
-        ("[Composition]    Shannon entropy",                           "shannon_entropy",                            lambda: shannon_entropy(sequence, **_p("shannon_entropy"))),
+        ("[Composition]    Shannon entropy",                           "shannon_entropy",                            lambda: shannon_entropy(sequence)),
         ("[Composition]    Pseudo amino acid composition",             "pseudo_amino_acid_composition",              lambda: pseudo_amino_acid_composition(sequence, **_p("pseudo_amino_acid_composition"))),
         ("[Composition]    Amphiphilic pseudo amino acid comp.",       "amphiphilic_pseudo_amino_acid_composition",  lambda: amphiphilic_pseudo_amino_acid_composition(sequence, **_p("amphiphilic_pseudo_amino_acid_composition"))),
         # ── Autocorrelation ────────────────────────────────────────────────────

@@ -268,7 +268,7 @@ class ProtpyEncodeTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             protpy.all_descriptors(self.protein_seq1, params={'conjoint_triad': {}})
         with self.assertRaises(ValueError):
-            protpy.all_descriptors(self.protein_seq1, params={'aromaticity': {}})
+            protpy.all_descriptors(self.protein_seq1, params={'gravy': {}})
 #3.) params of wrong type raises TypeError
         with self.assertRaises(TypeError):
             protpy.all_descriptors(self.protein_seq1, params="lag=15")
