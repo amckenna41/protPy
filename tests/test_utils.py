@@ -79,7 +79,8 @@ class ProtpyUtilsTests(unittest.TestCase):
         "abbreviation", "parameters", "output_shape", "speed", "reference",
     }
 
-    VALID_CATEGORIES = {"Composition", "Autocorrelation", "Conjoint Triad", "CTD", "Sequence Order"}
+    VALID_CATEGORIES = {"Composition", "Autocorrelation", "Conjoint Triad", "CTD", "Sequence Order",
+                        "Scales"}
     VALID_SPEEDS = {"Fast", "Moderate", "Slow"}
 
 # ── Registry integrity ────────────────────────────────────────────────────────

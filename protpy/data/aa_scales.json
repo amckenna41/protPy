@@ -194,5 +194,1597 @@
     "reference": "Cosic, I. 'Macromolecular bioactivity: is it resonant interaction between macromolecules?--Theory and applications' IEEE Trans Biomed Eng. 41, 1101-1114 (1994) (values are cited from Protein Eng. 15:193-203)",
     "doi": "10.1109/10.335859",
     "source_note": "AAindex1 record COSI940101 (Kawashima et al. 2008), which reproduces the published table; copied 2026-10-12."
+  },
+  "z_scales_5": {
+    "name": "z_scales_5",
+    "values": {
+      "A": [
+        0.24,
+        -2.32,
+        0.6,
+        -0.14,
+        1.3
+      ],
+      "C": [
+        0.84,
+        -1.67,
+        3.71,
+        0.18,
+        -2.65
+      ],
+      "D": [
+        3.98,
+        0.93,
+        1.93,
+        -2.46,
+        0.75
+      ],
+      "E": [
+        3.11,
+        0.26,
+        -0.11,
+        -3.04,
+        -0.25
+      ],
+      "F": [
+        -4.22,
+        1.94,
+        1.06,
+        0.54,
+        -0.62
+      ],
+      "G": [
+        2.05,
+        -4.06,
+        0.36,
+        -0.82,
+        -0.38
+      ],
+      "H": [
+        2.47,
+        1.95,
+        0.26,
+        3.9,
+        0.09
+      ],
+      "I": [
+        -3.89,
+        -1.73,
+        -1.71,
+        -0.84,
+        0.26
+      ],
+      "K": [
+        2.29,
+        0.89,
+        -2.49,
+        1.49,
+        0.31
+      ],
+      "L": [
+        -4.28,
+        -1.3,
+        -1.49,
+        0.72,
+        0.84
+      ],
+      "M": [
+        -2.85,
+        -0.22,
+        0.47,
+        1.94,
+        -0.98
+      ],
+      "N": [
+        3.05,
+        1.62,
+        1.04,
+        -1.15,
+        1.61
+      ],
+      "P": [
+        -1.66,
+        0.27,
+        1.84,
+        0.7,
+        2.0
+      ],
+      "Q": [
+        1.75,
+        0.5,
+        -1.44,
+        -1.34,
+        0.66
+      ],
+      "R": [
+        3.52,
+        2.5,
+        -3.5,
+        1.99,
+        -0.17
+      ],
+      "S": [
+        2.39,
+        -1.07,
+        1.15,
+        -1.39,
+        0.67
+      ],
+      "T": [
+        0.75,
+        -2.18,
+        -1.12,
+        -1.46,
+        -0.4
+      ],
+      "V": [
+        -2.59,
+        -2.64,
+        -1.54,
+        -0.85,
+        -0.02
+      ],
+      "W": [
+        -4.36,
+        3.94,
+        0.59,
+        3.44,
+        -1.59
+      ],
+      "Y": [
+        -2.54,
+        2.44,
+        0.43,
+        0.04,
+        -1.47
+      ]
+    },
+    "reference": "Sandberg M. et al. (1998). New chemical descriptors relevant for the design of biologically active peptides. A multivariate characterization of 87 amino acids. J Med Chem, 41(14), 2481-2491.",
+    "doi": "10.1021/jm9700575",
+    "source_note": "Transcribed 2026-10-12 programmatically from van Westen G.J.P. et al. (2013). Benchmarking of protein descriptor sets in proteochemometric modeling (part 1): comparative study of 13 amino acid descriptor sets. J Cheminform, 5, 41. Additional file 2 (CC-BY Pipeline Pilot component 'Protein Descriptor (Published)'), which embeds the published table; block appending properties Z1..Z5. Secondary source: the primary paper is paywalled and was not available to check. UNRESOLVED: differs from peptides.py at C Z3 (3.71 here, 3.75 in peptides.py), L Z4 (0.72 vs -0.72); check against the primary paper."
+  },
+  "vhse": {
+    "name": "vhse",
+    "values": {
+      "A": [
+        0.15,
+        -1.11,
+        -1.35,
+        -0.92,
+        0.02,
+        -0.91,
+        0.36,
+        -0.48
+      ],
+      "C": [
+        0.18,
+        -1.67,
+        -0.46,
+        -0.21,
+        0.0,
+        1.2,
+        -1.61,
+        -0.19
+      ],
+      "D": [
+        -1.15,
+        0.67,
+        -0.41,
+        -0.01,
+        -2.68,
+        1.31,
+        0.03,
+        0.56
+      ],
+      "E": [
+        -1.18,
+        0.4,
+        0.1,
+        0.36,
+        -2.16,
+        -0.17,
+        0.91,
+        0.02
+      ],
+      "F": [
+        1.52,
+        0.61,
+        0.96,
+        -0.16,
+        0.25,
+        0.28,
+        -1.33,
+        -0.2
+      ],
+      "G": [
+        -0.2,
+        -1.53,
+        -2.63,
+        2.28,
+        -0.53,
+        -1.18,
+        2.01,
+        -1.34
+      ],
+      "H": [
+        -0.43,
+        -0.25,
+        0.37,
+        0.19,
+        0.51,
+        1.28,
+        0.93,
+        0.65
+      ],
+      "I": [
+        1.27,
+        -0.14,
+        0.3,
+        -1.8,
+        0.3,
+        -1.61,
+        -0.16,
+        -0.13
+      ],
+      "K": [
+        -1.17,
+        0.7,
+        0.7,
+        0.8,
+        1.64,
+        0.67,
+        1.63,
+        0.13
+      ],
+      "L": [
+        1.36,
+        0.07,
+        0.26,
+        -0.8,
+        0.22,
+        -1.37,
+        0.08,
+        -0.62
+      ],
+      "M": [
+        1.01,
+        -0.53,
+        0.43,
+        0.0,
+        0.23,
+        0.1,
+        -0.86,
+        -0.68
+      ],
+      "N": [
+        -0.99,
+        0.0,
+        -0.37,
+        0.69,
+        -0.55,
+        0.85,
+        0.73,
+        -0.8
+      ],
+      "P": [
+        0.22,
+        -0.17,
+        -0.5,
+        0.05,
+        -0.01,
+        -1.34,
+        -0.19,
+        3.56
+      ],
+      "Q": [
+        -0.96,
+        0.12,
+        0.18,
+        0.16,
+        0.09,
+        0.42,
+        -0.2,
+        -0.41
+      ],
+      "R": [
+        -1.47,
+        1.45,
+        1.24,
+        1.27,
+        1.55,
+        1.47,
+        1.3,
+        0.83
+      ],
+      "S": [
+        -0.67,
+        -0.86,
+        -1.07,
+        -0.41,
+        -0.32,
+        0.27,
+        -0.64,
+        0.11
+      ],
+      "T": [
+        -0.34,
+        -0.51,
+        -0.55,
+        -1.06,
+        -0.06,
+        -0.01,
+        -0.79,
+        0.39
+      ],
+      "V": [
+        0.76,
+        -0.92,
+        -0.17,
+        -1.91,
+        0.22,
+        -1.4,
+        -0.24,
+        -0.03
+      ],
+      "W": [
+        1.5,
+        2.06,
+        1.79,
+        0.75,
+        0.75,
+        -0.13,
+        -1.01,
+        -0.85
+      ],
+      "Y": [
+        0.61,
+        1.6,
+        1.17,
+        0.73,
+        0.53,
+        0.25,
+        -0.96,
+        -0.52
+      ]
+    },
+    "reference": "Mei H. et al. (2005). A new set of amino acid descriptors and its application in peptide QSARs. Biopolymers, 80(6), 775-786.",
+    "doi": "10.1002/bip.20296",
+    "source_note": "Transcribed 2026-10-12 programmatically from van Westen G.J.P. et al. (2013). Benchmarking of protein descriptor sets in proteochemometric modeling (part 1): comparative study of 13 amino acid descriptor sets. J Cheminform, 5, 41. Additional file 2 (CC-BY Pipeline Pilot component 'Protein Descriptor (Published)'), which embeds the published table; block appending properties VHSE1..VHSE8. Secondary source: the primary paper is paywalled and was not available to check. UNRESOLVED: differs from peptides.py at L VHSE3 (0.26 here, 0.36 in peptides.py); check against the primary paper."
+  },
+  "st_scales": {
+    "name": "st_scales",
+    "values": {
+      "A": [
+        -1.552,
+        -0.791,
+        -0.627,
+        0.237,
+        -0.461,
+        -2.229,
+        0.283,
+        1.221
+      ],
+      "C": [
+        -1.276,
+        -0.401,
+        0.134,
+        0.859,
+        -0.196,
+        -0.72,
+        0.639,
+        -0.857
+      ],
+      "D": [
+        -0.907,
+        -0.054,
+        -0.781,
+        -0.248,
+        1.12,
+        0.101,
+        -0.245,
+        -0.075
+      ],
+      "E": [
+        -0.629,
+        0.39,
+        -0.38,
+        -0.366,
+        0.635,
+        0.514,
+        0.175,
+        0.367
+      ],
+      "F": [
+        -0.019,
+        0.024,
+        1.08,
+        -0.22,
+        -0.937,
+        0.57,
+        -0.357,
+        0.278
+      ],
+      "G": [
+        -1.844,
+        -0.018,
+        -0.184,
+        0.573,
+        -0.728,
+        -3.317,
+        0.166,
+        2.522
+      ],
+      "H": [
+        -0.225,
+        0.361,
+        0.079,
+        -1.037,
+        0.568,
+        0.273,
+        1.208,
+        -0.001
+      ],
+      "I": [
+        -0.785,
+        -1.01,
+        -0.349,
+        -0.097,
+        -0.402,
+        1.091,
+        -0.139,
+        -0.764
+      ],
+      "K": [
+        -0.504,
+        0.245,
+        0.297,
+        -0.065,
+        -0.387,
+        1.011,
+        0.525,
+        0.553
+      ],
+      "L": [
+        -0.826,
+        -0.379,
+        0.038,
+        -0.059,
+        -0.625,
+        1.025,
+        -0.229,
+        -0.129
+      ],
+      "M": [
+        -0.693,
+        0.498,
+        0.658,
+        0.457,
+        -0.231,
+        1.064,
+        0.248,
+        -0.778
+      ],
+      "N": [
+        -0.888,
+        -0.057,
+        -0.651,
+        -0.214,
+        0.917,
+        0.164,
+        -0.14,
+        -0.166
+      ],
+      "P": [
+        -1.049,
+        -0.407,
+        -0.067,
+        -0.066,
+        -0.813,
+        -0.89,
+        0.021,
+        -0.894
+      ],
+      "Q": [
+        -0.622,
+        0.228,
+        -0.193,
+        -0.105,
+        0.418,
+        0.474,
+        0.172,
+        0.408
+      ],
+      "R": [
+        -0.059,
+        0.731,
+        -0.013,
+        -0.096,
+        -0.253,
+        0.3,
+        1.256,
+        0.854
+      ],
+      "S": [
+        -1.343,
+        -0.311,
+        -0.917,
+        -0.049,
+        0.549,
+        -1.533,
+        0.166,
+        0.28
+      ],
+      "T": [
+        -1.061,
+        -0.928,
+        -0.911,
+        -0.063,
+        0.538,
+        -0.775,
+        -0.147,
+        -0.717
+      ],
+      "V": [
+        -1.133,
+        -0.893,
+        -0.325,
+        0.303,
+        -0.561,
+        -0.175,
+        -0.02,
+        -0.311
+      ],
+      "W": [
+        0.853,
+        0.039,
+        0.26,
+        -1.163,
+        0.16,
+        -0.202,
+        1.01,
+        0.195
+      ],
+      "Y": [
+        0.308,
+        0.569,
+        1.1,
+        -0.464,
+        -0.144,
+        -0.354,
+        -1.099,
+        0.162
+      ]
+    },
+    "reference": "Yang L. et al. (2010). ST-scale as a novel amino acid descriptor and its application in QSAM of peptides and analogues. Amino Acids, 38(3), 805-816.",
+    "doi": "10.1007/s00726-009-0287-y",
+    "source_note": "Transcribed 2026-10-12 programmatically from van Westen G.J.P. et al. (2013). Benchmarking of protein descriptor sets in proteochemometric modeling (part 1): comparative study of 13 amino acid descriptor sets. J Cheminform, 5, 41. Additional file 2 (CC-BY Pipeline Pilot component 'Protein Descriptor (Published)'), which embeds the published table; block appending properties ST1..ST8. Secondary source: the primary paper is paywalled and was not available to check. UNRESOLVED: differs from peptides.py at Q ST1 (-0.622 here, -0.662 in peptides.py), E ST2 (0.39 vs -0.39); check against the primary paper."
+  },
+  "t_scales": {
+    "name": "t_scales",
+    "values": {
+      "A": [
+        -9.11,
+        -1.63,
+        0.63,
+        1.04,
+        2.26
+      ],
+      "C": [
+        -7.35,
+        -0.86,
+        -0.33,
+        0.8,
+        0.98
+      ],
+      "D": [
+        -4.65,
+        0.75,
+        1.39,
+        -0.4,
+        1.05
+      ],
+      "E": [
+        -3.03,
+        1.82,
+        0.51,
+        -0.58,
+        0.43
+      ],
+      "F": [
+        0.49,
+        -0.94,
+        -0.63,
+        -1.27,
+        -0.44
+      ],
+      "G": [
+        -10.61,
+        -1.21,
+        -0.12,
+        0.75,
+        3.25
+      ],
+      "H": [
+        -1.01,
+        -1.31,
+        0.01,
+        -1.81,
+        -0.21
+      ],
+      "I": [
+        -4.25,
+        -0.28,
+        -0.15,
+        1.4,
+        -0.21
+      ],
+      "K": [
+        -2.59,
+        2.34,
+        -1.69,
+        0.41,
+        -0.21
+      ],
+      "L": [
+        -4.38,
+        0.28,
+        -0.49,
+        1.45,
+        0.02
+      ],
+      "M": [
+        -4.08,
+        0.98,
+        -2.34,
+        1.64,
+        -0.79
+      ],
+      "N": [
+        -4.62,
+        0.66,
+        1.16,
+        -0.22,
+        0.93
+      ],
+      "P": [
+        -5.11,
+        -3.54,
+        -0.53,
+        -0.36,
+        -0.29
+      ],
+      "Q": [
+        -3.0,
+        1.72,
+        0.28,
+        -0.39,
+        0.33
+      ],
+      "R": [
+        0.23,
+        3.89,
+        -1.16,
+        -0.39,
+        -0.06
+      ],
+      "S": [
+        -7.44,
+        -0.65,
+        0.68,
+        -0.17,
+        1.58
+      ],
+      "T": [
+        -5.97,
+        -0.62,
+        1.11,
+        0.31,
+        0.95
+      ],
+      "V": [
+        -5.87,
+        -0.94,
+        0.28,
+        1.1,
+        0.48
+      ],
+      "W": [
+        5.73,
+        -2.67,
+        -0.07,
+        -1.96,
+        -0.54
+      ],
+      "Y": [
+        2.08,
+        -0.47,
+        0.07,
+        -1.67,
+        -0.35
+      ]
+    },
+    "reference": "Tian F., Zhou P. & Li Z. (2007). T-scale as a novel vector of topological descriptors for amino acids and its application in QSARs of peptides. J Mol Struct, 830, 106-115.",
+    "doi": "10.1016/j.molstruc.2006.07.004",
+    "source_note": "Transcribed 2026-10-12 programmatically from van Westen G.J.P. et al. (2013). Benchmarking of protein descriptor sets in proteochemometric modeling (part 1): comparative study of 13 amino acid descriptor sets. J Cheminform, 5, 41. Additional file 2 (CC-BY Pipeline Pilot component 'Protein Descriptor (Published)'), which embeds the published table; block appending properties T1..T5. Secondary source: the primary paper is paywalled and was not available to check. Cross-checked: identical to peptides.py."
+  },
+  "ms_whim": {
+    "name": "ms_whim",
+    "values": {
+      "A": [
+        -0.73,
+        0.2,
+        -0.62
+      ],
+      "C": [
+        -0.66,
+        0.26,
+        -0.27
+      ],
+      "D": [
+        0.11,
+        -1.0,
+        -0.96
+      ],
+      "E": [
+        0.24,
+        -0.39,
+        -0.04
+      ],
+      "F": [
+        0.76,
+        0.85,
+        -0.34
+      ],
+      "G": [
+        -0.31,
+        -0.28,
+        -0.75
+      ],
+      "H": [
+        0.84,
+        0.67,
+        -0.78
+      ],
+      "I": [
+        -0.91,
+        0.83,
+        -0.25
+      ],
+      "K": [
+        -0.51,
+        0.08,
+        0.6
+      ],
+      "L": [
+        -0.74,
+        0.72,
+        -0.16
+      ],
+      "M": [
+        -0.7,
+        1.0,
+        -0.32
+      ],
+      "N": [
+        0.14,
+        0.2,
+        -0.66
+      ],
+      "P": [
+        -0.43,
+        0.73,
+        -0.6
+      ],
+      "Q": [
+        0.3,
+        1.0,
+        -0.3
+      ],
+      "R": [
+        -0.22,
+        0.27,
+        1.0
+      ],
+      "S": [
+        -0.8,
+        0.61,
+        -1.0
+      ],
+      "T": [
+        -0.58,
+        0.85,
+        -0.89
+      ],
+      "V": [
+        -1.0,
+        0.79,
+        -0.58
+      ],
+      "W": [
+        1.0,
+        0.98,
+        -0.47
+      ],
+      "Y": [
+        0.97,
+        0.66,
+        -0.16
+      ]
+    },
+    "reference": "Zaliani A. & Gancia E. (1999). MS-WHIM scores for amino acids: a new 3D-description for peptide QSAR and QSPR studies. J Chem Inf Comput Sci, 39(3), 525-533.",
+    "doi": "10.1021/ci980211b",
+    "source_note": "Transcribed 2026-10-12 programmatically from van Westen G.J.P. et al. (2013). Benchmarking of protein descriptor sets in proteochemometric modeling (part 1): comparative study of 13 amino acid descriptor sets. J Cheminform, 5, 41. Additional file 2 (CC-BY Pipeline Pilot component 'Protein Descriptor (Published)'), which embeds the published table; block appending properties MW1..MW3. Secondary source: the primary paper is paywalled and was not available to check. Cross-checked: identical to peptides.py."
+  },
+  "fasgai": {
+    "name": "fasgai",
+    "values": {
+      "A": [
+        0.207,
+        0.821,
+        -1.009,
+        1.387,
+        0.063,
+        -0.6
+      ],
+      "C": [
+        0.997,
+        0.021,
+        -1.419,
+        -2.08,
+        -0.799,
+        0.502
+      ],
+      "D": [
+        -1.298,
+        -0.444,
+        -0.584,
+        -0.175,
+        -0.259,
+        -1.762
+      ],
+      "E": [
+        -1.349,
+        1.388,
+        -0.361,
+        0.213,
+        0.424,
+        -1.303
+      ],
+      "F": [
+        1.247,
+        0.293,
+        1.336,
+        -0.026,
+        0.012,
+        -0.015
+      ],
+      "G": [
+        -0.205,
+        -2.219,
+        -1.656,
+        1.229,
+        -1.115,
+        -1.146
+      ],
+      "H": [
+        -0.27,
+        0.461,
+        -0.024,
+        -1.407,
+        0.001,
+        0.169
+      ],
+      "I": [
+        1.524,
+        0.536,
+        0.809,
+        0.734,
+        -0.196,
+        0.427
+      ],
+      "K": [
+        -1.387,
+        0.572,
+        0.285,
+        0.333,
+        -0.169,
+        1.157
+      ],
+      "L": [
+        1.2,
+        1.128,
+        0.703,
+        1.904,
+        0.536,
+        -0.141
+      ],
+      "M": [
+        0.886,
+        1.346,
+        0.277,
+        -0.913,
+        0.007,
+        -0.265
+      ],
+      "N": [
+        -1.009,
+        -0.939,
+        -0.428,
+        -0.397,
+        -0.539,
+        -0.605
+      ],
+      "P": [
+        -0.407,
+        -2.038,
+        -0.564,
+        -0.128,
+        3.847,
+        -1.008
+      ],
+      "Q": [
+        -0.88,
+        0.381,
+        -0.044,
+        -0.455,
+        -0.04,
+        0.405
+      ],
+      "R": [
+        -1.229,
+        0.378,
+        0.516,
+        -0.328,
+        -0.052,
+        2.728
+      ],
+      "S": [
+        -0.495,
+        -0.847,
+        -1.079,
+        0.582,
+        0.035,
+        -0.068
+      ],
+      "T": [
+        -0.032,
+        -0.45,
+        -0.61,
+        0.341,
+        0.117,
+        0.577
+      ],
+      "V": [
+        1.332,
+        0.545,
+        0.029,
+        1.026,
+        -0.229,
+        1.038
+      ],
+      "W": [
+        0.844,
+        -0.075,
+        2.069,
+        -1.36,
+        -0.81,
+        -0.38
+      ],
+      "Y": [
+        0.329,
+        -0.858,
+        1.753,
+        -0.479,
+        -0.835,
+        0.289
+      ]
+    },
+    "reference": "Liang G. & Li Z. (2007). Factor analysis scale of generalized amino acid information as the source of a new set of descriptors for elucidating the structure and activity relationships of cationic antimicrobial peptides. QSAR Comb Sci, 26(6), 754-763.",
+    "doi": "10.1002/qsar.200630145",
+    "source_note": "Transcribed 2026-10-12 programmatically from van Westen G.J.P. et al. (2013). Benchmarking of protein descriptor sets in proteochemometric modeling (part 1): comparative study of 13 amino acid descriptor sets. J Cheminform, 5, 41. Additional file 2 (CC-BY Pipeline Pilot component 'Protein Descriptor (Published)'), which embeds the published table; block appending properties F1..F6. Secondary source: the primary paper is paywalled and was not available to check. UNRESOLVED: differs from peptides.py at V F1 (1.332 here, -1.332 in peptides.py), P F6 (-1.008 vs -1.108); check against the primary paper."
+  },
+  "blosum_indices": {
+    "name": "blosum_indices",
+    "values": {
+      "A": [
+        0.077,
+        -0.916,
+        0.526,
+        0.004,
+        0.24,
+        0.19,
+        0.656,
+        -0.047,
+        1.357,
+        0.333
+      ],
+      "C": [
+        -1.084,
+        -1.112,
+        1.562,
+        0.814,
+        1.828,
+        -1.048,
+        -0.742,
+        0.379,
+        -0.121,
+        -0.102
+      ],
+      "D": [
+        1.551,
+        0.005,
+        0.323,
+        0.493,
+        -0.991,
+        0.01,
+        -1.615,
+        0.526,
+        -0.15,
+        -0.282
+      ],
+      "E": [
+        1.477,
+        0.229,
+        -0.67,
+        -0.355,
+        -0.284,
+        -0.075,
+        -1.014,
+        0.363,
+        0.769,
+        0.298
+      ],
+      "F": [
+        -1.619,
+        1.007,
+        -0.311,
+        0.623,
+        -0.549,
+        0.29,
+        -0.021,
+        0.098,
+        0.433,
+        -1.288
+      ],
+      "G": [
+        0.849,
+        0.174,
+        1.726,
+        0.093,
+        -0.548,
+        1.186,
+        1.213,
+        0.874,
+        0.009,
+        0.242
+      ],
+      "H": [
+        0.716,
+        1.548,
+        -0.802,
+        1.547,
+        0.35,
+        -0.785,
+        0.655,
+        -0.076,
+        -0.186,
+        0.99
+      ],
+      "I": [
+        -1.462,
+        -1.126,
+        -0.761,
+        0.382,
+        -0.599,
+        0.276,
+        -0.132,
+        0.198,
+        -0.216,
+        0.207
+      ],
+      "K": [
+        1.135,
+        -0.039,
+        -0.802,
+        -0.849,
+        0.819,
+        0.097,
+        0.213,
+        0.129,
+        0.176,
+        -0.85
+      ],
+      "L": [
+        -1.406,
+        -0.856,
+        -0.879,
+        -0.172,
+        0.032,
+        0.344,
+        0.109,
+        0.146,
+        -0.436,
+        -0.021
+      ],
+      "M": [
+        -0.963,
+        -0.585,
+        -0.972,
+        -0.528,
+        0.236,
+        0.365,
+        0.062,
+        0.208,
+        -0.56,
+        0.361
+      ],
+      "N": [
+        1.511,
+        0.215,
+        -0.046,
+        1.009,
+        0.12,
+        0.834,
+        -0.033,
+        -0.57,
+        -1.2,
+        -0.139
+      ],
+      "P": [
+        0.883,
+        -0.675,
+        0.382,
+        -0.869,
+        -1.243,
+        -2.023,
+        0.845,
+        -0.352,
+        -0.421,
+        -0.298
+      ],
+      "Q": [
+        1.094,
+        0.296,
+        -0.871,
+        -0.718,
+        0.5,
+        -0.08,
+        -0.442,
+        0.202,
+        0.384,
+        0.667
+      ],
+      "R": [
+        1.014,
+        0.189,
+        -0.86,
+        -0.609,
+        1.277,
+        0.195,
+        0.661,
+        0.175,
+        -0.219,
+        -0.52
+      ],
+      "S": [
+        0.844,
+        -0.448,
+        0.423,
+        0.317,
+        0.2,
+        0.541,
+        0.009,
+        -0.797,
+        0.624,
+        -0.129
+      ],
+      "T": [
+        0.188,
+        -0.733,
+        0.178,
+        -0.012,
+        0.022,
+        0.378,
+        -0.304,
+        -1.958,
+        0.149,
+        0.063
+      ],
+      "V": [
+        -1.127,
+        -1.227,
+        -0.633,
+        0.064,
+        -0.596,
+        0.158,
+        0.014,
+        0.016,
+        0.251,
+        0.607
+      ],
+      "W": [
+        -1.577,
+        2.281,
+        1.166,
+        -1.61,
+        0.122,
+        0.239,
+        -0.542,
+        -0.398,
+        -0.349,
+        0.499
+      ],
+      "Y": [
+        -1.142,
+        1.74,
+        -0.582,
+        0.747,
+        -0.119,
+        -0.475,
+        0.241,
+        -0.251,
+        0.713,
+        -0.251
+      ]
+    },
+    "reference": "Georgiev A.G. (2009). Interpretable numerical descriptors of amino acid space. J Comput Biol, 16(5), 703-723.",
+    "doi": "10.1089/cmb.2008.0173",
+    "source_note": "Transcribed 2026-10-12 programmatically from van Westen G.J.P. et al. (2013). Benchmarking of protein descriptor sets in proteochemometric modeling (part 1): comparative study of 13 amino acid descriptor sets. J Cheminform, 5, 41. Additional file 2 (CC-BY Pipeline Pilot component 'Protein Descriptor (Published)'), which embeds the published table; block appending properties B1..B10. Secondary source: the primary paper is paywalled and was not available to check. Cross-checked: agrees with peptides.py (2 dp) after rounding."
+  },
+  "protfp": {
+    "name": "protfp",
+    "values": {
+      "A": [
+        -0.1,
+        -4.94,
+        -2.13,
+        1.7,
+        -0.39,
+        1.06,
+        -1.39,
+        0.97
+      ],
+      "C": [
+        4.62,
+        -3.54,
+        1.5,
+        -1.26,
+        3.27,
+        -0.34,
+        -0.47,
+        -0.23
+      ],
+      "D": [
+        -6.61,
+        0.94,
+        -3.04,
+        -4.58,
+        0.48,
+        -1.31,
+        0.1,
+        0.94
+      ],
+      "E": [
+        -5.1,
+        2.2,
+        -3.59,
+        -2.26,
+        -2.14,
+        1.35,
+        -0.45,
+        -1.31
+      ],
+      "F": [
+        6.76,
+        0.88,
+        0.89,
+        -1.12,
+        -0.49,
+        -0.55,
+        -0.87,
+        1.05
+      ],
+      "G": [
+        -5.7,
+        -8.72,
+        4.18,
+        -1.35,
+        -0.31,
+        2.91,
+        0.32,
+        -0.11
+      ],
+      "H": [
+        0.17,
+        2.14,
+        1.2,
+        0.71,
+        1.16,
+        -0.38,
+        -1.85,
+        -2.79
+      ],
+      "I": [
+        6.58,
+        -1.73,
+        -2.49,
+        1.09,
+        -0.34,
+        -0.28,
+        1.97,
+        -0.92
+      ],
+      "K": [
+        -4.99,
+        5.0,
+        0.7,
+        3.0,
+        -1.23,
+        1.41,
+        0.19,
+        0.87
+      ],
+      "L": [
+        5.76,
+        -1.33,
+        -1.71,
+        0.63,
+        -1.7,
+        0.71,
+        -0.05,
+        -0.51
+      ],
+      "M": [
+        5.11,
+        0.19,
+        -1.02,
+        0.15,
+        0.13,
+        -0.3,
+        -2.95,
+        0.5
+      ],
+      "N": [
+        -4.88,
+        0.81,
+        0.14,
+        -0.14,
+        1.23,
+        -0.65,
+        1.02,
+        -1.94
+      ],
+      "P": [
+        -3.82,
+        -2.31,
+        3.45,
+        1.0,
+        -3.22,
+        -3.54,
+        -0.36,
+        -0.3
+      ],
+      "Q": [
+        -3.95,
+        2.88,
+        -0.83,
+        0.52,
+        0.9,
+        0.55,
+        -0.08,
+        0.64
+      ],
+      "R": [
+        -2.79,
+        6.6,
+        1.21,
+        2.07,
+        1.67,
+        0.76,
+        0.0,
+        0.32
+      ],
+      "S": [
+        -4.57,
+        -2.55,
+        -0.67,
+        1.11,
+        0.99,
+        -1.02,
+        0.11,
+        0.65
+      ],
+      "T": [
+        -2.0,
+        -1.77,
+        -0.7,
+        1.02,
+        1.06,
+        -1.2,
+        0.74,
+        1.65
+      ],
+      "V": [
+        5.04,
+        -2.9,
+        -2.29,
+        1.38,
+        0.06,
+        0.08,
+        1.79,
+        -0.38
+      ],
+      "W": [
+        7.33,
+        4.55,
+        2.77,
+        -2.41,
+        -1.08,
+        1.04,
+        0.23,
+        0.59
+      ],
+      "Y": [
+        3.14,
+        3.59,
+        2.45,
+        -1.27,
+        -0.06,
+        -0.29,
+        1.99,
+        0.3
+      ]
+    },
+    "reference": "van Westen G.J.P. et al. (2013). Benchmarking of protein descriptor sets in proteochemometric modeling (part 1): comparative study of 13 amino acid descriptor sets. J Cheminform, 5, 41.",
+    "doi": "10.1186/1758-2946-5-41",
+    "source_note": "ProtFP (PCA, 8 components) from Additional file 2 of the primary paper (block appending PCA1..PCA8); transcribed 2026-10-12. Cross-checked: identical to peptides.py."
+  },
+  "atchley_factors": {
+    "name": "atchley_factors",
+    "values": {
+      "A": [
+        -0.591,
+        -1.302,
+        -0.733,
+        1.57,
+        -0.146
+      ],
+      "C": [
+        -1.343,
+        0.465,
+        -0.862,
+        -1.02,
+        -0.255
+      ],
+      "D": [
+        1.05,
+        0.302,
+        -3.656,
+        -0.259,
+        -3.242
+      ],
+      "E": [
+        1.357,
+        -1.453,
+        1.477,
+        0.113,
+        -0.837
+      ],
+      "F": [
+        -1.006,
+        -0.59,
+        1.891,
+        -0.397,
+        0.412
+      ],
+      "G": [
+        -0.384,
+        1.652,
+        1.33,
+        1.045,
+        2.064
+      ],
+      "H": [
+        0.336,
+        -0.417,
+        -1.673,
+        -1.474,
+        -0.078
+      ],
+      "I": [
+        -1.239,
+        -0.547,
+        2.131,
+        0.393,
+        0.816
+      ],
+      "K": [
+        1.831,
+        -0.561,
+        0.533,
+        -0.277,
+        1.648
+      ],
+      "L": [
+        -1.019,
+        -0.987,
+        -1.505,
+        1.266,
+        -0.912
+      ],
+      "M": [
+        -0.663,
+        -1.524,
+        2.219,
+        -1.005,
+        1.212
+      ],
+      "N": [
+        0.945,
+        0.828,
+        1.299,
+        -0.169,
+        0.933
+      ],
+      "P": [
+        0.189,
+        2.081,
+        -1.628,
+        0.421,
+        -1.392
+      ],
+      "Q": [
+        0.931,
+        -0.179,
+        -3.005,
+        -0.503,
+        -1.853
+      ],
+      "R": [
+        1.538,
+        -0.055,
+        1.502,
+        0.44,
+        2.897
+      ],
+      "S": [
+        -0.228,
+        1.399,
+        -4.76,
+        0.67,
+        -2.647
+      ],
+      "T": [
+        -0.032,
+        0.326,
+        2.213,
+        0.908,
+        1.313
+      ],
+      "V": [
+        -1.337,
+        -0.279,
+        -0.544,
+        1.242,
+        -1.262
+      ],
+      "W": [
+        -0.595,
+        0.009,
+        0.672,
+        -2.128,
+        -0.184
+      ],
+      "Y": [
+        0.26,
+        0.83,
+        3.097,
+        -0.838,
+        1.512
+      ]
+    },
+    "reference": "Atchley W.R. et al. (2005). Solving the protein sequence metric problem. PNAS, 102(18), 6395-6400.",
+    "doi": "10.1073/pnas.0408677102",
+    "source_note": "Table 2 of the primary paper (PMC1088356), transcribed programmatically 2026-10-12. Cross-checked: agrees with peptides.py to the 3 dp published."
   }
 }
