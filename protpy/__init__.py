@@ -7,6 +7,7 @@ from .scales import *
 from .physicochemical import *
 from .complexity import *
 from .signal import *
+from .structural import *
 from .utils import get_descriptor_info, list_descriptors, print_descriptor_info
 from .encode import all_descriptors, encode_dataset, read_sequences_from_file
 
@@ -52,4 +53,6 @@ descriptor_names = ["amino_acid_composition", "dipeptide_composition", "tripepti
     "hydrophobicity_profile", "hydrophobic_ratio", "half_life", "ivywrel_index", "cvp_bias", "flexibility",
     "wootton_federhen_complexity", "linguistic_complexity", "lempel_ziv_complexity",
     "fft_descriptors", "dct_descriptors",
+    "aggrescan", "uversky_charge_hydropathy", "fold_index", "disorder_propensity", "transmembrane_features",
+    "signal_peptide_features", "functional_site_counts", "plaac", "antigenicity_surface", "cysteine_features",
     ]

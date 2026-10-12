@@ -1255,10 +1255,11 @@ def hydrophobic_moment(sequence: str, window: int = 11, angle: float | str = 100
     Default angle of 100° corresponds to an alpha-helix; 160° is used for
     beta-strands (Eisenberg et al. 1984).
 
-    By default H is protpy's normalised hydrophobicity table (the values used
-    for PseAAC, A = 0.62, also widely quoted as the "Eisenberg consensus" scale).
-    ``scale`` selects another single-value scale, e.g. "eisenberg" (AAindex
-    EISD840101, Eisenberg 1984, A = 0.25), "kyte_doolittle" or any AAindex1 code.
+    By default H is protpy's normalised hydrophobicity table (A = 0.62), which is
+    the normalised consensus scale of Eisenberg, Schwarz, Komarony & Wall (1984,
+    J Mol Biol 179:125-142) as listed by ExPASy ProtScale. ``scale`` selects
+    another single-value scale, e.g. "eisenberg" (AAindex EISD840101, Eisenberg
+    1984 Annu Rev Biochem, A = 0.25), "kyte_doolittle" or any AAindex1 code.
 
     Parameters
     ==========

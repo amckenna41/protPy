@@ -35,8 +35,10 @@ V1_4_2_DESCRIPTORS = [
 def _sequences() -> dict:
     seqs = {}
     for name in sorted(os.listdir(TEST_DATA)):
-        if name.endswith(".fasta"):
-            seqs[name] = str(next(SeqIO.parse(os.path.join(TEST_DATA, name), "fasta")).seq)
+        #only the original v1.4.2 test sequences are pinned
+        if name.startswith("test_fasta") and name.endswith(".fasta"):
+            with open(os.path.join(TEST_DATA, name)) as f:
+                seqs[name] = str(next(SeqIO.parse(f, "fasta")).seq)
     return seqs
 
 
