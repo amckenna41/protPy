@@ -84,7 +84,8 @@ def charge_fractions(sequence: str) -> pd.DataFrame:
     Returns
     =======
     :charge_fractions_df: pd.DataFrame
-        pandas DataFrame of shape 1 x 4, columns ``FCR``, ``FPlus``, ``FMinus``, ``Sigma``.
+        pandas DataFrame of shape 1 x 4, columns ``Charge_FCR``, ``Charge_FPlus``,
+        ``Charge_FMinus`` and ``Charge_Sigma``.
     """
     #validate input protein sequence
     sequence = _validate_sequence(sequence)
@@ -93,7 +94,8 @@ def charge_fractions(sequence: str) -> pd.DataFrame:
     f_plus, f_minus = np.mean(q > 0), np.mean(q < 0)
     fcr, ncpr_ = f_plus + f_minus, f_plus - f_minus
     sigma = ncpr_ ** 2 / fcr if fcr else 0.0
-    return _to_df([fcr, f_plus, f_minus, sigma], ["FCR", "FPlus", "FMinus", "Sigma"])
+    #prefixed so "FCR" cannot clash with the tripeptide-composition column of the same name
+    return _to_df([fcr, f_plus, f_minus, sigma], ["Charge_FCR", "Charge_FPlus", "Charge_FMinus", "Charge_Sigma"])
 
 #################################### NCPR #################################################
 
@@ -144,18 +146,29 @@ def _delta_max(n_pos: int, n_neg: int, length: int, g: int, sigma: float) -> flo
     """
     Maximal delta over the most segregated arrangements of the composition: a block of
     positives and a block of negatives, with the neutral residues split across the three
-    gaps around them. Every split is tried (O(n0^2) candidates), in chunks.
+    gaps around them (left a, between b, right c).
+
+    Blobs lying entirely in a neutral flank contribute (0 - sigma)^2 whatever the flank's
+    length, so for a given b only flank lengths up to g - 1 are distinct. Trying every b
+    with those a/c splits covers every distinct delta in O(n0 x g) candidates instead of
+    the O(n0^2) of a full enumeration.
     """
     n0 = length - n_pos - n_neg
-    best = 0.0
+    candidates = set()
+    for b in range(n0 + 1):
+        rest = n0 - b
+        for k in range(min(g, rest + 1)):
+            candidates.add((k, b))
+            candidates.add((rest - k, b))
+    candidates = np.array(sorted(candidates))
     idx = np.arange(length)
-    for a in range(n0 + 1):
-        #a neutrals, positive block, b neutrals, negative block, remaining neutrals
-        b = np.arange(n0 - a + 1)[:, None]
-        pos = (idx >= a) & (idx < a + n_pos)
-        neg = (idx >= a + n_pos + b) & (idx < a + n_pos + b + n_neg)
-        pos = np.broadcast_to(pos, neg.shape).astype(float)
-        best = max(best, float(_delta(pos, neg.astype(float), g, sigma).max()))
+    best = 0.0
+    #chunk the (candidate x residue) arrays to bound memory on long sequences
+    for chunk in np.array_split(candidates, max(1, len(candidates) // 1000)):
+        a, b = chunk[:, :1], chunk[:, 1:]
+        pos = ((idx >= a) & (idx < a + n_pos)).astype(float)
+        neg = ((idx >= a + n_pos + b) & (idx < a + n_pos + b + n_neg)).astype(float)
+        best = max(best, float(_delta(pos, neg, g, sigma).max()))
     return best
 
 
@@ -171,7 +184,8 @@ def kappa(sequence: str, blob_sizes: tuple[int, ...] = (5, 6)) -> pd.DataFrame:
     where sigma = NCPR^2 / FCR of the whole sequence and delta_max,g is the
     largest delta over the maximally segregated arrangements of the same
     composition (a positive block and a negative block with the neutral residues
-    distributed over the three surrounding gaps). kappa is the mean of kappa_g
+    distributed over the three surrounding gaps; every distinct arrangement is
+    evaluated). kappa is the mean of kappa_g
     over ``blob_sizes`` (5 and 6 in [2]); 0 means well mixed and 1 fully
     segregated. Charges: K, R = +1; D, E = -1; H = 0.
 
@@ -231,7 +245,7 @@ def sequence_charge_decoration(sequence: str) -> pd.DataFrame:
     Returns
     =======
     :scd_df: pd.DataFrame
-        pandas DataFrame of shape 1 x 1, column ``SCD``.
+        pandas DataFrame of shape 1 x 1, column ``Charge_SCD``.
     """
     #validate input protein sequence
     sequence = _validate_sequence(sequence)
@@ -241,7 +255,8 @@ def sequence_charge_decoration(sequence: str) -> pd.DataFrame:
     #only charged residues contribute; pairwise over them is O(n_charged^2)
     m, n = np.triu_indices(len(idx), k=1)
     scd = np.sum(q[idx[m]] * q[idx[n]] * np.sqrt(idx[n] - idx[m])) / len(sequence)
-    return _to_df([scd], ["SCD"])
+    #prefixed so "SCD" cannot clash with the tripeptide-composition column of the same name
+    return _to_df([scd], ["Charge_SCD"])
 
 #################################### Charge Density #######################################
 

@@ -36,13 +36,13 @@ class ProtpyChargeTests(unittest.TestCase):
 
     def test_charge_fractions(self):
         df = protpy.charge_fractions("KKDD")
-        self.assertEqual(list(df.columns), ["FCR", "FPlus", "FMinus", "Sigma"])
+        self.assertEqual(list(df.columns), ["Charge_FCR", "Charge_FPlus", "Charge_FMinus", "Charge_Sigma"])
         self.assertEqual(df.values[0].tolist(), [1.0, 0.5, 0.5, 0.0])
         #H is neutral; sigma = NCPR^2 / FCR
         df = protpy.charge_fractions("KKKDAAHH")
-        self.assertEqual(df["FCR"].iloc[0], 0.5)
-        self.assertEqual(df["Sigma"].iloc[0], round(0.25 ** 2 / 0.5, 3))
-        self.assertEqual(protpy.charge_fractions("AAAA")["Sigma"].iloc[0], 0.0)
+        self.assertEqual(df["Charge_FCR"].iloc[0], 0.5)
+        self.assertEqual(df["Charge_Sigma"].iloc[0], round(0.25 ** 2 / 0.5, 3))
+        self.assertEqual(protpy.charge_fractions("AAAA")["Charge_Sigma"].iloc[0], 0.0)
         self._check_invalid(protpy.charge_fractions)
 
     def test_ncpr(self):
@@ -71,14 +71,14 @@ class ProtpyChargeTests(unittest.TestCase):
         self._check_invalid(protpy.kappa)
 
     def test_scd(self):
-        self.assertEqual(protpy.sequence_charge_decoration("AAAA")["SCD"].iloc[0], 0.0)
+        self.assertEqual(protpy.sequence_charge_decoration("AAAA")["Charge_SCD"].iloc[0], 0.0)
         #brute force
         q = [1 if aa in "KR" else -1 if aa in "DE" else 0 for aa in SEQ]
         ref = sum(q[m] * q[n] * math.sqrt(m - n) for m in range(len(q)) for n in range(m)) / len(q)
-        self.assertAlmostEqual(protpy.sequence_charge_decoration(SEQ)["SCD"].iloc[0], round(ref, 3))
+        self.assertAlmostEqual(protpy.sequence_charge_decoration(SEQ)["Charge_SCD"].iloc[0], round(ref, 3))
         #segregated charges are more negative than mixed
-        self.assertLess(protpy.sequence_charge_decoration("E" * 25 + "K" * 25)["SCD"].iloc[0],
-                        protpy.sequence_charge_decoration("EK" * 25)["SCD"].iloc[0])
+        self.assertLess(protpy.sequence_charge_decoration("E" * 25 + "K" * 25)["Charge_SCD"].iloc[0],
+                        protpy.sequence_charge_decoration("EK" * 25)["Charge_SCD"].iloc[0])
         self._check_invalid(protpy.sequence_charge_decoration)
 
     def test_charge_density(self):
