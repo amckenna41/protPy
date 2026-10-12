@@ -470,7 +470,7 @@ The descriptors that accept custom parameters and their available keyword argume
    * - ``motif_composition``
      - ``motifs`` (dict[str, str] | None, default None)
    * - ``aggregation_propensity``
-     - ``window`` (int, default 5), ``hydrophobicity_threshold`` (float, default 2.0), ``charge_threshold`` (int, default 1)
+     - ``window`` (int, default 5), ``hydrophobicity_threshold`` (float, default 2.0), ``charge_threshold`` (int, default 0)
    * - ``hydrophobic_moment``
      - ``window`` (int, default 11), ``angle`` (float, default 100)
    * - ``pseudo_amino_acid_composition``

@@ -43,7 +43,7 @@ class ProtpyConjointTriadTests(unittest.TestCase):
         conjoint_triad_seq1 = protpy.conjoint_triad(self.protein_seq1)
         #testing first 10 columns 
         conjoint_triad_seq1_expected_values = pd.DataFrame(columns=["conj_triad_111", "conj_triad_112", "conj_triad_113", "conj_triad_114", "conj_triad_115", "conj_triad_116", "conj_triad_117", "conj_triad_121", "conj_triad_122", "conj_triad_123"])
-        conjoint_triad_seq1_expected_values.loc[0] = [7, 17, 11, 3, 6, 6, 2, 16, 11, 19]
+        conjoint_triad_seq1_expected_values.loc[0] = [9, 17, 11, 3, 6, 6, 2, 16, 11, 19]
 
         self.assertIsInstance(conjoint_triad_seq1, pd.DataFrame, 
             'Expected output to be a DataFrame, got {}.'.format(type(conjoint_triad_seq1)))

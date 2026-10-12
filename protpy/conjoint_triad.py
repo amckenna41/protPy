@@ -4,6 +4,7 @@
 
 from __future__ import annotations
 
+from collections import Counter
 import pandas as pd
 
 """
@@ -63,12 +64,15 @@ def conjoint_triad(sequence: str) -> pd.DataFrame:
     for i in _aa_triads:
         protein_num = protein_num.replace(i, str(_aa_triads[i]))
 
+    #count overlapping triads with a sliding window (str.count misses overlaps, e.g. "111" in "11111")
+    triad_counts = Counter(protein_num[i:i+3] for i in range(len(protein_num) - 2))
+
     #calculate 7 triads for amino acids
     for i in range(1, 8):
         for j in range(1, 8):
             for k in range(1, 8):
                 temp = str(i) + str(j) + str(k)
-                conjoint_triad["conj_triad_" + temp] = protein_num.count(temp)
+                conjoint_triad["conj_triad_" + temp] = triad_counts[temp]
     
     #transform descriptor values to dataframe
     conjoint_triad_df = pd.DataFrame([list(conjoint_triad.values())], columns=list(conjoint_triad.keys()))

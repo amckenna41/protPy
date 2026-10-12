@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 import os
+import csv
 import pandas as pd
 from tqdm import tqdm as _tqdm
 
@@ -23,7 +24,6 @@ from .composition import (
     kmer_composition,
     reduced_alphabet_composition,
     motif_composition,
-    amino_acid_pair_composition,
     aliphatic_index,
     extinction_coefficient,
     boman_index,
@@ -69,7 +69,7 @@ def all_descriptors(
     sequence: str,
     params: dict[str, dict] | None = None,
     show_progress: bool = False,
-    output_file: str | None = "descriptors.csv",
+    output_file: str | None = None,
     save_each_sequence: bool = True,
     _show_descriptor_list: bool = True,
 ) -> pd.DataFrame:
@@ -131,11 +131,13 @@ def all_descriptors(
         When ``True``, display a ``tqdm`` progress bar that names the
         descriptor currently being computed and tracks overall progress.
 
-    :output_file: str | None (default="descriptors.csv")
-        Path to the CSV file where results are written.  Pass ``None`` to
-        disable all file output.  When calling this function in a loop over
+    :output_file: str | None (default=None)
+        Path to the CSV file where results are written.  ``None`` (default)
+        disables all file output.  When calling this function in a loop over
         multiple sequences the rows are accumulated in the file across calls;
-        each call appends one row to any previously saved sequences.
+        each call appends one row to any previously saved sequences.  A
+        ``ValueError`` is raised, and the file left untouched, if an existing
+        file has different columns.
 
     :save_each_sequence: bool (default=True)
         When ``True``, the output CSV is updated once after all descriptors
@@ -210,7 +212,6 @@ def all_descriptors(
           if _kmer_k not in (2, 3) else []),
         ("[Composition]    Reduced alphabet composition",           lambda: reduced_alphabet_composition(sequence, **_p("reduced_alphabet_composition"))),
         ("[Composition]    Motif composition",                      lambda: motif_composition(sequence, **_p("motif_composition"))),
-        ("[Composition]    Amino acid pair composition",            lambda: amino_acid_pair_composition(sequence)),
         ("[Composition]    Aliphatic index",                        lambda: aliphatic_index(sequence)),
         ("[Composition]    Extinction coefficient",                 lambda: extinction_coefficient(sequence)),
         ("[Composition]    Boman index",                            lambda: boman_index(sequence)),
@@ -226,7 +227,7 @@ def all_descriptors(
         # ── Conjoint Triad ─────────────────────────────────────────────────────
         ("[Conjoint Triad]  Conjoint triad",                       lambda: _conjoint_triad(sequence)),
         # ── CTD ────────────────────────────────────────────────────────────────
-        ("[CTD]             Composition, transition & distribution",lambda: ctd_(sequence, all_ctd=True, **_p("ctd_"))),
+        ("[CTD]             Composition, transition & distribution",lambda: ctd_(sequence, **{"all_ctd": True, **_p("ctd_")})),
         # ── Sequence Order ─────────────────────────────────────────────────────
         ("[Sequence Order]  Sequence order coupling number",        lambda: sequence_order_coupling_number_all(sequence, **_p("sequence_order_coupling_number_all"))),
         ("[Sequence Order]  Quasi sequence order",                  lambda: quasi_sequence_order_all(sequence, **_p("quasi_sequence_order_all"))),
@@ -235,20 +236,6 @@ def all_descriptors(
     descriptor_names = [label.split("]", 1)[1].strip() for label, _ in steps]
     if _show_descriptor_list:
         print("Calculating descriptors: " + ", ".join(descriptor_names))
-
-    # Load any rows already saved from previous sequences in this run so they
-    # are preserved when we rewrite the file after each checkpoint.
-    existing_df: pd.DataFrame | None = None
-    if output_file is not None and os.path.isfile(output_file):
-        try:
-            existing_df = pd.read_csv(output_file)
-        except Exception:
-            existing_df = None
-
-    def _checkpoint(frames_so_far: list[pd.DataFrame]) -> None:
-        partial = pd.concat(frames_so_far, axis=1)
-        out = pd.concat([existing_df, partial], ignore_index=True) if existing_df is not None else partial
-        out.to_csv(output_file, index=False)
 
     frames: list[pd.DataFrame] = []
 
@@ -272,7 +259,8 @@ def all_descriptors(
     result = pd.concat(frames, axis=1)
 
     if output_file is not None and save_each_sequence:
-        _checkpoint(frames)
+        _prepare_output_file(output_file, list(result.columns))
+        result.to_csv(output_file, mode="a", header=False, index=False)
 
     return result
 
@@ -318,10 +306,13 @@ def encode_dataset(
 
     :output_file: str | None (default="descriptors.csv")
         Path to the CSV file where results are written.  Each completed row
-        (identifier prepended) is flushed immediately after that sequence
+        (identifier prepended) is appended immediately after that sequence
         finishes, so progress is preserved if the process is interrupted.
-        Rows already present in the file from a previous run are retained.
-        Pass ``None`` to disable all file output.
+        Rows already present in the file from a previous run are retained,
+        except rows whose identifier is encoded again in this run, which are
+        replaced.  A ``ValueError`` is raised, and the file left untouched, if
+        an existing file has different columns.  Pass ``None`` to disable all
+        file output.
 
     :save_each_sequence: bool (default=True)
         When ``True``, the CSV is updated after each sequence completes.
@@ -394,14 +385,6 @@ def encode_dataset(
             f"sequences must be a list[str] or pd.DataFrame, got {type(sequences)}."
         )
 
-    # Snapshot any previously saved rows so they are preserved on each flush.
-    initial_df: pd.DataFrame | None = None
-    if output_file is not None and os.path.isfile(output_file):
-        try:
-            initial_df = pd.read_csv(output_file)
-        except Exception:
-            pass
-
     completed: list[pd.DataFrame] = []
     total = len(seqs)
 
@@ -428,19 +411,41 @@ def encode_dataset(
         completed.append(row_df)
 
         if output_file is not None and save_each_sequence:
-            new_rows = pd.concat(completed, ignore_index=True)
-            # Only prepend the initial snapshot when its columns exactly match the
-            # current run (mismatches arise from stale CSVs with mangled duplicate
-            # column names written by a prior buggy run).
-            if initial_df is not None and list(initial_df.columns) == list(new_rows.columns):
-                out = pd.concat([initial_df, new_rows], ignore_index=True)
-            else:
-                out = new_rows
-            out.to_csv(output_file, index=False)
+            if idx == 1:
+                _prepare_output_file(output_file, list(row_df.columns), replace_ids=ids)
+            row_df.to_csv(output_file, mode="a", header=False, index=False)
 
     if not completed:
         return pd.DataFrame()
     return pd.concat(completed, ignore_index=True)
+
+
+def _prepare_output_file(output_file: str, columns: list, replace_ids: list | None = None) -> None:
+    """
+    Get ``output_file`` ready for rows to be appended. A missing or empty file
+    gets a header row. An existing file must have exactly ``columns`` as its
+    header, otherwise a ValueError is raised and the file is not modified.
+    When ``replace_ids`` is given, existing rows whose first column matches
+    one of them are removed so a re-run does not duplicate them.
+    """
+    if not os.path.isfile(output_file) or os.path.getsize(output_file) == 0:
+        with open(output_file, "w", newline="") as fh:
+            csv.writer(fh).writerow(columns)
+        return
+
+    with open(output_file, newline="") as fh:
+        rows = list(csv.reader(fh))
+    if rows[0] != [str(c) for c in columns]:
+        raise ValueError(
+            f"Existing output file '{output_file}' has different columns from this run; "
+            "refusing to overwrite it. Pass a different output_file or remove the file."
+        )
+    if replace_ids:
+        replace = {str(i) for i in replace_ids}
+        kept = [rows[0]] + [r for r in rows[1:] if r and r[0] not in replace]
+        if len(kept) != len(rows):
+            with open(output_file, "w", newline="") as fh:
+                csv.writer(fh).writerows(kept)
 
 
 def _parse_fasta(filepath: str) -> list[str]:

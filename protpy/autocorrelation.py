@@ -4,7 +4,6 @@
 
 from __future__ import annotations
 
-import numpy as np
 import pandas as pd
 import math
 from aaindex import aaindex1
@@ -25,7 +24,7 @@ References
 """
 
 #list of amino acids
-from ._constants import amino_acids, _validate_sequence
+from ._constants import amino_acids, _validate_sequence, _validate_int
     
 ############################### MoreauBroto Autocorrelation ###############################
 
@@ -82,49 +81,13 @@ def moreaubroto_autocorrelation(sequence: str, lag: int = 30,
     #validate input protein sequence
     sequence = _validate_sequence(sequence)
 
-    #validate lag, set default lag if invalid value input
-    if (lag>=len(sequence) or (lag<0) or not (isinstance(lag, int))):
+    #validate lag; fall back to the default of 30 when lag exceeds the sequence length
+    lag = _validate_int("lag", lag)
+    if lag >= len(sequence):
         lag = 30
 
-    #validate that at least 1 property input to function
-    if (properties == "" or properties == []):
-        raise ValueError('At least one property must be passed into function.')
-
-    #if 1 property passed into function, wrap it to an iterable list
-    if (isinstance(properties, str)):
-        properties = [properties]
-    
-    #initialise dicts to store AAI properties and values
-    aai_properties = {}
-    for prop in properties:
-        #raise value error if accession number not found in aaindex1
-        if not (prop in aaindex1.record_codes()):
-            raise ValueError(f"Property {prop} not found in list of available properties in the aaindex1:\n{properties}.")
-        aai_properties[prop] = {}
-
-    #iterate through list of properties, getting property values for accession numbers from AAIndex1
-    for prop in list(aai_properties.keys()):
-        #get property values from AAIndex 
-        aaindex1[prop].values.pop('-', None)
-        prop_amino_acid_values = aaindex1[prop].values
-     
-        #normalise property values if applicable, calculate mean and std dev
-        aai_property_vals = {}
-        if (normalize):
-            for i, j in prop_amino_acid_values.items():
-                aai_property_vals[i] = (j - (sum(prop_amino_acid_values.values()) / 
-                    len(prop_amino_acid_values.values()))) / _std(prop_amino_acid_values.values(), ddof=0)
-        else:
-            #use raw (unnormalized) property values
-            for i, j in prop_amino_acid_values.items():
-                aai_property_vals[i] = j
-        aa_counter = 0
-
-        #assign property and associated amino acid values to aai_property_vals array
-        for i, j in aai_property_vals.items():
-            aai_property_vals[amino_acids[aa_counter]] = aai_property_vals[i]
-            aa_counter+=1
-        aai_properties[prop] = aai_property_vals
+    #get (optionally normalized) property values for each AAIndex accession number
+    aai_properties = _get_properties(properties, normalize)
 
     #store resultant autocorrelation values
     moreaubroto_autocorrelation = {}
@@ -135,12 +98,9 @@ def moreaubroto_autocorrelation(sequence: str, lag: int = 30,
             temp = 0  # reset per lag
             for j in range(len(sequence)-i):
                 temp = temp + aai_properties[key][sequence[j]] * aai_properties[key][sequence[j+i]]
-            if (len(sequence) - i == 0):
-                moreaubroto_autocorrelation["MBAuto_" + key + "_" + str(i)] = round(
-                    temp / (len(sequence)), 3)
-            else:
-                moreaubroto_autocorrelation["MBAuto_" + key + "_" + str(i)] = round(
-                    temp / (len(sequence) - i), 3)
+            #lags with no residue pairs (lag >= sequence length) are 0
+            moreaubroto_autocorrelation["MBAuto_" + key + "_" + str(i)] = (
+                round(temp / (len(sequence) - i), 3) if len(sequence) > i else 0.0)
 
     #transform values and columns to DataFrame
     moreaubroto_autocorrelation_df = pd.DataFrame([list(moreaubroto_autocorrelation.values())], 
@@ -180,50 +140,13 @@ def moran_autocorrelation(sequence: str, lag: int = 30,
     #validate input protein sequence
     sequence = _validate_sequence(sequence)
 
-    #validate lag, set default lag if invalid value input
-    if (lag>=len(sequence) or (lag<0) or not (isinstance(lag, int))):
+    #validate lag; fall back to the default of 30 when lag exceeds the sequence length
+    lag = _validate_int("lag", lag)
+    if lag >= len(sequence):
         lag = 30
 
-    #validate at least 1 property input to function
-    if (properties == "" or properties == []):
-        raise ValueError('At least one property must be passed into function.')
-
-    #if 1 property passed into function, wrap it to an iterable list
-    if (isinstance(properties, str)):
-        properties = [properties]
-
-    #initialise dicts to store AAI properties and values
-    aai_properties = {}
-    for prop in properties:
-        #raise value error if accession number not found in aaindex1
-        if not (prop in aaindex1.record_codes()):
-            raise ValueError(f"Property {prop} not found in list of available properties in the aaindex1:\n{properties}.")
-        aai_properties[prop] = {}
-
-    #iterate through list of properties, getting property values for accession numbers from AAIndex1
-    for prop in list(aai_properties.keys()):
-        #get property values from AAIndex
-        aaindex1[prop].values.pop('-', None)
-        prop_aminoacid_values = aaindex1[prop].values
-
-        aai_property_vals = {}
-
-        #normalise property values, calculate mean and std dev        
-        if (normalize):
-            for i, j in prop_aminoacid_values.items():
-                aai_property_vals[i] = (j - (sum(prop_aminoacid_values.values()) / 
-                    len(prop_aminoacid_values.values()))) / _std(prop_aminoacid_values.values(), ddof=0)
-        else:
-            #use raw (unnormalized) property values
-            for i, j in prop_aminoacid_values.items():
-                aai_property_vals[i] = j
-        aa_counter = 0
-
-        #assign property and associated amino acid values to aai_property_vals array
-        for i, j in aai_property_vals.items():
-            aai_property_vals[amino_acids[aa_counter]] = aai_property_vals[i]
-            aa_counter+=1
-        aai_properties[prop] = aai_property_vals
+    #get (optionally normalized) property values for each AAIndex accession number
+    aai_properties = _get_properties(properties, normalize)
 
     #store resultant autocorrelation values
     moran_autocorrelation = {}
@@ -243,12 +166,9 @@ def moran_autocorrelation(sequence: str, lag: int = 30,
             for j in range(len(sequence) - i):
                 temp = temp + (aai_properties[key][sequence[j]] - prop_mean) * (
                     aai_properties[key][sequence[j+i]] - prop_mean)
-            if len(sequence) - i == 0:
-                moran_autocorrelation["MAuto_" + key + "_" + str(i)] = round(
-                    temp / ((len(sequence)) / k), 5)
-            else:
-                moran_autocorrelation["MAuto_" + key + "_" + str(i)] = round(
-                    temp / ((len(sequence) - i) / k), 5)
+            #Moran: (1/(N-d) * sum) / variance; 0 when there are no pairs or no variance
+            moran_autocorrelation["MAuto_" + key + "_" + str(i)] = (
+                round(temp / (len(sequence) - i) / k, 5) if (len(sequence) > i and k > 0) else 0.0)
 
     #transform values and columns to DataFrame
     moran_autocorrelation_df = pd.DataFrame([list(moran_autocorrelation.values())], 
@@ -288,50 +208,13 @@ def geary_autocorrelation(sequence: str, lag: int = 30,
     #validate input protein sequence
     sequence = _validate_sequence(sequence)
             
-    #validate lag, set default lag if invalid value input
-    if (lag>=len(sequence) or (lag<0) or not (isinstance(lag, int))):
+    #validate lag; fall back to the default of 30 when lag exceeds the sequence length
+    lag = _validate_int("lag", lag)
+    if lag >= len(sequence):
         lag = 30
 
-    #validate at least 1 property input to function
-    if (properties == "" or properties == []):
-        raise ValueError('At least one property must be passed into function.')
-
-    #if 1 property passed into function, wrap it to an iterable list
-    if (isinstance(properties, str)):
-        properties = [properties]
-        
-    #initialise dicts to store AAI properties and values
-    aai_properties = {}
-    for prop in properties:
-        #raise value error if accession number not found in aaindex1
-        if not (prop in aaindex1.record_codes()):
-            raise ValueError(f"Property {prop} not found in list of available properties in the aaindex1:\n{properties}.")
-        aai_properties[prop] = {}
-
-    #iterate through list of properties, getting property values for accession numbers from AAIndex1
-    for prop in list(aai_properties.keys()):
-        #get property values from AAIndex & reshape
-        aaindex1[prop].values.pop('-', None)
-        prop_aminoacid_values = aaindex1[prop].values
-
-        aai_property_vals = {}
-
-        #normalise property values, calculate mean and std dev
-        if (normalize):
-            for i, j in prop_aminoacid_values.items():
-                aai_property_vals[i] = (j - (sum(prop_aminoacid_values.values()) / 
-                    len(prop_aminoacid_values.values()))) / _std(prop_aminoacid_values.values(), ddof=0)
-        else:
-            #use raw (unnormalized) property values
-            for i, j in prop_aminoacid_values.items():
-                aai_property_vals[i] = j
-        aa_counter = 0
-
-        #assign property and associated amino acid values to aai_property_vals array
-        for i, j in aai_property_vals.items():
-            aai_property_vals[amino_acids[aa_counter]] = aai_property_vals[i]
-            aa_counter+=1
-        aai_properties[prop] = aai_property_vals
+    #get (optionally normalized) property values for each AAIndex accession number
+    aai_properties = _get_properties(properties, normalize)
 
     #store resultant autocorrelation values
     geary_autocorrelation = {}
@@ -341,24 +224,63 @@ def geary_autocorrelation(sequence: str, lag: int = 30,
         cc = []
         for aa in sequence:
             cc.append(aai_properties[key][aa])
-        k = ((np.std(cc, ddof=0)) ** 2) * len(sequence) / (len(sequence) - 1)
+        k = ((_std(cc, ddof=0)) ** 2) * len(sequence) / (len(sequence) - 1) if len(sequence) > 1 else 0.0
         for i in range(1, lag+1):
             temp = 0
             for j in range(len(sequence) - i):
                 temp = (temp + (
                     aai_properties[key][sequence[j]] - aai_properties[key][sequence[j+i]]) ** 2)
-            if len(sequence) - i == 0:
-                geary_autocorrelation["GAuto_" + key + "_" + str(i)] = round(
-                    temp / (2* (len(sequence))) / k, 3)
-            else:
-                geary_autocorrelation["GAuto_" + key + "_" + str(i)] = round(
-                    temp / (2* (len(sequence) -i)) / k, 3)
+            #0 when there are no pairs or no variance
+            geary_autocorrelation["GAuto_" + key + "_" + str(i)] = (
+                round(temp / (2* (len(sequence) -i)) / k, 3) if (len(sequence) > i and k > 0) else 0.0)
 
     #transform values and columns to DataFrame
     geary_autocorrelation_df = pd.DataFrame([list(geary_autocorrelation.values())], 
         columns=list(geary_autocorrelation.keys()))
 
     return geary_autocorrelation_df
+
+def _get_properties(properties: list[str] | str, normalize: bool) -> dict[str, dict[str, float]]:
+    """
+    Get the values of the 20 canonical amino acids for each AAIndex1 accession number,
+    optionally normalized to zero mean and unit standard deviation. Values are copied
+    so the aaindex records themselves are never modified.
+
+    Parameters
+    ==========
+    :properties: list[str] | str
+        AAIndex1 accession number(s).
+    :normalize: bool
+        normalize the property values.
+
+    Returns
+    =======
+    :aai_properties: dict
+        {accession_number: {amino_acid: value}}.
+    """
+    #validate that at least 1 property input to function
+    if (properties == "" or properties == [] or properties is None):
+        raise ValueError('At least one property must be passed into function.')
+
+    #if 1 property passed into function, wrap it to an iterable list
+    if (isinstance(properties, str)):
+        properties = [properties]
+
+    record_codes = aaindex1.record_codes()
+    aai_properties = {}
+    for prop in properties:
+        #raise value error if accession number not found in aaindex1
+        if prop not in record_codes:
+            raise ValueError(f"Property {prop} not found in list of available properties in the aaindex1:\n{properties}.")
+        #keep only the 20 canonical amino acids (drops the '-' gap entry)
+        vals = {aa: v for aa, v in aaindex1[prop].values.items() if aa in amino_acids}
+        if normalize:
+            mean = sum(vals.values()) / len(vals)
+            std = _std(list(vals.values()), ddof=0)
+            vals = {aa: (v - mean) / std if std else 0.0 for aa, v in vals.items()}
+        aai_properties[prop] = vals
+
+    return aai_properties
 
 def _std(array: list[float], ddof: int = 1) -> float:
     """

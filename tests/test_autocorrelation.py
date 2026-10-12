@@ -259,7 +259,7 @@ class ProtpyAutocorrelationTests(unittest.TestCase):
             properties=["CIDH920105"], normalize=False)
         moran_nf_expected = pd.DataFrame(columns=["MAuto_CIDH920105_1", "MAuto_CIDH920105_2",
             "MAuto_CIDH920105_3", "MAuto_CIDH920105_4", "MAuto_CIDH920105_5"])
-        moran_nf_expected.loc[0] = [-0.05779, -0.0779, -0.04184, -0.02121, -0.05371]
+        moran_nf_expected.loc[0] = [-0.05781, -0.07792, -0.04185, -0.02122, -0.05372]
         self.assertIsInstance(moran_nf_seq1, pd.DataFrame,
             'Expected output to be of type DataFrame, got {}.'.format(type(moran_nf_seq1)))
         self.assertEqual(moran_nf_seq1.shape, (1, lag),

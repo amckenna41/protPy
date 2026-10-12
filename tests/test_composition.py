@@ -11,6 +11,7 @@ from Bio import SeqIO
 unittest.TestLoader.sortTestMethodsUsing = None
 
 import protpy as protpy
+from protpy.composition import normalize_property
 
 class ProtpyCompositionTests(unittest.TestCase):
     """
@@ -231,7 +232,7 @@ class ProtpyCompositionTests(unittest.TestCase):
         dipeptide_comp_seq1 = protpy.dipeptide_composition(self.protein_seq1)
         #testing first 10 columns 
         dipeptide_comp_seq1_expected_values = pd.DataFrame(columns=["AA", "AC", "AD", "AE", "AF", "AG", "AH", "AI", "AK", "AL"])
-        dipeptide_comp_seq1_expected_values.loc[0] = [0.72, 0.16, 0.48, 0.4, 0.24, 0.48, 0.0, 0.56, 0.16, 0.48] 
+        dipeptide_comp_seq1_expected_values.loc[0] = [0.8, 0.16, 0.48, 0.4, 0.24, 0.48, 0.0, 0.56, 0.16, 0.48] 
 
         self.assertIsInstance(dipeptide_comp_seq1, pd.DataFrame,
             'Expected output to be of type DataFrame, got {}.'.format(type(dipeptide_comp_seq1)))
@@ -459,6 +460,18 @@ class ProtpyCompositionTests(unittest.TestCase):
             tripeptide_composition_seq7 = protpy.tripeptide_composition(invalid_seq7)
         with self.assertRaises(TypeError):
             tripeptide_composition_seq8 = protpy.tripeptide_composition(invalid_seq8)
+
+    def test_short_sequence_pseudo_amino_acid_composition(self):
+        """Short sequences should not crash when lamda exceeds the usable distance."""
+        result = protpy.pseudo_amino_acid_composition("A")
+        self.assertIsInstance(result, pd.DataFrame)
+        self.assertEqual(result.shape, (1, 50))
+        self.assertFalse(result.isnull().any().any())
+
+    def test_zero_variance_property_normalization(self):
+        """Properties with zero variance should normalize safely to zeros."""
+        result = normalize_property({"A": 1.0, "C": 1.0, "D": 1.0})
+        self.assertEqual(result, {"A": 0.0, "C": 0.0, "D": 0.0})
 
     # @unittest.skip("Descriptor can take quite a bit of time to calculate therefore skipping.") #**
     def test_pseudo_amino_acid_composition(self): 
@@ -753,16 +766,16 @@ class ProtpyCompositionTests(unittest.TestCase):
             'Expected 5.412 for seq1, got {}.'.format(pi_seq1["IsoelectricPoint"].values[0]))
 #2.)
         pi_seq2 = protpy.isoelectric_point(self.protein_seq2)
-        self.assertEqual(pi_seq2["IsoelectricPoint"].values[0], 10.514,
-            'Expected 10.514 for seq2, got {}.'.format(pi_seq2["IsoelectricPoint"].values[0]))
+        self.assertEqual(pi_seq2["IsoelectricPoint"].values[0], 10.515,
+            'Expected 10.515 for seq2, got {}.'.format(pi_seq2["IsoelectricPoint"].values[0]))
 #3.)
         pi_seq3 = protpy.isoelectric_point(self.protein_seq3)
         self.assertEqual(pi_seq3["IsoelectricPoint"].values[0], 6.134,
             'Expected 6.134 for seq3, got {}.'.format(pi_seq3["IsoelectricPoint"].values[0]))
 #4.)
         pi_seq4 = protpy.isoelectric_point(self.protein_seq4)
-        self.assertEqual(pi_seq4["IsoelectricPoint"].values[0], 10.472,
-            'Expected 10.472 for seq4, got {}.'.format(pi_seq4["IsoelectricPoint"].values[0]))
+        self.assertEqual(pi_seq4["IsoelectricPoint"].values[0], 10.473,
+            'Expected 10.473 for seq4, got {}.'.format(pi_seq4["IsoelectricPoint"].values[0]))
 #5.)
         with self.assertRaises(ValueError):
             protpy.isoelectric_point("ABCDEF")
@@ -787,20 +800,20 @@ class ProtpyCompositionTests(unittest.TestCase):
             'Incorrect columns: {}.'.format(list(mw_seq1.columns)))
         self.assertTrue(mw_seq1.any().isnull().sum() == 0,
             'Expected no null values.')
-        self.assertEqual(mw_seq1["MolecularWeight"].values[0], 139122.355,
-            'Expected 139122.355 for seq1, got {}.'.format(mw_seq1["MolecularWeight"].values[0]))
+        self.assertEqual(mw_seq1["MolecularWeight"].values[0], 139125.12,
+            'Expected 139125.12 for seq1, got {}.'.format(mw_seq1["MolecularWeight"].values[0]))
 #2.)
         mw_seq2 = protpy.molecular_weight(self.protein_seq2)
-        self.assertEqual(mw_seq2["MolecularWeight"].values[0], 46023.455,
-            'Expected 46023.455 for seq2, got {}.'.format(mw_seq2["MolecularWeight"].values[0]))
+        self.assertEqual(mw_seq2["MolecularWeight"].values[0], 46025.03,
+            'Expected 46025.03 for seq2, got {}.'.format(mw_seq2["MolecularWeight"].values[0]))
 #3.)
         mw_seq3 = protpy.molecular_weight(self.protein_seq3)
-        self.assertEqual(mw_seq3["MolecularWeight"].values[0], 8360.93,
-            'Expected 8360.93 for seq3, got {}.'.format(mw_seq3["MolecularWeight"].values[0]))
+        self.assertEqual(mw_seq3["MolecularWeight"].values[0], 8361.0,
+            'Expected 8361.0 for seq3, got {}.'.format(mw_seq3["MolecularWeight"].values[0]))
 #4.)
         mw_seq4 = protpy.molecular_weight(self.protein_seq4)
-        self.assertEqual(mw_seq4["MolecularWeight"].values[0], 45624.194,
-            'Expected 45624.194 for seq4, got {}.'.format(mw_seq4["MolecularWeight"].values[0]))
+        self.assertEqual(mw_seq4["MolecularWeight"].values[0], 45625.699,
+            'Expected 45625.699 for seq4, got {}.'.format(mw_seq4["MolecularWeight"].values[0]))
 #5.)
         with self.assertRaises(ValueError):
             protpy.molecular_weight("ABCDEF")
@@ -1164,13 +1177,13 @@ class ProtpyCompositionTests(unittest.TestCase):
         self.assertEqual(list(bi_seq1.columns), ["BomanIndex"],
             'Incorrect columns: {}.'.format(list(bi_seq1.columns)))
         self.assertTrue(bi_seq1.any().isnull().sum() == 0, 'Expected no null values.')
-        self.assertEqual(bi_seq1["BomanIndex"].values[0], 0.119)
+        self.assertEqual(bi_seq1["BomanIndex"].values[0], 1.198)
 #2.)
-        self.assertEqual(protpy.boman_index(self.protein_seq2)["BomanIndex"].values[0], -0.498)
+        self.assertEqual(protpy.boman_index(self.protein_seq2)["BomanIndex"].values[0], 2.598)
 #3.)
-        self.assertEqual(protpy.boman_index(self.protein_seq3)["BomanIndex"].values[0], 1.237)
+        self.assertEqual(protpy.boman_index(self.protein_seq3)["BomanIndex"].values[0], -0.354)
 #4.)
-        self.assertEqual(protpy.boman_index(self.protein_seq4)["BomanIndex"].values[0], -0.455)
+        self.assertEqual(protpy.boman_index(self.protein_seq4)["BomanIndex"].values[0], 2.519)
 #5.)
         with self.assertRaises(ValueError): protpy.boman_index("ABCDEF")
         with self.assertRaises(ValueError): protpy.boman_index("OOOOO")

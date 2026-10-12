@@ -274,7 +274,7 @@ _DESCRIPTOR_REGISTRY: dict[str, dict] = {
     },
     "boman_index": {
         "description": (
-            "Boman Index (potential protein interaction index) — sum of residue "
+            "Boman Index (potential protein interaction index) — negated sum of residue "
             "solubility values divided by sequence length. Values > 2.48 suggest "
             "high protein-binding potential."
         ),
@@ -301,7 +301,7 @@ _DESCRIPTOR_REGISTRY: dict[str, dict] = {
             "sequence": "str — protein sequence",
             "window": "int (default=5) — sliding window length",
             "hydrophobicity_threshold": "float (default=2.0) — minimum mean Kyte-Doolittle hydrophobicity",
-            "charge_threshold": "int (default=1) — max charged residues allowed in an APR window",
+            "charge_threshold": "int (default=0) — max charged residues allowed in an APR window",
         },
         "output_shape": "1 x 2  [AggregProneRegions, AggregProneFraction]",
         "speed": "Fast",
@@ -321,7 +321,7 @@ _DESCRIPTOR_REGISTRY: dict[str, dict] = {
             "window": "int (default=11) — helical window size",
             "angle": "float (default=100) — residue rotation angle in degrees (100° for alpha-helix)",
         },
-        "output_shape": "1 x 1",
+        "output_shape": "1 x 2  [HydrophobicMoment_Mean, HydrophobicMoment_Max]",
         "speed": "Fast",
         "reference": "[19] Eisenberg et al. (1982). Nature, 299, 371-374.",
     },

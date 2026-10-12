@@ -433,7 +433,7 @@ windows and the fraction of the sequence covered.
      - Minimum mean hydrophobicity
    * - ``charge_threshold``
      - int
-     - ``1``
+     - ``0``
      - Maximum charged residues per window
 
 .. code-block:: python

@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import re
 import itertools
+from collections import Counter
 import pandas as pd
 import math
 from aaindex import aaindex1
@@ -63,7 +64,7 @@ References
     299, 371-374. https://doi.org/10.1038/299371a0
 """
 #list of amino acids
-from ._constants import amino_acids, _validate_sequence
+from ._constants import amino_acids, _validate_sequence, _validate_int, _validate_weight
 
 #physicochemical values for all amino acids for hydrophobicity, hydrophilicty and residue mass
 #values taken from http://www.csbio.sjtu.edu.cn/bioinf/PseAAC/ParaValue.htm
@@ -166,12 +167,16 @@ def dipeptide_composition(sequence: str) -> pd.DataFrame:
 
     dipeptide_composition = {}
 
+    #count overlapping dipeptides with a sliding window (str.count misses overlaps, e.g. "AA" in "AAA")
+    total_dipeptides = len(sequence) - 1
+    counts = Counter(sequence[i:i+2] for i in range(total_dipeptides))
+
     #iterate through each amino acid, calculating each dipeptide combination's composition
     for i in amino_acids:
         for j in amino_acids:
             dipep = i + j
             dipeptide_composition[dipep] = round(
-                float(sequence.count(dipep)) / (len(sequence)-1) * 100, 2)
+                counts[dipep] / total_dipeptides * 100, 2) if total_dipeptides > 0 else 0.0
 
     #transform values and columns to DataFrame
     dipeptide_composition_df = pd.DataFrame([list(dipeptide_composition.values())], 
@@ -224,8 +229,9 @@ def tripeptide_composition(sequence: str) -> pd.DataFrame:
 
     #get fractional frequency of each tripeptide (percentage), consistent with dipeptide_composition
     total_tripeptides = len(sequence) - 2
+    counts = Counter(sequence[i:i+3] for i in range(max(total_tripeptides, 0)))
     for i in tripeptides:
-        tripeptide_composition[i] = round(sequence.count(i) / total_tripeptides * 100, 3) if total_tripeptides > 0 else 0.0
+        tripeptide_composition[i] = round(counts[i] / total_tripeptides * 100, 3) if total_tripeptides > 0 else 0.0
 
     #transform values and columns to DataFrame
     tripeptide_composition_df = pd.DataFrame([list(tripeptide_composition.values())], 
@@ -422,7 +428,7 @@ def isoelectric_point(sequence: str) -> pd.DataFrame:
     """
     Calculate the theoretical Isoelectric Point (pI) of a protein sequence.
     pI is the pH at which the net charge of the protein is zero. It is computed
-    by iteratively adjusting pH until positive and negative charges balance [11].
+    by bisecting the pH range 0-14 until positive and negative charges balance [11].
 
     Parameters
     ==========
@@ -440,9 +446,7 @@ def isoelectric_point(sequence: str) -> pd.DataFrame:
     #count ionisable residues
     counts = {aa: sequence.count(aa) for aa in "DEHCYKR"}
 
-    #iterative charge-balance: adjust pH by +/- 0.001 until net charge < 1e-4
-    ph = 7.0
-    for _ in range(5000):
+    def _net_charge(ph: float) -> float:
         pos = (counts["K"] / (1 + 10 ** (ph - pka_values_["K"])) +
                counts["R"] / (1 + 10 ** (ph - pka_values_["R"])) +
                counts["H"] / (1 + 10 ** (ph - pka_values_["H"])) +
@@ -452,10 +456,17 @@ def isoelectric_point(sequence: str) -> pd.DataFrame:
                counts["C"] / (1 + 10 ** (pka_values_["C"] - ph)) +
                counts["Y"] / (1 + 10 ** (pka_values_["Y"] - ph)) +
                1.0 / (1 + 10 ** (pka_values_["C_term"] - ph)))
-        net_charge = pos - neg
-        if abs(net_charge) < 1e-4:
-            break
-        ph += 0.001 if net_charge > 0 else -0.001
+        return pos - neg
+
+    #net charge decreases monotonically with pH, so bisect over the full 0-14 range
+    low, high = 0.0, 14.0
+    for _ in range(50):
+        mid = (low + high) / 2
+        if _net_charge(mid) > 0:
+            low = mid
+        else:
+            high = mid
+    ph = (low + high) / 2
 
     #transform to DataFrame
     isoelectric_point_df = pd.DataFrame([[round(ph, 3)]], columns=["IsoelectricPoint"])
@@ -467,7 +478,7 @@ def isoelectric_point(sequence: str) -> pd.DataFrame:
 #average residue molecular weights (Da) for each of the 20 standard amino acids [12]
 residue_molecular_weight_ = {
     "A": 89.094,  "C": 121.154, "D": 133.104, "E": 147.130, "F": 165.192,
-    "G": 75.032,  "H": 155.156, "I": 131.174, "K": 146.189, "L": 131.174,
+    "G": 75.067,  "H": 155.156, "I": 131.174, "K": 146.189, "L": 131.174,
     "M": 149.208, "N": 132.119, "P": 115.132, "Q": 146.146, "R": 174.203,
     "S": 105.093, "T": 119.119, "V": 117.148, "W": 204.228, "Y": 181.191
 }
@@ -656,9 +667,8 @@ def kmer_composition(sequence: str, k: int = 2) -> pd.DataFrame:
     #validate input protein sequence
     sequence = _validate_sequence(sequence)
 
-    #validate k; default to 2 if invalid; raise error for impractically large k
-    if not isinstance(k, int) or k < 1:
-        k = 2
+    #validate k; raise error for impractically large k
+    k = _validate_int("k", k, 1)
     if k > 4:
         raise ValueError(
             f"k={k} would generate {20**k:,} columns (20^k). Maximum supported k is 4."
@@ -668,11 +678,11 @@ def kmer_composition(sequence: str, k: int = 2) -> pd.DataFrame:
     all_kmers = ["".join(p) for p in itertools.product(amino_acids, repeat=k)]
     total = len(sequence) - k + 1
 
+    #count every (overlapping) k-mer in one pass, divide by total k-mer count
+    counts = Counter(sequence[i:i+k] for i in range(max(total, 0)))
     kmer_comp = {}
-    #count each k-mer occurrence, divide by total k-mer count
     for kmer in all_kmers:
-        cnt = sum(1 for i in range(total) if sequence[i:i+k] == kmer)
-        kmer_comp[kmer] = round(cnt / total * 100, 3) if total > 0 else 0.0
+        kmer_comp[kmer] = round(counts[kmer] / total * 100, 3) if total > 0 else 0.0
 
     kmer_composition_df = pd.DataFrame([list(kmer_comp.values())], columns=list(kmer_comp.keys()))
 
@@ -748,7 +758,7 @@ default_motifs_ = {
     "CxxC_zinc_finger":    r"C.{2}C",
     "CAAX_prenylation":    r"C[ACFILMVWY]{2}[ACEILMQV]$",
     "cAMP_PKA":            r"RR.S",
-    "dileucine_sorting":   r"[DE]xxxL[LI]$",
+    "dileucine_sorting":   r"[DE]...L[LI]",
     "PEST_region":         r"P.{1,10}[ESD].{1,10}T"
 }
 
@@ -824,13 +834,13 @@ def amino_acid_pair_composition(sequence: str) -> pd.DataFrame:
         return "Charged"
 
     total = len(sequence) - 1
+    counts = Counter(sequence[k:k+2] for k in range(total))
     pair_comp = {}
     #build the 400 annotated columns and compute frequencies
     for i in amino_acids:
         for j in amino_acids:
             label = f"{i}{j}_{_aa_class(i)}-{_aa_class(j)}"
-            count = sum(1 for k in range(total) if sequence[k] == i and sequence[k+1] == j)
-            pair_comp[label] = round(count / total * 100, 3) if total > 0 else 0.0
+            pair_comp[label] = round(counts[i + j] / total * 100, 3) if total > 0 else 0.0
 
     pair_composition_df = pd.DataFrame([list(pair_comp.values())], columns=list(pair_comp.keys()))
 
@@ -921,21 +931,21 @@ def extinction_coefficient(sequence: str) -> pd.DataFrame:
 
 ################################ Boman Index ##############################################
 
-#solubility scale from Boman (2003) [18]
+#side-chain solubility values (Radzicka & Wolfenden) used by Boman (2003) [18]
 boman_scale_ = {
-    "A":  2.1, "C": -0.7, "D": -3.5, "E": -3.5, "F":  2.8, "G":  2.1,
-    "H": -3.2, "I":  4.5, "K": -3.9, "L":  4.5, "M":  1.9, "N": -4.8,
-    "P": -1.6, "Q": -3.5, "R": -0.8, "S": -0.8, "T": -0.7, "V":  4.2,
-    "W": -0.9, "Y": -1.3
+    "A":  1.81, "C":  1.28, "D": -8.72, "E": -6.81, "F":  2.98, "G":  0.94,
+    "H": -4.66, "I":  4.92, "K": -5.55, "L":  4.92, "M":  2.35, "N": -6.64,
+    "P":  0.00, "Q": -5.54, "R": -14.92, "S": -3.40, "T": -2.57, "V":  4.04,
+    "W":  2.33, "Y": -0.14
 }
 
 def boman_index(sequence: str) -> pd.DataFrame:
     """
     Calculate the Boman Index (potential protein interaction index) for
     a protein sequence. The index is the sum of the solubility values of
-    all residues divided by the sequence length [18]:
+    all residues divided by the sequence length, negated [18]:
 
-    BI = sum(solubility(aa_i)) / N
+    BI = -sum(solubility(aa_i)) / N
 
     Higher values indicate a greater tendency to bind other proteins or
     cell membranes (e.g. antimicrobial peptides). Values >2.48 suggest
@@ -954,8 +964,8 @@ def boman_index(sequence: str) -> pd.DataFrame:
     #validate input protein sequence
     sequence = _validate_sequence(sequence)
 
-    #sum solubility values and divide by sequence length
-    bi = round(sum(boman_scale_[aa] for aa in sequence) / len(sequence), 3)
+    #negated mean of the solubility values
+    bi = round(-sum(boman_scale_[aa] for aa in sequence) / len(sequence), 3)
 
     boman_index_df = pd.DataFrame([[bi]], columns=["BomanIndex"])
 
@@ -963,13 +973,13 @@ def boman_index(sequence: str) -> pd.DataFrame:
 
 ############################### Aggregation Propensity ####################################
 
-def aggregation_propensity(sequence: str, window: int = 5, hydrophobicity_threshold: float = 2.0, charge_threshold: int = 1) -> pd.DataFrame:
+def aggregation_propensity(sequence: str, window: int = 5, hydrophobicity_threshold: float = 2.0, charge_threshold: int = 0) -> pd.DataFrame:
     """
     Calculate the Aggregation Propensity of a protein sequence. Aggregation-
     prone regions (APRs) are identified using a sliding window: a window is
     classified as an APR when its mean Kyte-Doolittle hydrophobicity exceeds
     ``hydrophobicity_threshold`` and the number of charged residues (D, E, K,
-    R) is below ``charge_threshold`` [8].
+    R) is at most ``charge_threshold`` [8].
 
     Parameters
     ==========
@@ -979,7 +989,7 @@ def aggregation_propensity(sequence: str, window: int = 5, hydrophobicity_thresh
         sliding window length in residues.
     :hydrophobicity_threshold: float (default=2.0)
         minimum mean Kyte-Doolittle hydrophobicity for an APR window.
-    :charge_threshold: int (default=1)
+    :charge_threshold: int (default=0)
         maximum number of charged residues (D, E, K, R) allowed in an APR.
 
     Returns
@@ -992,6 +1002,8 @@ def aggregation_propensity(sequence: str, window: int = 5, hydrophobicity_thresh
     #validate input protein sequence
     sequence = _validate_sequence(sequence)
 
+    window = _validate_int("window", window, 1)
+
     n = len(sequence)
     charged = frozenset("DEKR")
     #track which residue positions are covered by at least one APR
@@ -1003,7 +1015,7 @@ def aggregation_propensity(sequence: str, window: int = 5, hydrophobicity_thresh
         seg = sequence[i:i + window]
         avg_hydro = sum(kyte_doolittle_[aa] for aa in seg) / window
         n_charged = sum(1 for aa in seg if aa in charged)
-        if avg_hydro >= hydrophobicity_threshold and n_charged < charge_threshold:
+        if avg_hydro >= hydrophobicity_threshold and n_charged <= charge_threshold:
             apr_count += 1
             for j in range(i, i + window):
                 covered[j] = True
@@ -1099,6 +1111,8 @@ def hydrophobic_moment(sequence: str, window: int = 11, angle: float = 100) -> p
     #validate input protein sequence
     sequence = _validate_sequence(sequence)
 
+    window = _validate_int("window", window, 1)
+
     n = len(sequence)
     #use full sequence as single window when shorter than default window
     effective_window = min(window, n)
@@ -1159,13 +1173,11 @@ def pseudo_amino_acid_composition(sequence: str, lamda: int = 30, weight: float 
     #validate input protein sequence
     sequence = _validate_sequence(sequence)
 
-    #set lamda to its default value of 30 if <0, or > sequence len or not an int
-    if ((lamda < 0) or (lamda > len(sequence)) or not isinstance(lamda, int)):
-        lamda = 30  
-
-    #validate weight, set default weight of 0.05 if invalid value input
-    if ((weight < 0) or not (isinstance(weight, (float, int)))):
-        weight = 0.05
+    #validate lamda & weight; lamda falls back to its default of 30 when > sequence length
+    lamda = _validate_int("lamda", lamda)
+    if lamda > len(sequence):
+        lamda = 30
+    weight = _validate_weight(weight)
 
     #normalize None to empty list before further processing
     if properties is None:
@@ -1185,7 +1197,9 @@ def pseudo_amino_acid_composition(sequence: str, lamda: int = 30, weight: float 
         for prop in properties:
             if (prop not in aaindex1.record_codes()):
                 raise ValueError(f"Accession number not found in aaindex1: {prop}.")
-            property_values.append(aaindex1[prop].values)
+            #keep only the 20 canonical amino acids (drops the '-' gap entry)
+            property_values.append(
+                {aa: v for aa, v in aaindex1[prop].values.items() if aa in amino_acids})
 
     psuedo_aac = {}
 
@@ -1235,15 +1249,23 @@ def sequence_order_correlation_factor(sequence: str, k: int = 1, properties: lis
     # default to empty list if not provided (avoid mutable default argument)
     if properties is None:
         properties = []
+
+    # If there are no valid residue pairs for the requested gap, return 0.0.
+    if len(sequence) <= k:
+        return 0.0
+
+    #normalize each property once rather than for every residue pair
+    normalized_props = [normalize_property(prop) for prop in properties]
     correlation_factor = []
 
-    #iterate through sequence using correlation function to calculate sequence order
-    #between its amino acids with gap=k 
+    #iterate through sequence calculating the correlation (as in correlation_function)
+    #between its amino acids with gap=k
     for i in range(len(sequence) - k):
         aa1 = sequence[i]
         aa2 = sequence[i + k]
-        correlation_factor.append(correlation_function(aa1, aa2, properties))
-    
+        theta = sum(math.pow(norm[aa1] - norm[aa2], 2) for norm in normalized_props)
+        correlation_factor.append(round(theta / len(normalized_props), 3))
+
     #round array of correlation factors 
     correlation_factor_ = round(sum(correlation_factor) / (len(sequence) - k), 3)
 
@@ -1300,8 +1322,13 @@ def normalize_property(properties: dict[str, float]) -> dict[str, float]:
         dict of normalized property values.
     """
     vals = list(properties.values())
+    if not vals:
+        return {}
+
     mean = sum(vals) / len(vals)
     std = _std(vals, mean, ddof=0)
+    if std == 0:
+        return {aa: 0.0 for aa, _ in properties.items()}
     return {aa: (v - mean) / std for aa, v in properties.items()}
 
 def _std(prop: list[float], mean: float, ddof: int = 1) -> float:
@@ -1367,13 +1394,11 @@ def amphiphilic_pseudo_amino_acid_composition(sequence: str, lamda: int = 30, we
     #validate input protein sequence
     sequence = _validate_sequence(sequence)
 
-    #set lamda to its default value of 30 if <0, or > sequence len or not an int
-    if ((lamda < 0) or (lamda > len(sequence)) or not isinstance(lamda, int)):
+    #validate lamda & weight; lamda falls back to its default of 30 when > sequence length
+    lamda = _validate_int("lamda", lamda)
+    if lamda > len(sequence):
         lamda = 30
-
-    #validate weight, set default weight of 0.5 if invalid value input
-    if ((weight < 0) or not (isinstance(weight, (float, int)))):
-        weight = 0.5
+    weight = _validate_weight(weight)
 
     #cast properties to list
     if not isinstance(properties, list):
@@ -1434,6 +1459,11 @@ def amphiphilic_sequence_order_correlation_factor(sequence: str, k: int = 1,
     if properties is None:
         properties = [hydrophobicity_, hydrophilicity_]
 
+    #no residue pairs for the requested gap: every correlation factor is 0
+    denom = len(sequence) - k
+    if denom <= 0:
+        return [0.0] * len(properties)
+
     #pre-normalize all properties once rather than inside every pair evaluation
     normalized_props = [normalize_property(prop) for prop in properties]
     n_props = len(properties)
@@ -1445,7 +1475,6 @@ def amphiphilic_sequence_order_correlation_factor(sequence: str, k: int = 1,
         for p_idx, norm in enumerate(normalized_props):
             accumulators[p_idx].append(round(norm[aa1] * norm[aa2], 3))
 
-    denom = len(sequence) - k
     return [round(sum(acc) / denom, 3) for acc in accumulators]
 
 def amphiphilic_correllation_function(Ri: str = "S", Rj: str = "D",

@@ -10,16 +10,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
+- **Autocorrelation crash on fresh installs**: `aaindex1[code]` can return a new record on each access, so `.values.pop('-')` was lost and all three autocorrelation descriptors (and `all_descriptors`/`encode_dataset`) raised `IndexError`. Property values are now copied and filtered to the 20 canonical amino acids; aaindex records are no longer mutated.
+- **Moran autocorrelation formula**: multiplied by the property variance instead of dividing by it.
+- **CTD groups**: `polarity` groups 2/3 were copied from polarizability (A, D, G, S, T unassigned; 8 residues duplicated) — now `LIFWCMVY / PAGST / HQRKNED`. `normalized_vdwv` group 1 was missing C.
+- **Overlapping counts**: dipeptide, tripeptide and conjoint triad used `str.count`, which skips overlapping matches (e.g. `"AA"` in `"AAA"`).
+- **Short/repetitive sequences**: APAAComp raised `ZeroDivisionError` for sequences <= 30 residues; dipeptide composition, CTD transition, Moran and Geary crashed or returned NaN for single-residue or homopolymer sequences; lags with no residue pairs now return 0.0.
+- **`all_descriptors(params={"ctd_": {"all_ctd": False}})`** raised `TypeError`.
+- **Motif `dileucine_sorting`** never matched (literal `xxx` and stray `$`).
+- **Boman index** now uses the published Radzicka-Wolfenden solubility scale and `BI = -sum/N`.
+- **Isoelectric point** uses bisection over pH 0-14 (previously capped at 12.0 for very basic proteins).
+- **PseAAC with AAIndex properties** included the `'-'` entry in normalization.
+- **Glycine molecular weight** 75.032 -> 75.067.
+- **`aggregation_propensity`**: `charge_threshold` is now an inclusive maximum, as documented; default changed 1 -> 0 so default results are unchanged.
+- **`hydrophobic_moment`** registry entry now reports its `1 x 2` output shape.
 - **MoreauBroto Autocorrelation (Bug 1)**: Two intertwined bugs in `moreaubroto_autocorrelation` — the lag index always read `sequence[j+1]` (hardcoded lag=1) regardless of the current lag `i`, and the accumulator `temp` was not reset between lags, causing values to accumulate across all lags. Both corrected: `sequence[j+1]` → `sequence[j+i]`, and `temp = 0` moved inside the lag loop.
 - **PseAAC normalization denominator (Bug 2)**: `pseudo_amino_acid_composition` used `1 + weight + Σθ_k` where the Chou (2001) formula requires `1 + weight * Σθ_k`. Fixed operator `+` → `*`. Removed the redundant first normalization loop and unified output computation into a single pass.
 - **APAAComp properties parameter ignored (Bug 3)**: `amphiphilic_pseudo_amino_acid_composition` accepted a `properties` parameter but the underlying helpers `amphiphilic_correllation_function` and `amphiphilic_sequence_order_correlation_factor` hardcoded `hydrophobicity_` and `hydrophilicity_`, silently ignoring any user-supplied properties. Fixed by threading `properties` through all three functions and pre-normalizing once per call.
 - **`JSONDecodeError` constructor misuse (Bug 5)**: `sequence_order_coupling_number_` raised `json.JSONDecodeError(msg)` which fails at runtime with `TypeError` because `JSONDecodeError` requires `(msg, doc, pos)` positional arguments. Changed to `raise ValueError(...)`.
 
 ### Performance
+- `kmer_composition`, dipeptide/tripeptide/pair composition count k-mers in one pass; QSO computes each SOCN once; PseAAC normalizes properties once per gap instead of per residue pair.
 - **`sequence_order_coupling_number_` disk I/O (Issue 6)**: Added `@functools.lru_cache(maxsize=2)` loader `_load_distance_matrix` in `sequence_order.py`. The distance matrix JSON was read from disk on every call; for a sequence with `lag=30`, that was 30 file reads per descriptor invocation. Now both matrices are cached in memory after the first load.
 - **`normalize_property` O(n²) (Issue 7)**: Refactored to compute `mean` and `std` once before the loop, reducing from O(n²) to O(n) for the 20-amino-acid property dictionaries used in PseAAC and APAAComp descriptors.
 
 ### Changed
+- Invalid `lag`, `lamda`, `k`, `window` (non-integer or negative) and `weight` (non-numeric or negative) now raise `ValueError` instead of being silently replaced by defaults. `lag`/`lamda` larger than the sequence still fall back to 30.
+- `all_descriptors` no longer writes `descriptors.csv` by default (`output_file=None`).
+- `all_descriptors` no longer includes `amino_acid_pair_composition` (it duplicated dipeptide composition's 400 values).
+- `encode_dataset`/`all_descriptors` refuse to overwrite an existing output file with different columns, append rows instead of rewriting the whole file per sequence, and `encode_dataset` replaces rows for re-encoded IDs instead of duplicating them.
 - **`tripeptide_composition` returns percentages (Gap 8)**: Output values are now fractional percentages (`count / (N-2) * 100`, rounded to 3 dp) consistent with `dipeptide_composition`, instead of raw integer counts. Column dtype is now `float64` instead of `int64`.
 - **`encode_dataset` verbose parameter (Gap 11)**: Added `verbose: bool = True` parameter to `encode_dataset`. When `False`, all per-sequence stdout status lines are suppressed. Default `True` preserves existing behaviour.
 

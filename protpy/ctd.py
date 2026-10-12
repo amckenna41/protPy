@@ -28,10 +28,10 @@ References
 hydrophobicity = {"name": "hydrophobicity", "1": "RKEDQN", "2": "GASTPHY", "3": "CLVIMFW"}
 # '1' -> Polar; '2' -> Neutral, '3' -> Hydrophobicity
 
-normalized_vdwv = {"name": "normalized_vdwv", "1": "GASTPD", "2": "NVEQIL", "3": "MHKFRYW"}
+normalized_vdwv = {"name": "normalized_vdwv", "1": "GASTPDC", "2": "NVEQIL", "3": "MHKFRYW"}
 # '1' -> (0-2.78); '2' -> (2.95-4.0), '3' -> (4.03-8.08)
 
-polarity = {"name": "polarity", "1": "LIFWCMVY", "2": "CPNVEQIL", "3": "KMHFRYW"}
+polarity = {"name": "polarity", "1": "LIFWCMVY", "2": "PAGST", "3": "HQRKNED"}
 # '1' -> (4.9-6.2); '2' -> (8.0-9.2), '3' -> (10.4-13.0)
 
 charge = {"name": "charge", "1": "KR", "2": "ANCQGHILMFPSTWYV", "3": "DE"}
@@ -179,13 +179,18 @@ def ctd_transition(sequence: str, property: str = "hydrophobicity") -> pd.DataFr
     
     ctd_transition_ = {}
 
+    #a single residue has no transitions
+    n_pairs = len(sequence) - 1
+    if n_pairs == 0:
+        n_pairs = 1
+
     #calculate descriptor values, append to ctd_transition_ dict
     ctd_transition_["CTD_T_12_" + prop["name"]] = round(
-        float(seq.count("12") + seq.count("21")) / (len(sequence)-1), 3)
+        float(seq.count("12") + seq.count("21")) / n_pairs, 3)
     ctd_transition_["CTD_T_13_" + prop["name"]] = round(
-        float(seq.count("13") + seq.count("31")) / (len(sequence)-1), 3)
+        float(seq.count("13") + seq.count("31")) / n_pairs, 3)
     ctd_transition_["CTD_T_23_" + prop["name"]] = round(
-        float(seq.count("23") + seq.count("32")) / (len(sequence)-1), 3)
+        float(seq.count("23") + seq.count("32")) / n_pairs, 3)
 
     #transform values and columns to DataFrame
     ctd_transition_df = pd.DataFrame([list(ctd_transition_.values())], columns=list(ctd_transition_.keys()))

@@ -295,7 +295,7 @@ Estimates aggregation-prone regions via a sliding-window approach combining Kyte
 |-----------|------|---------|-------------|
 | `window` | int | `5` | Sliding window size |
 | `hydrophobicity_threshold` | float | `2.0` | Minimum mean hydrophobicity |
-| `charge_threshold` | int | `1` | Maximum charged residues per window |
+| `charge_threshold` | int | `0` | Maximum charged residues per window |
 
 ```python
 result = protpy.aggregation_propensity(protein_seq)
@@ -713,7 +713,7 @@ Compute all available descriptors for a single protein sequence and return them 
 | `sequence` | str | — | Protein sequence |
 | `params` | dict or None | `None` | Per-descriptor keyword arguments keyed by descriptor name |
 | `show_progress` | bool | `False` | Display a `tqdm` progress bar naming each descriptor as it is computed |
-| `output_file` | str or None | `"descriptors.csv"` | Path to save results; `None` disables file output |
+| `output_file` | str or None | `None` | Path to save results; `None` disables file output |
 | `save_each_sequence` | bool | `True` | Append this row to the output CSV immediately after computation; useful when calling in a loop |
 
 ```python

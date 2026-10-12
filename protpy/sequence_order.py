@@ -31,7 +31,7 @@ References
 """
 
 #list of amino acids
-from ._constants import amino_acids, _validate_sequence
+from ._constants import amino_acids, _validate_sequence, _validate_int, _validate_weight
 
 @functools.lru_cache(maxsize=2)
 def _load_distance_matrix(name: str) -> dict:
@@ -129,11 +129,8 @@ def sequence_order_coupling_number(sequence: str, lag: int = 30,
     #validate input protein sequence
     sequence = _validate_sequence(sequence)
 
-    #raise value error if int cant be parsed from input lag
-    try:
-        lag = int(lag)
-    except (ValueError, TypeError):
-        raise ValueError(f"Invalid lag value input: {lag}.")
+    #raise value error if a non-negative int cant be parsed from input lag
+    lag = _validate_int("lag", lag)
 
     #set dataframe column name prefixes based on input distance matrix, raise error if invalid name input
     col_prefix = ""
@@ -145,7 +142,7 @@ def sequence_order_coupling_number(sequence: str, lag: int = 30,
         raise ValueError(f"Invalid distance matrix name input {distance_matrix}, values can be schneider-wrede or grantham.")
 
     #validate lag, set default lag of 30 if invalid value input
-    if (lag>=len(sequence) or (lag<0)):
+    if (lag>=len(sequence)):
         lag = 30
 
     seq_order = {}
@@ -191,14 +188,11 @@ def sequence_order_coupling_number_all(sequence: str, lag: int = 30) -> pd.DataF
     #validate input protein sequence
     sequence = _validate_sequence(sequence)
 
-    #raise value error if int cant be parsed from input lag
-    try:
-        lag = int(lag)
-    except (ValueError, TypeError):
-        raise ValueError(f"Invalid lag value input: {lag}.")
+    #raise value error if a non-negative int cant be parsed from input lag
+    lag = _validate_int("lag", lag)
 
     #validate lag, set default lag of 30 if invalid value input
-    if (lag>=len(sequence) or (lag<0)):
+    if (lag>=len(sequence)):
         lag = 30
 
     #calculate SOCN using schneider-wrede distance matrix
@@ -248,19 +242,15 @@ def quasi_sequence_order(sequence: str, lag: int = 30, weight: float = 0.1,
     #validate input protein sequence
     sequence = _validate_sequence(sequence)
 
-    #raise value error if int can't be parsed from input lag
-    try:
-        lag = int(lag)
-    except (ValueError, TypeError):
-        raise ValueError(f"Invalid lag value input: {lag}.")
+    #raise value error if a non-negative int can't be parsed from input lag
+    lag = _validate_int("lag", lag)
 
     #validate lag, set default lag of 30 if invalid value input
-    if (lag>=len(sequence) or (lag<0)):
+    if (lag>=len(sequence)):
         lag = 30
 
-    #validate weight, set default weight of 0.1 if invalid value input
-    if ((weight < 0) or not (isinstance(weight, (float, int)))):
-        weight = 0.1
+    #validate weight
+    weight = _validate_weight(weight)
 
     #set dataframe column name prefixes based on input distance matrix, raise error if invalid name input
     col_prefix = ""
@@ -272,29 +262,19 @@ def quasi_sequence_order(sequence: str, lag: int = 30, weight: float = 0.1,
         raise ValueError(f"Invalid distance matrix name input {distance_matrix}, values can be schneider-wrede or grantham.")
     
     quasi_sequence_order = {}
-    right_part = 0.0
 
-    #calculate first 20 quasi sequence order using sequence order coupling number for
-    #proteins using lag and specificed physicochemical distance matrix
-    for aa in range(lag):
-        right_part = right_part + sequence_order_coupling_number_(sequence, aa+1, distance_matrix)
+    #calculate SOCN for each gap up to lag once, using the specified distance matrix
+    _right_part = [sequence_order_coupling_number_(sequence, i+1, distance_matrix) for i in range(lag)]
 
     #get amino acid composition
     aa_comp = composition.amino_acid_composition(sequence)
 
-    #iterate over amino acids, calculating descriptor value 
-    temp = 1 + weight * right_part
+    #iterate over amino acids, calculating first 20 descriptor values
+    temp = 1 + weight * sum(_right_part)
     for index, aa in enumerate(amino_acids):
         quasi_sequence_order[col_prefix + str(index + 1)] = round(aa_comp[aa].values[0] / temp, 6)
-    
-    #calculate SOCN up until maxlag
-    _right_part = []
-    for i in range(lag):
-        _right_part.append(
-            sequence_order_coupling_number_(sequence, i+1, distance_matrix))
 
-    #calculate the last maxlag descriptor values
-    temp = 1 + weight * sum(_right_part)
+    #calculate the last lag descriptor values
     for index in range(20, 20 + lag):
         quasi_sequence_order[col_prefix + str(index + 1)] = round(
             weight * _right_part[index - 20] / temp, 6)
@@ -335,19 +315,15 @@ def quasi_sequence_order_all(sequence: str, lag: int = 30, weight: float = 0.1) 
     #validate input protein sequence
     sequence = _validate_sequence(sequence)
 
-    #raise value error if int can't be parsed from input lag
-    try:
-        lag = int(lag)
-    except (ValueError, TypeError):
-        raise ValueError(f"Invalid lag value input: {lag}.")
+    #raise value error if a non-negative int can't be parsed from input lag
+    lag = _validate_int("lag", lag)
 
     #validate lag, set default lag of 30 if invalid value input
-    if (lag>=len(sequence) or (lag<0)):
+    if (lag>=len(sequence)):
         lag = 30
 
-    #validate weight, set default weight if invalid value input
-    if ((weight < 0) or not (isinstance(weight, (float, int)))):
-        weight = 0.1
+    #validate weight
+    weight = _validate_weight(weight)
 
     #calculate quasi seq order using schneider distance matrix
     quasi_schneider = quasi_sequence_order(sequence, lag, weight=weight, 
