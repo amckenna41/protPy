@@ -86,7 +86,21 @@ _MODULES = {
 
 
 def _set_members(descriptor_set: str) -> list[str]:
-    """Registry descriptors (outside the classic set) that belong to ``descriptor_set``, in registry order."""
+    """
+    Get the descriptors outside the classic set that belong to a descriptor set,
+    in the order of the descriptor registry. Membership is taken from the
+    descriptor_sets field of each registry entry.
+
+    Parameters
+    ==========
+    :descriptor_set: str
+        descriptor set: "classic", "extended" or "all".
+
+    Returns
+    =======
+    :members: list[str]
+        names of the descriptors added by the set; empty for "classic".
+    """
     if descriptor_set == "classic":
         return []
     return [name for name, meta in _DESCRIPTOR_REGISTRY.items()

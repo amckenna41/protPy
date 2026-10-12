@@ -29,7 +29,25 @@ __all__ = ["fft_descriptors", "dct_descriptors"]
 
 
 def _signal(sequence: str, scale: str | dict) -> tuple[np.ndarray, str]:
-    """Mean-centred single-value property signal and the name used in column labels."""
+    """
+    Convert a protein sequence into a numerical signal using a single-value amino
+    acid scale, with the mean of the signal subtracted.
+
+    Parameters
+    ==========
+    :sequence: str
+        protein sequence.
+    :scale: str | dict
+        single-value scale name, AAindex accession number or dict of amino acid
+        values.
+
+    Returns
+    =======
+    :signal: np.ndarray
+        mean-centred property values along the sequence.
+    :name: str
+        name of the scale used in column names ("custom" for a dict).
+    """
     values = _property_matrix(sequence, scale)
     if values.shape[1] != 1:
         raise ValueError(f"Scale '{scale}' is multi-dimensional; use a single-value scale.")
@@ -40,30 +58,37 @@ def _signal(sequence: str, scale: str | dict) -> tuple[np.ndarray, str]:
 
 def fft_descriptors(sequence: str, scale: str | dict = "eiip", n_bins: int = 10) -> pd.DataFrame:
     """
-    Calculate a length-invariant binned power spectrum of a property signal, as
-    in the resonant recognition model of Cosic [1]. Each residue is replaced by
-    its scale value (default: electron-ion interaction potential, EIIP), the
-    signal is mean-centred, and its power spectrum is
+    Calculate Fast Fourier Transform (FFT) descriptors of protein sequence. Each
+    amino acid in the sequence is replaced by its value on a property scale, by
+    default the electron-ion interaction potential (EIIP) used in the resonant
+    recognition model [1], and the power spectrum of the mean-centred signal is
+    calculated as:
 
-    P(f) = abs(FFT(x)(f))^2 / L,   f = 0 .. 0.5 cycles/residue
+    P(f) = abs(FFT(x)(f))^2 / L
 
-    The normalised frequency range 0-0.5 is divided into ``n_bins`` equal-width
-    bins (the last bin includes 0.5) and the mean power in each bin is returned;
-    bins containing no frequency are 0.
+    where x is the property signal, f is the frequency in cycles per residue
+    (0 to 0.5) and L is the length of the sequence. To give the same number of
+    features for any sequence length, the frequency range 0-0.5 is split into
+    n_bins equal-width bins and the mean power in each bin is returned; bins
+    containing no frequencies are 0.
 
     Parameters
     ==========
     :sequence: str
         protein sequence.
     :scale: str | dict (default="eiip")
-        single-value scale name, AAindex1 accession code or {aa: value} dict.
+        single-value scale name, AAindex accession number or dict of amino acid
+        values.
     :n_bins: int (default=10)
         number of frequency bins.
 
     Returns
     =======
     :fft_df: pd.DataFrame
-        pandas DataFrame of shape 1 x n_bins, columns ``FFT_{scale}_bin{1..n}``.
+        pandas dataframe of FFT descriptors for protein sequence. Dataframe will be
+        of the shape 1 x n_bins, where n_bins is the number of features calculated
+        from the descriptor and 1 is the input sequence. Column names are of the
+        form FFT_<scale>_bin<n>, e.g. FFT_eiip_bin1.
     """
     #validate input protein sequence
     sequence = _validate_sequence(sequence)
@@ -83,27 +108,36 @@ def fft_descriptors(sequence: str, scale: str | dict = "eiip", n_bins: int = 10)
 
 def dct_descriptors(sequence: str, scale: str | dict = "kyte_doolittle", n_coeffs: int = 10) -> pd.DataFrame:
     """
-    Calculate the first ``n_coeffs`` coefficients of the orthonormal type-II
-    discrete cosine transform (DCT-II) of a mean-centred property signal [2]:
+    Calculate Discrete Cosine Transform (DCT) descriptors of protein sequence.
+    Each amino acid in the sequence is replaced by its value on a property scale,
+    by default the Kyte-Doolittle hydropathy, and the first n_coeffs coefficients
+    of the orthonormal type-II DCT of the mean-centred signal are returned. The
+    DCT compresses a sequence-length signal into a fixed number of coefficients
+    [2], calculated as:
 
-    X_k = s_k sum_{n=0}^{L-1} x_n cos(pi k (2n + 1) / (2L)),
-    s_0 = sqrt(1/L), s_k = sqrt(2/L) for k > 0
+    X_k = s_k * sum_{n=0}^{L-1} x_n * cos(pi * k * (2n + 1) / (2L))
 
-    X_0 is 0 because the signal is mean-centred.
+    where X_k is coefficient k, x_n is the property value at position n, L is the
+    length of the sequence, and s_0 = sqrt(1/L) and s_k = sqrt(2/L) for k > 0. X_0
+    is 0 because the signal is mean-centred.
 
     Parameters
     ==========
     :sequence: str
         protein sequence.
     :scale: str | dict (default="kyte_doolittle")
-        single-value scale name, AAindex1 accession code or {aa: value} dict.
+        single-value scale name, AAindex accession number or dict of amino acid
+        values.
     :n_coeffs: int (default=10)
-        number of coefficients, at most the sequence length.
+        number of coefficients, at most the length of the sequence.
 
     Returns
     =======
     :dct_df: pd.DataFrame
-        pandas DataFrame of shape 1 x n_coeffs, columns ``DCT_{scale}_{0..n-1}``.
+        pandas dataframe of DCT descriptors for protein sequence. Dataframe will be
+        of the shape 1 x n_coeffs, where n_coeffs is the number of features
+        calculated from the descriptor and 1 is the input sequence. Column names
+        are of the form DCT_<scale>_<k>, e.g. DCT_kyte_doolittle_0.
     """
     #validate input protein sequence
     sequence = _validate_sequence(sequence)

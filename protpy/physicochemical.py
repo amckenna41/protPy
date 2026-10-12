@@ -68,13 +68,21 @@ __all__ = [
 
 def charge_fractions(sequence: str) -> pd.DataFrame:
     """
-    Calculate the charge fractions of a protein sequence [1, 2]:
+    Calculate the Charge Fractions (FCR) of protein sequence. The fraction of
+    charged residues (FCR), the fractions of positive and negative residues and
+    the overall charge asymmetry (sigma) describe the charge content of a protein
+    sequence, and are key parameters of the conformations of intrinsically
+    disordered proteins [1, 2]. They are calculated as:
 
-    FCR    = (n+ + n-) / L          fraction of charged residues
-    FPlus  = n+ / L,  FMinus = n- / L
-    Sigma  = NCPR^2 / FCR           overall charge asymmetry (0 if FCR = 0)
+    FCR = (n+ + n-) / L
 
-    where n+ counts K/R and n- counts D/E (H is neutral). Values are fractions.
+    FPlus = n+ / L, FMinus = n- / L
+
+    Sigma = NCPR^2 / FCR
+
+    where n+ is the number of positive residues (K, R), n- the number of negative
+    residues (D, E), L is the length of the sequence and NCPR = (n+ - n-) / L. His
+    is treated as neutral and sigma is 0 when there are no charged residues.
 
     Parameters
     ==========
@@ -84,8 +92,10 @@ def charge_fractions(sequence: str) -> pd.DataFrame:
     Returns
     =======
     :charge_fractions_df: pd.DataFrame
-        pandas DataFrame of shape 1 x 4, columns ``Charge_FCR``, ``Charge_FPlus``,
-        ``Charge_FMinus`` and ``Charge_Sigma``.
+        pandas dataframe of charge fractions for protein sequence. Dataframe will
+        be of the shape 1 x 4, where 4 is the number of features calculated from
+        the descriptor and 1 is the input sequence. Column names are Charge_FCR,
+        Charge_FPlus, Charge_FMinus and Charge_Sigma.
     """
     #validate input protein sequence
     sequence = _validate_sequence(sequence)
@@ -101,11 +111,13 @@ def charge_fractions(sequence: str) -> pd.DataFrame:
 
 def ncpr(sequence: str) -> pd.DataFrame:
     """
-    Calculate the Net Charge Per Residue (NCPR) of a protein sequence [1]:
+    Calculate the Net Charge Per Residue (NCPR) of protein sequence. NCPR is the
+    net charge of a protein sequence divided by its length [1], calculated as:
 
     NCPR = (n+ - n-) / L
 
-    with n+ counting K/R and n- counting D/E.
+    where n+ is the number of positive residues (K, R), n- the number of negative
+    residues (D, E) and L is the length of the sequence.
 
     Parameters
     ==========
@@ -115,7 +127,8 @@ def ncpr(sequence: str) -> pd.DataFrame:
     Returns
     =======
     :ncpr_df: pd.DataFrame
-        pandas DataFrame of shape 1 x 1, column ``NCPR``.
+        pandas dataframe of NCPR for protein sequence. Dataframe will be of the
+        shape 1 x 1, with the column NCPR.
     """
     #validate input protein sequence
     sequence = _validate_sequence(sequence)
@@ -124,7 +137,29 @@ def ncpr(sequence: str) -> pd.DataFrame:
 #################################### Kappa ################################################
 
 def _blob_sigma(pos: np.ndarray, neg: np.ndarray, g: int) -> np.ndarray:
-    """Charge asymmetry (f+ - f-)^2 / (f+ + f-) of every overlapping blob of size g (rows = candidates)."""
+    """
+    Calculate the charge asymmetry of every overlapping blob (window) of size g
+    along one or more sequences, as used in the kappa calculation [2], where:
+
+    sigma_b = (f+ - f-)^2 / (f+ + f-)
+
+    and f+ and f- are the fractions of positive and negative residues in the blob.
+    Uncharged blobs have a charge asymmetry of 0.
+
+    Parameters
+    ==========
+    :pos: np.ndarray
+        1 for positive residues and 0 otherwise; one row per sequence when 2-D.
+    :neg: np.ndarray
+        1 for negative residues and 0 otherwise, same shape as pos.
+    :g: int
+        blob size.
+
+    Returns
+    =======
+    :blob_sigma: np.ndarray
+        charge asymmetry of each blob, with one row per sequence when 2-D.
+    """
     kernel = np.ones(g)
     if pos.ndim == 1:
         p = np.convolve(pos, kernel, mode="valid")
@@ -139,19 +174,58 @@ def _blob_sigma(pos: np.ndarray, neg: np.ndarray, g: int) -> np.ndarray:
 
 
 def _delta(pos: np.ndarray, neg: np.ndarray, g: int, sigma: float) -> np.ndarray:
+    """
+    Calculate the mean squared deviation (delta) of the blob charge asymmetries
+    from the charge asymmetry of the whole sequence, as used in the kappa
+    calculation [2].
+
+    Parameters
+    ==========
+    :pos: np.ndarray
+        1 for positive residues and 0 otherwise; one row per sequence when 2-D.
+    :neg: np.ndarray
+        1 for negative residues and 0 otherwise, same shape as pos.
+    :g: int
+        blob size.
+    :sigma: float
+        charge asymmetry of the whole sequence.
+
+    Returns
+    =======
+    :delta: np.ndarray
+        delta of each sequence (a single value for a 1-D input).
+    """
     return np.mean((_blob_sigma(pos, neg, g) - sigma) ** 2, axis=-1)
 
 
 def _delta_max(n_pos: int, n_neg: int, length: int, g: int, sigma: float) -> float:
     """
-    Maximal delta over the most segregated arrangements of the composition: a block of
-    positives and a block of negatives, with the neutral residues split across the three
-    gaps around them (left a, between b, right c).
+    Calculate the maximum delta of a sequence composition, used to normalise kappa
+    [2]. The maximum is taken over the most segregated arrangements of the
+    composition: a block of positive residues and a block of negative residues,
+    with the neutral residues split across the three gaps around them. Blobs lying
+    entirely in a neutral flank contribute the same value whatever the length of
+    the flank, so for each gap between the blocks only flank lengths up to g - 1
+    need to be tried. This evaluates every distinct arrangement in O(n0 * g)
+    candidates, where n0 is the number of neutral residues.
 
-    Blobs lying entirely in a neutral flank contribute (0 - sigma)^2 whatever the flank's
-    length, so for a given b only flank lengths up to g - 1 are distinct. Trying every b
-    with those a/c splits covers every distinct delta in O(n0 x g) candidates instead of
-    the O(n0^2) of a full enumeration.
+    Parameters
+    ==========
+    :n_pos: int
+        number of positive residues.
+    :n_neg: int
+        number of negative residues.
+    :length: int
+        length of the sequence.
+    :g: int
+        blob size.
+    :sigma: float
+        charge asymmetry of the whole sequence.
+
+    Returns
+    =======
+    :best: float
+        maximum delta over the segregated arrangements.
     """
     n0 = length - n_pos - n_neg
     candidates = set()
@@ -174,37 +248,41 @@ def _delta_max(n_pos: int, n_neg: int, length: int, g: int, sigma: float) -> flo
 
 def kappa(sequence: str, blob_sizes: tuple[int, ...] = (5, 6)) -> pd.DataFrame:
     """
-    Calculate the kappa charge-patterning parameter of Das & Pappu [2]. For blob
-    size g, the sequence is split into the L - g + 1 overlapping blobs and
+    Calculate the Kappa (Kappa) charge patterning parameter of protein sequence.
+    Kappa describes how well oppositely charged residues are mixed or segregated
+    along a protein sequence, which strongly affects the conformations of
+    intrinsically disordered proteins [2]. The sequence is split into overlapping
+    blobs of g residues and kappa is calculated as:
 
-    sigma_b = (f+ - f-)^2 / (f+ + f-)        per blob (0 if uncharged)
-    delta_g = mean over blobs of (sigma_b - sigma)^2
+    sigma_b = (f+ - f-)^2 / (f+ + f-)
+
+    delta_g = mean over all blobs of (sigma_b - sigma)^2
+
     kappa_g = delta_g / delta_max,g
 
-    where sigma = NCPR^2 / FCR of the whole sequence and delta_max,g is the
-    largest delta over the maximally segregated arrangements of the same
-    composition (a positive block and a negative block with the neutral residues
-    distributed over the three surrounding gaps; every distinct arrangement is
-    evaluated). kappa is the mean of kappa_g
-    over ``blob_sizes`` (5 and 6 in [2]); 0 means well mixed and 1 fully
-    segregated. Charges: K, R = +1; D, E = -1; H = 0.
-
-    kappa is reported as 0 (not NaN) when the sequence has no charges or only one
-    charge type, where oppositely charged residues cannot be segregated. A blob
-    size longer than the sequence is reduced to the sequence length.
+    where sigma_b is the charge asymmetry of a blob, f+ and f- are its fractions of
+    positive (K, R) and negative (D, E) residues, sigma = NCPR^2 / FCR is the charge
+    asymmetry of the whole sequence and delta_max,g is the largest delta over the
+    most segregated arrangements of the same composition. The final kappa is the
+    mean of kappa_g over the blob sizes (5 and 6 by default). Kappa ranges from 0
+    (well mixed) to 1 (fully segregated). It is reported as 0 when the sequence has
+    no charged residues or only one type of charge, and blobs longer than the
+    sequence are reduced to its length.
 
     Parameters
     ==========
     :sequence: str
         protein sequence.
-    :blob_sizes: tuple[int, ...] (default=(5, 6))
-        blob sizes g to average over.
+    :blob_sizes: tuple (default=(5, 6))
+        blob sizes g to average kappa over.
 
     Returns
     =======
     :kappa_df: pd.DataFrame
-        pandas DataFrame of shape 1 x (1 + len(blob_sizes)), columns ``Kappa`` and
-        ``Kappa_{g}``.
+        pandas dataframe of kappa values for protein sequence. Dataframe will be of
+        the shape 1 x (1 + number of blob sizes), where the first column (Kappa) is
+        the mean and the remaining columns (Kappa_g) are the values for each blob
+        size. By default the shape will be 1 x 3.
     """
     #validate input protein sequence
     sequence = _validate_sequence(sequence)
@@ -230,12 +308,16 @@ def kappa(sequence: str, blob_sizes: tuple[int, ...] = (5, 6)) -> pd.DataFrame:
 
 def sequence_charge_decoration(sequence: str) -> pd.DataFrame:
     """
-    Calculate the Sequence Charge Decoration (SCD) of Sawle & Ghosh [3]:
+    Calculate the Sequence Charge Decoration (SCD) of protein sequence. SCD
+    describes the patterning of charges along a protein sequence, weighting each
+    pair of charges by the square root of their separation [3]. It is calculated as:
 
-    SCD = (1/L) sum_{m=2}^{L} sum_{n=1}^{m-1} q_m q_n (m - n)^{1/2}
+    SCD = (1/L) * sum_{m=2}^{L} sum_{n=1}^{m-1} q_m * q_n * (m - n)^(1/2)
 
-    with q = +1 for K/R, -1 for D/E and 0 otherwise. More negative values
-    indicate more segregated opposite charges; uncharged sequences give 0.
+    where q_m and q_n are the charges of the residues at positions m and n (+1 for
+    K and R, -1 for D and E, 0 otherwise) and L is the length of the sequence. More
+    negative values indicate more segregated opposite charges and uncharged
+    sequences have an SCD of 0.
 
     Parameters
     ==========
@@ -245,7 +327,8 @@ def sequence_charge_decoration(sequence: str) -> pd.DataFrame:
     Returns
     =======
     :scd_df: pd.DataFrame
-        pandas DataFrame of shape 1 x 1, column ``Charge_SCD``.
+        pandas dataframe of SCD for protein sequence. Dataframe will be of the
+        shape 1 x 1, with the column Charge_SCD.
     """
     #validate input protein sequence
     sequence = _validate_sequence(sequence)
@@ -262,24 +345,28 @@ def sequence_charge_decoration(sequence: str) -> pd.DataFrame:
 
 def charge_density(sequence: str, ph: float = 7.4) -> pd.DataFrame:
     """
-    Calculate the charge density of a protein sequence [4]: the net charge at
-    ``ph`` (from ``charge_distribution``) divided by the molecular weight (from
-    ``molecular_weight``), in charges per Da.
+    Calculate the Charge Density of protein sequence. Charge density is the net
+    charge of a protein sequence at a given pH divided by its molecular weight [4],
+    calculated as:
 
     ChargeDensity = NetCharge(pH) / MW
+
+    where NetCharge(pH) is calculated using the charge_distribution function and MW
+    using the molecular_weight function.
 
     Parameters
     ==========
     :sequence: str
         protein sequence.
     :ph: float (default=7.4)
-        pH at which the net charge is evaluated.
+        pH at which to calculate the net charge.
 
     Returns
     =======
     :charge_density_df: pd.DataFrame
-        pandas DataFrame of shape 1 x 1, column ``ChargeDensity``. The value is
-        rounded to 6 dp because it is typically of order 1e-4.
+        pandas dataframe of charge density (charges per Da) for protein sequence.
+        Dataframe will be of the shape 1 x 1, with the column ChargeDensity. The
+        value is rounded to 6 decimal places because it is typically of order 1e-4.
     """
     #validate input protein sequence
     sequence = _validate_sequence(sequence)
@@ -293,33 +380,42 @@ def charge_density(sequence: str, ph: float = 7.4) -> pd.DataFrame:
 def hydrophobicity_profile(sequence: str, scale: str = "kyte_doolittle", window: int = 9, edge: float = 1.0,
     threshold: float | None = None) -> pd.DataFrame:
     """
-    Summarise a sliding-window hydrophobicity profile [5, 6]. Each residue is
-    replaced by its scale value and a window of length ``window`` is slid along
-    the sequence; ``edge < 1`` weights the window ends linearly down to ``edge``
-    (ExPASy ProtScale semantics). The profile is reduced to its mean, max, min
-    and standard deviation, plus the fraction of windows above ``threshold``
-    when one is given (e.g. 1.6 for Kyte-Doolittle transmembrane segments).
-    Windows longer than the sequence use the whole sequence.
+    Calculate the Hydrophobicity Profile (HP) of protein sequence. Each amino acid
+    in the sequence is replaced by its value on a hydrophobicity scale and the
+    values are averaged over a sliding window, giving a profile along the sequence
+    [5, 6]. The profile is summarised by its mean, maximum, minimum and standard
+    deviation, and optionally the fraction of windows above a threshold, e.g. 1.6
+    for transmembrane segments with the Kyte-Doolittle scale [5]. The window value
+    is calculated as:
+
+    HP(i) = sum_j w_j * H(s_i+j) / sum_j w_j
+
+    where H is the hydrophobicity scale and w_j are the window weights. With
+    edge=1.0 all weights are 1 (a plain mean); with edge < 1 the weights fall
+    linearly from 1 at the centre of the window to edge at its ends, as in ExPASy
+    ProtScale. Windows longer than the sequence use the whole sequence.
 
     Parameters
     ==========
     :sequence: str
         protein sequence.
     :scale: str (default="kyte_doolittle")
-        single-value scale: "kyte_doolittle", "hopp_woods", "eisenberg",
-        "wimley_white", "engelman", "domcut", or any AAindex1 accession code.
+        single-value hydrophobicity scale: "kyte_doolittle", "hopp_woods",
+        "eisenberg", "wimley_white", "engelman", "domcut" or any AAindex
+        accession number.
     :window: int (default=9)
-        window length.
+        length of the sliding window.
     :edge: float (default=1.0)
-        relative weight of the window ends, 0-1.
+        relative weight of the ends of the window, between 0 and 1.
     :threshold: float | None (default=None)
-        if set, add the fraction of windows with a value above it.
+        if set, also calculate the fraction of windows with a value above it.
 
     Returns
     =======
     :profile_df: pd.DataFrame
-        pandas DataFrame of shape 1 x 4 (1 x 5 with ``threshold``), columns
-        ``HP_{scale}_w{window}_{mean,max,min,std[,frac_above]}``.
+        pandas dataframe of hydrophobicity profile statistics for protein sequence.
+        Dataframe will be of the shape 1 x 4 (1 x 5 with a threshold), with the
+        columns HP_<scale>_w<window>_mean, _max, _min, _std and _frac_above.
     """
     #validate input protein sequence
     sequence = _validate_sequence(sequence)
@@ -341,10 +437,14 @@ _apd_hydrophobic = frozenset("LIVFMACW")
 
 def hydrophobic_ratio(sequence: str) -> pd.DataFrame:
     """
-    Calculate the hydrophobic ratio of the Antimicrobial Peptide Database (APD)
-    [7]: the percentage of residues that are L, I, V, F, M, A, C or W.
+    Calculate the Hydrophobic Ratio of protein sequence. The hydrophobic ratio is
+    the percentage of hydrophobic residues in a protein sequence, as defined by
+    the Antimicrobial Peptide Database (APD) [7], calculated as:
 
-    HydrophobicRatio = N(LIVFMACW) / L x 100
+    HydrophobicRatio = N(LIVFMACW) / L * 100
+
+    where N(LIVFMACW) is the number of L, I, V, F, M, A, C and W residues and L
+    is the length of the sequence.
 
     Parameters
     ==========
@@ -354,7 +454,8 @@ def hydrophobic_ratio(sequence: str) -> pd.DataFrame:
     Returns
     =======
     :hydrophobic_ratio_df: pd.DataFrame
-        pandas DataFrame of shape 1 x 1, column ``HydrophobicRatio`` (percentage).
+        pandas dataframe of hydrophobic ratio for protein sequence. Dataframe will
+        be of the shape 1 x 1, with the column HydrophobicRatio.
     """
     #validate input protein sequence
     sequence = _validate_sequence(sequence)
@@ -364,14 +465,15 @@ def hydrophobic_ratio(sequence: str) -> pd.DataFrame:
 
 def half_life(sequence: str) -> pd.DataFrame:
     """
-    Estimate the in vivo half-life of a protein from its N-terminal residue by
-    the N-end rule [8, 9, 10], as tabulated by ExPASy ProtParam [6]: mammalian
-    reticulocytes (in vitro), yeast and E. coli (in vivo).
-
-    Values are in hours. Lower bounds in the source (">20 h" in yeast, ">10 h"
-    in E. coli, ">20 h" for mammalian Pro) are reported as the bound. The E. coli
-    value for an N-terminal Pro is unknown in the source and returned as NaN.
-    Not applicable to N-terminally modified proteins.
+    Calculate the estimated Half Life of protein sequence. The half-life is a
+    prediction of the time it takes for half of the amount of a protein in a cell
+    to disappear after its synthesis. It is estimated from the N-terminal residue
+    using the N-end rule [8, 9, 10], for 3 model systems: mammalian reticulocytes
+    (in vitro), yeast and E. coli (in vivo), using the values tabulated by ExPASy
+    ProtParam [6]. Values given as lower bounds in ProtParam (">20 hours" for yeast,
+    ">10 hours" for E. coli) are reported as the bound. The E. coli value for an
+    N-terminal proline is unknown in ProtParam and returned as NaN. The estimate is
+    not applicable to N-terminally modified proteins.
 
     Parameters
     ==========
@@ -381,8 +483,9 @@ def half_life(sequence: str) -> pd.DataFrame:
     Returns
     =======
     :half_life_df: pd.DataFrame
-        pandas DataFrame of shape 1 x 3, columns ``HalfLife_Mammal_h``,
-        ``HalfLife_Yeast_h`` and ``HalfLife_Ecoli_h``.
+        pandas dataframe of half-lives (hours) for protein sequence. Dataframe will
+        be of the shape 1 x 3, with the columns HalfLife_Mammal_h, HalfLife_Yeast_h
+        and HalfLife_Ecoli_h.
     """
     #validate input protein sequence
     sequence = _validate_sequence(sequence)
@@ -395,11 +498,15 @@ def half_life(sequence: str) -> pd.DataFrame:
 
 def ivywrel_index(sequence: str) -> pd.DataFrame:
     """
-    Calculate the IVYWREL index of Zeldovich et al. [11]: the fraction of residues
-    that are I, V, Y, W, R, E or L, which correlates with optimal growth
-    temperature.
+    Calculate the IVYWREL Index of protein sequence. The IVYWREL index is the
+    fraction of I, V, Y, W, R, E and L residues in a protein sequence, which
+    correlates with the optimal growth temperature of the organism [11]. It is
+    calculated as:
 
     IVYWREL = N(IVYWREL) / L
+
+    where N(IVYWREL) is the number of I, V, Y, W, R, E and L residues and L is the
+    length of the sequence.
 
     Parameters
     ==========
@@ -409,7 +516,8 @@ def ivywrel_index(sequence: str) -> pd.DataFrame:
     Returns
     =======
     :ivywrel_df: pd.DataFrame
-        pandas DataFrame of shape 1 x 1, column ``IVYWREL`` (fraction).
+        pandas dataframe of IVYWREL index for protein sequence. Dataframe will be
+        of the shape 1 x 1, with the column IVYWREL.
     """
     #validate input protein sequence
     sequence = _validate_sequence(sequence)
@@ -419,10 +527,13 @@ def ivywrel_index(sequence: str) -> pd.DataFrame:
 
 def cvp_bias(sequence: str) -> pd.DataFrame:
     """
-    Calculate the charged-versus-polar (CvP) bias of Suhre & Claverie [12], an
-    indicator of hyperthermostability:
+    Calculate the Charged versus Polar Bias (CvP) of protein sequence. The CvP bias
+    is the difference between the percentages of charged and polar residues in a
+    protein sequence, an indicator of hyperthermostability [12], calculated as:
 
     CvP = %(D + E + K + R) - %(N + Q + S + T)
+
+    where %(X) is the percentage of residues of type X in the sequence.
 
     Parameters
     ==========
@@ -432,7 +543,8 @@ def cvp_bias(sequence: str) -> pd.DataFrame:
     Returns
     =======
     :cvp_df: pd.DataFrame
-        pandas DataFrame of shape 1 x 1, column ``CvP_Bias`` (percentage points).
+        pandas dataframe of CvP bias for protein sequence. Dataframe will be of the
+        shape 1 x 1, with the column CvP_Bias.
     """
     #validate input protein sequence
     sequence = _validate_sequence(sequence)
@@ -444,29 +556,30 @@ def cvp_bias(sequence: str) -> pd.DataFrame:
 
 def flexibility(sequence: str, window: int = 9) -> pd.DataFrame:
     """
-    Summarise the flexibility profile of Vihinen et al. [13]. Average normalised
-    B-values (Vihinen's "average" parameter set, AAindex VINM940101) are averaged
-    over a window of 9 whose end weights fall linearly to 0.25 (weights 0.25,
-    0.4375, 0.625, 0.8125, 1, ..., 0.25; sum 5.25), and the profile is reduced
-    to its mean, max, min and standard deviation.
-
-    The neighbour-dependent parameter sets of [13] (residues with 0, 1 or 2 rigid
-    neighbours) are not used. Compared with Biopython's
-    ``ProteinAnalysis.flexibility``, which uses the same values and weights,
-    protpy centres each window on its middle residue and includes the last
-    window; Biopython takes the residue after the centre and omits the last window.
+    Calculate the Flexibility (Flex) profile of protein sequence. Each amino acid
+    in the sequence is replaced by its normalised flexibility parameter (B-value)
+    and the values are averaged over a sliding window of 9 residues whose end
+    weights fall linearly to 0.25 (weights 0.25, 0.4375, 0.625, 0.8125, 1, ...,
+    0.25), as in Vihinen et al. [13]. The profile is summarised by its mean,
+    maximum, minimum and standard deviation. The average B-values of Vihinen et
+    al. are used; their parameter sets for residues with 0, 1 or 2 rigid
+    neighbours are not. Compared with Biopython's ProteinAnalysis.flexibility,
+    which uses the same values and weights, each window is centred on its middle
+    residue and the last window is included.
 
     Parameters
     ==========
     :sequence: str
         protein sequence.
     :window: int (default=9)
-        window length (the parameters were optimised for 9).
+        length of the sliding window (the parameters were optimised for 9).
 
     Returns
     =======
     :flexibility_df: pd.DataFrame
-        pandas DataFrame of shape 1 x 4, columns ``Flex_{mean,max,min,std}``.
+        pandas dataframe of flexibility profile statistics for protein sequence.
+        Dataframe will be of the shape 1 x 4, with the columns Flex_mean, Flex_max,
+        Flex_min and Flex_std.
     """
     #validate input protein sequence
     sequence = _validate_sequence(sequence)

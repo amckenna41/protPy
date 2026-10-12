@@ -46,32 +46,39 @@ __all__ = [
 
 def wootton_federhen_complexity(sequence: str, window: int = 12, k2_trigger: float = 2.2) -> pd.DataFrame:
     """
-    Calculate Wootton-Federhen local compositional complexity [1, 2]. For every
-    window of length W with residue counts n_i:
+    Calculate the Wootton-Federhen Complexity (WF) of protein sequence. The
+    Wootton-Federhen measures describe the local compositional complexity of a
+    protein sequence over a sliding window, and are the basis of the SEG program
+    for finding low-complexity regions [1, 2]. For each window of W residues
+    they are calculated as:
 
-    K1 = (1/W) log_20( W! / prod_i n_i! )             (complexity state, 0-1)
-    K2 = -sum_i (n_i/W) log2(n_i/W)                   (Shannon entropy, bits)
+    K1 = (1/W) * log_20(W! / prod_i n_i!)
 
-    The low-complexity fraction is the fraction of residues covered by at least
-    one window with K2 <= ``k2_trigger``. This is the SEG trigger stage only:
-    SEG's extension to the K2 extension threshold and its interval merging and
-    optimisation are not performed. A window longer than the sequence uses the
-    whole sequence.
+    K2 = -sum_i (n_i / W) * log2(n_i / W)
+
+    where K1 is the complexity state, K2 is the Shannon entropy of the window in
+    bits and n_i is the number of residues of amino acid i in the window. The
+    low-complexity fraction is the fraction of residues covered by at least one
+    window with K2 <= k2_trigger. This is the trigger stage of SEG only; SEG's
+    extension and merging of low-complexity segments are not performed. A window
+    longer than the sequence uses the whole sequence.
 
     Parameters
     ==========
     :sequence: str
         protein sequence.
     :window: int (default=12)
-        window length W (SEG default 12).
+        length of the sliding window W (the SEG default).
     :k2_trigger: float (default=2.2)
-        K2 trigger complexity in bits (SEG default 2.2).
+        K2 value in bits at or below which a window is low complexity (the SEG
+        default).
 
     Returns
     =======
     :wf_df: pd.DataFrame
-        pandas DataFrame of shape 1 x 4, columns ``WF_K1_mean``, ``WF_K2_mean``,
-        ``WF_K2_min`` and ``WF_LowComplexity_frac``.
+        pandas dataframe of Wootton-Federhen complexity for protein sequence.
+        Dataframe will be of the shape 1 x 4, with the columns WF_K1_mean,
+        WF_K2_mean, WF_K2_min and WF_LowComplexity_frac.
     """
     #validate input protein sequence
     sequence = _validate_sequence(sequence)
@@ -99,27 +106,30 @@ def wootton_federhen_complexity(sequence: str, window: int = 12, k2_trigger: flo
 
 def linguistic_complexity(sequence: str, max_k: int | None = None) -> pd.DataFrame:
     """
-    Calculate the linguistic complexity (LC) of a protein sequence [3]: the
-    number of distinct subwords (k-mers) observed, over the maximum number
-    possible for a sequence of that length over the 20-letter alphabet:
+    Calculate the Linguistic Complexity (LC) of protein sequence. Linguistic
+    complexity describes how repetitive a sequence is, as the number of distinct
+    subwords (k-mers) it contains relative to the maximum possible number for a
+    sequence of its length [3]. It is calculated as:
 
     LC = sum_{k=1}^{K} U_k / sum_{k=1}^{K} min(20^k, L - k + 1)
 
-    where U_k is the number of distinct k-mers and K = ``max_k`` (default L, i.e.
-    all subwords). This is the ratio-of-sums form, counting all subwords as in
-    [3]; repetitive sequences have low LC.
+    where U_k is the number of distinct k-mers in the sequence, L is the length of
+    the sequence and K is the longest subword length (by default L, i.e. all
+    subwords). Repetitive sequences have a low LC and random sequences an LC
+    close to 1.
 
     Parameters
     ==========
     :sequence: str
         protein sequence.
     :max_k: int | None (default=None)
-        longest subword length; None uses the sequence length.
+        longest subword length K; None uses the length of the sequence.
 
     Returns
     =======
     :lc_df: pd.DataFrame
-        pandas DataFrame of shape 1 x 1, column ``LinguisticComplexity`` (0-1).
+        pandas dataframe of LC for protein sequence. Dataframe will be of the
+        shape 1 x 1, with the column LinguisticComplexity.
     """
     #validate input protein sequence
     sequence = _validate_sequence(sequence)
@@ -137,7 +147,22 @@ def linguistic_complexity(sequence: str, max_k: int | None = None) -> pd.DataFra
 ############################### Lempel-Ziv Complexity #####################################
 
 def _lz76(sequence: str) -> int:
-    """Number of components in the LZ76 exhaustive-history parsing (Kaspar-Schuster scheme)."""
+    """
+    Calculate the number of components in the Lempel-Ziv (LZ76) parsing of a
+    sequence [4], using the Kaspar-Schuster algorithm. The sequence is read from
+    left to right and each component is the shortest substring that cannot be
+    copied from the preceding part of the sequence.
+
+    Parameters
+    ==========
+    :sequence: str
+        protein sequence.
+
+    Returns
+    =======
+    :c: int
+        number of components c(n) in the LZ76 parsing.
+    """
     n = len(sequence)
     if n == 1:
         return 1
@@ -165,15 +190,16 @@ def _lz76(sequence: str) -> int:
 
 def lempel_ziv_complexity(sequence: str) -> pd.DataFrame:
     """
-    Calculate the Lempel-Ziv (LZ76) complexity of a protein sequence [4, 5]: the
-    number c(n) of new components found when the sequence is parsed from left to
-    right, each component being the shortest substring not producible by
-    copying from the preceding history. The normalised value for a 20-letter
-    alphabet is
+    Calculate the Lempel-Ziv Complexity (LZ) of protein sequence. The Lempel-Ziv
+    (LZ76) complexity is the number of new patterns, c(n), found when a sequence is
+    read from left to right, each pattern being the shortest substring that cannot
+    be copied from the preceding part of the sequence [4, 5]. As c(n) grows with the
+    length of the sequence, a normalised value is also calculated as:
 
-    LZ_Normalized = c(n) x log_20(n) / n
+    LZ_Normalized = c(n) * log_20(n) / n
 
-    (0 for a single residue).
+    where n is the length of the sequence and 20 is the size of the amino acid
+    alphabet. The normalised value is 0 for a single residue.
 
     Parameters
     ==========
@@ -183,8 +209,8 @@ def lempel_ziv_complexity(sequence: str) -> pd.DataFrame:
     Returns
     =======
     :lz_df: pd.DataFrame
-        pandas DataFrame of shape 1 x 2, columns ``LZ_Complexity`` (int) and
-        ``LZ_Normalized``.
+        pandas dataframe of LZ complexity for protein sequence. Dataframe will be
+        of the shape 1 x 2, with the columns LZ_Complexity and LZ_Normalized.
     """
     #validate input protein sequence
     sequence = _validate_sequence(sequence)

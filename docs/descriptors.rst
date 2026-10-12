@@ -1124,14 +1124,19 @@ Composition of k-spaced amino acid pairs: CKSAAP(XY,g) = N_g(XY) / (L-g-1) x 100
 
 .. code-block:: text
 
-   Calculate the Composition of k-Spaced Amino Acid Pairs (CKSAAP) of a protein
-   sequence. For each spacing g = 0..gap, every residue pair (s_i, s_{i+g+1})
-   is counted and divided by the number of such pairs:
+   Calculate Composition of k-Spaced Amino Acid Pairs (CKSAAP) of protein
+   sequence. CKSAAP describes the frequency of each amino acid pair separated
+   by g residues within a protein sequence, for each gap g in the range
+   0..gap. With 400 possible amino acid pairs per gap this creates a
+   400 * (gap+1) Dimensional vector, calculated as:
 
-   CKSAAP(XY, g) = N_g(XY) / (L - g - 1) x 100
+   CKSAAP(XY, g) = N_g(XY) / (L - g - 1) * 100
 
-   g = 0 is the dipeptide composition. Values are percentages; a spacing with no
-   pairs (L - g - 1 <= 0) gives zeros.
+   where CKSAAP(XY, g) is the composition of the amino acid pair XY with g
+   residues between X and Y, N_g(XY) is the number of such pairs in the sequence
+   and L is the length of the sequence. A gap of 0 is the same as the
+   dipeptide composition. A gap with no pairs (L - g - 1 <= 0) gives values
+   of 0.
 
 .. code-block:: python
 
@@ -1151,15 +1156,17 @@ Composition of k-spaced amino acid group pairs over the iFeature 5-group alphabe
 
 .. code-block:: text
 
-   Calculate the Composition of k-Spaced Amino Acid Group Pairs (CKSAAGP).
-   As CKSAAP, but residues are first mapped to the five iFeature groups:
-   aliphatic (GAVLMI), aromatic (FYW), positive (KRH), negative (DE) and
-   uncharged (STCPNQ).
+   Calculate Composition of k-Spaced Amino Acid Group Pairs (CKSAAGP) of protein
+   sequence. CKSAAGP is the same as CKSAAP but the amino acids are first mapped
+   to 5 groups: aliphatic (GAVLMI), aromatic (FYW), positive charge (KRH),
+   negative charge (DE) and uncharged (STCPNQ). With 25 possible group pairs
+   per gap this creates a 25 * (gap+1) Dimensional vector, calculated as:
 
-   CKSAAGP(G1G2, g) = N_g(G1G2) / (L - g - 1) x 100
+   CKSAAGP(G1G2, g) = N_g(G1G2) / (L - g - 1) * 100
 
-   Values are percentages and the 25 values for each spacing sum to 100
-   (0 when the spacing has no pairs).
+   where CKSAAGP(G1G2, g) is the composition of the group pair G1G2 with g
+   residues between them, N_g(G1G2) is the number of such pairs in the sequence
+   and L is the length of the sequence. The 25 values for each gap sum to 100.
 
 .. code-block:: python
 
@@ -1179,17 +1186,24 @@ Dipeptide deviation from expected mean: (Dc - Tm) / sqrt(Tv), with Tm from codon
 
 .. code-block:: text
 
-   Calculate the Dipeptide Deviation from Expected Mean (DDE). The observed
-   dipeptide composition is standardised against the composition expected from
-   the number of codons coding each residue:
+   Calculate Dipeptide Deviation from Expected Mean (DDE) of protein sequence.
+   DDE compares the observed dipeptide composition of a protein sequence with
+   the composition expected from the number of codons that code for each amino
+   acid. For each of the 400 dipeptides it is calculated as:
 
    Dc(XY) = N(XY) / (L - 1)
-   Tm(XY) = (C_X / 61) x (C_Y / 61)
-   Tv(XY) = Tm(XY) x (1 - Tm(XY)) / (L - 1)
+
+   Tm(XY) = (C_X / 61) * (C_Y / 61)
+
+   Tv(XY) = Tm(XY) * (1 - Tm(XY)) / (L - 1)
+
    DDE(XY) = (Dc(XY) - Tm(XY)) / sqrt(Tv(XY))
 
-   where C_X is the number of sense codons for residue X in the standard genetic
-   code (61 in total). DDE is a standardised statistic, not a percentage.
+   where Dc(XY) is the observed composition of dipeptide XY, N(XY) is the
+   number of XY dipeptides, L is the length of the sequence, Tm(XY) and Tv(XY)
+   are the theoretical mean and variance, and C_X and C_Y are the number of
+   codons for amino acids X and Y out of the 61 sense codons. Unlike the
+   other composition descriptors, DDE values are not percentages.
 
 .. code-block:: python
 
@@ -1209,13 +1223,17 @@ Adaptive skip dipeptide composition: composition of all ordered pairs (s_i, s_j)
 
 .. code-block:: text
 
-   Calculate the Adaptive Skip Dipeptide Composition (ASDC): the composition
-   of every ordered residue pair (s_i, s_j) with i < j, over all gaps:
+   Calculate Adaptive Skip Dipeptide Composition (ASDC) of protein sequence.
+   ASDC is a modified dipeptide composition that counts every ordered pair of
+   amino acids (s_i, s_j), where i < j, at all gaps along the sequence, rather
+   than just adjacent pairs, calculated as:
 
-   ASDC(XY) = sum_g N_g(XY) / sum_g sum_XY N_g(XY) x 100
+   ASDC(XY) = sum_g N_g(XY) / sum_g sum_XY N_g(XY) * 100
 
-   The denominator is the total number of ordered pairs, L(L-1)/2. Values are
-   percentages and sum to 100 (zeros for a single residue).
+   where ASDC(XY) is the composition of the amino acid pair XY, N_g(XY) is the
+   number of XY pairs separated by g residues, and the denominator is the total
+   number of ordered pairs in the sequence, L(L-1)/2, where L is the length of
+   the sequence. The 400 values sum to 100.
 
 .. code-block:: python
 
@@ -1235,20 +1253,23 @@ PseAAC of distance-pairs over a reduced cluster profile (cp13/cp14/cp19/cp20).
 
 .. code-block:: text
 
-   Calculate the PseAAC of distance-pairs over a reduced amino acid alphabet
-   (iDNA-Prot|dis). Residues are mapped to the clusters of a cluster
-   profile cp(n) and the vector is
+   Calculate Distance Pair (DP) descriptor of protein sequence. The descriptor
+   incorporates amino acid distance pairs and a reduced amino acid alphabet into
+   the general pseudo amino acid composition, as used in iDNA-Prot|dis.
+   The amino acids are first mapped to the clusters of a cluster profile cp(n),
+   and the descriptor is the composition of the clusters followed by the
+   composition of cluster pairs at each distance d = 1..rng:
 
-   [f^0(1..G), f^1(1..G^2), ..., f^d(1..G^2)]
+   DP(c) = N(c) / L * 100
 
-   where f^0 is the cluster composition (count / L) and f^d, d = 1..rng, is the
-   composition of cluster pairs (s_i, s_{i+d}) (count / (L - d)); d = 1 is the
-   nearest-neighbour pair. This follows Eqs. 5-12 of, giving G + G^2·rng
-   values (e.g. 14 + 14x14x3 = 602 for cp14, rng=3). Values are percentages.
+   DP(c1c2, d) = N_d(c1c2) / (L - d) * 100
 
-   Alphabets: cp13, cp14, cp19, cp20 (no reduction) from Eq. 10 of. The
-   printed cp(14) lists E twice; the stray E in the first cluster is dropped,
-   the only reading with 14 clusters.
+   where N(c) is the number of residues in cluster c, N_d(c1c2) is the number of
+   residue pairs (s_i, s_i+d) whose residues are in clusters c1 and c2, and L is
+   the length of the sequence. A distance of 1 is the nearest-neighbour pair.
+   The available cluster profiles are cp13, cp14, cp19 and cp20 (no reduction).
+   The published cp(14) lists E twice; the extra E in the first cluster is
+   dropped, as it is the only reading that gives 14 clusters.
 
 .. code-block:: python
 
@@ -1268,13 +1289,19 @@ Natural vector: count, mean position and normalised second central moment of eac
 
 .. code-block:: text
 
-   Calculate the Natural Vector of a protein sequence. For each amino acid k:
+   Calculate Natural Vector (NV) of protein sequence. The natural vector
+   describes the number of each amino acid in a protein sequence together with
+   the mean and the normalized central moment of their positions, calculated as:
 
-   n_k  = number of occurrences of k
-   mu_k = mean (1-based) position of k
-   D2_k = sum_i (pos_i - mu_k)^2 / (n_k x L)
+   n_k = number of occurrences of amino acid k
 
-   mu_k and D2_k are 0 when k does not occur. Values are not percentages.
+   mu_k = sum of the positions of k / n_k
+
+   D2_k = sum of (position of k - mu_k)^2 / (n_k * L)
+
+   where positions start at 1, L is the length of the sequence and k is each of
+   the 20 canonical amino acids. mu_k and D2_k are 0 when amino acid k is
+   not in the sequence.
 
 .. code-block:: python
 
@@ -1294,16 +1321,18 @@ Percentage of C, H, N, O and S atoms over the residues' free amino-acid formulas
 
 .. code-block:: text
 
-   Calculate the Atomic Composition (ATC) of a protein sequence: the
-   percentage of C, H, N, O and S atoms, summed over the molecular formulas of
-   the residues' free amino acids.
+   Calculate Atomic Composition (ATC) of protein sequence. ATC describes the
+   percentage of carbon, hydrogen, nitrogen, oxygen and sulphur atoms in a
+   protein sequence, using the molecular formulas of the free amino acids,
+   calculated as:
 
-   ATC(e) = N_e / (N_C + N_H + N_N + N_O + N_S) x 100
+   ATC(e) = N_e / (N_C + N_H + N_N + N_O + N_S) * 100
 
-   By default free amino-acid formulas are summed without removing water,
-   matching Pfeature. With ``subtract_water=True``, (L - 1) H2O are removed
-   for the peptide bonds, giving the formula of the linear peptide (e.g. "GG"
-   -> C4H8N2O3).
+   where ATC(e) is the atomic composition of element e and N_e is the number of
+   atoms of element e summed over all residues. By default the formulas of
+   the free amino acids are summed without removing water, matching Pfeature
+   . With subtract_water=True, one water molecule is removed for each of the
+   L - 1 peptide bonds, giving the formula of the peptide (e.g. "GG" -> C4H8N2O3).
 
 .. code-block:: python
 
@@ -1323,8 +1352,21 @@ Mean of the Sandberg 5 z-scales over the sequence (optionally per domain).
 
 .. code-block:: text
 
-   Calculate the mean z_scales_5 factor-scale descriptor of a protein sequence (Sandberg 5 z-scales).
-   See ``aa_scale_descriptors`` for the formula.
+   Calculate Sandberg 5 z-scales (Z5) of protein sequence. The z-scales are the
+   principal components of a set of physicochemical properties measured for 87
+   coded and non-coded amino acids. z1 mainly describes lipophilicity, z2
+   steric bulk and polarizability, z3 polarity and charge, and z4 and z5
+   electronegativity, heat of formation, electrophilicity and hardness.
+
+   Each amino acid in the sequence is replaced by its 5 z-scales and the mean of
+   each is taken over the sequence, calculated as:
+
+   S_j = (1/L) * sum_i z_j(s_i)
+
+   where S_j is the descriptor value for scale j, z_j(s_i) is the value of scale
+   j for the amino acid at position i and L is the length of the sequence. With
+   domains > 1 the sequence is split into that many near-equal segments and the
+   means of each segment are concatenated.
 
 .. code-block:: python
 
@@ -1344,8 +1386,21 @@ Mean of the VHSE (hydrophobic, steric, electronic) scales over the sequence (opt
 
 .. code-block:: text
 
-   Calculate the mean vhse factor-scale descriptor of a protein sequence (principal components score Vectors of Hydrophobic, Steric and Electronic properties).
-   See ``aa_scale_descriptors`` for the formula.
+   Calculate Vectors of Hydrophobic, Steric and Electronic properties (VHSE) of
+   protein sequence. The VHSE scales are principal components score vectors derived
+   from physicochemical variables of the 20 coded amino acids. VHSE1-2 describe
+   hydrophobic properties, VHSE3-4 steric properties and VHSE5-8 electronic
+   properties.
+
+   Each amino acid in the sequence is replaced by its 8 VHSE scales and the mean of
+   each is taken over the sequence, calculated as:
+
+   S_j = (1/L) * sum_i z_j(s_i)
+
+   where S_j is the descriptor value for scale j, z_j(s_i) is the value of scale
+   j for the amino acid at position i and L is the length of the sequence. With
+   domains > 1 the sequence is split into that many near-equal segments and the
+   means of each segment are concatenated.
 
 .. code-block:: python
 
@@ -1365,8 +1420,21 @@ Mean of the Atchley factors I-V over the sequence (optionally per domain).
 
 .. code-block:: text
 
-   Calculate the mean atchley_factors factor-scale descriptor of a protein sequence (Atchley factors I-V).
-   See ``aa_scale_descriptors`` for the formula.
+   Calculate Atchley Factors (AF) of protein sequence. The Atchley factors are 5
+   factors obtained from a factor analysis of 54 amino acid attributes. Factor
+   I mainly reflects polarity, accessibility and hydrophobicity, factor II
+   propensity for secondary structure, factor III molecular size, factor IV
+   relative amino acid composition and factor V electrostatic charge.
+
+   Each amino acid in the sequence is replaced by its 5 Atchley factors and the
+   mean of each is taken over the sequence, calculated as:
+
+   S_j = (1/L) * sum_i z_j(s_i)
+
+   where S_j is the descriptor value for scale j, z_j(s_i) is the value of scale
+   j for the amino acid at position i and L is the length of the sequence. With
+   domains > 1 the sequence is split into that many near-equal segments and the
+   means of each segment are concatenated.
 
 .. code-block:: python
 
@@ -1386,8 +1454,19 @@ Mean of the topological T-scales over the sequence (optionally per domain).
 
 .. code-block:: text
 
-   Calculate the mean t_scales factor-scale descriptor of a protein sequence (topological T-scales).
-   See ``aa_scale_descriptors`` for the formula.
+   Calculate Topological Scales (T-scales) of protein sequence. The T-scales are
+   principal components of topological descriptors of amino acids, describing their
+   structural and topological characteristics.
+
+   Each amino acid in the sequence is replaced by its 5 T-scales and the mean of
+   each is taken over the sequence, calculated as:
+
+   S_j = (1/L) * sum_i z_j(s_i)
+
+   where S_j is the descriptor value for scale j, z_j(s_i) is the value of scale
+   j for the amino acid at position i and L is the length of the sequence. With
+   domains > 1 the sequence is split into that many near-equal segments and the
+   means of each segment are concatenated.
 
 .. code-block:: python
 
@@ -1407,8 +1486,19 @@ Mean of the structural topology ST-scales over the sequence (optionally per doma
 
 .. code-block:: text
 
-   Calculate the mean st_scales factor-scale descriptor of a protein sequence (structural topology ST-scales).
-   See ``aa_scale_descriptors`` for the formula.
+   Calculate Structural Topology Scales (ST-scales) of protein sequence. The ST-
+   scales are principal components of 3D structural and topological properties of
+   amino acids.
+
+   Each amino acid in the sequence is replaced by its 8 ST-scales and the mean of
+   each is taken over the sequence, calculated as:
+
+   S_j = (1/L) * sum_i z_j(s_i)
+
+   where S_j is the descriptor value for scale j, z_j(s_i) is the value of scale
+   j for the amino acid at position i and L is the length of the sequence. With
+   domains > 1 the sequence is split into that many near-equal segments and the
+   means of each segment are concatenated.
 
 .. code-block:: python
 
@@ -1428,8 +1518,19 @@ Mean of the ProtFP (PCA, 8 components) over the sequence (optionally per domain)
 
 .. code-block:: text
 
-   Calculate the mean protfp factor-scale descriptor of a protein sequence (ProtFP PCA, 8 components).
-   See ``aa_scale_descriptors`` for the formula.
+   Calculate ProtFP (ProtFP) of protein sequence. ProtFP is a set of 8 principal
+   components calculated from a selection of physicochemical properties in the
+   AAindex database.
+
+   Each amino acid in the sequence is replaced by its 8 ProtFP components and the
+   mean of each is taken over the sequence, calculated as:
+
+   S_j = (1/L) * sum_i z_j(s_i)
+
+   where S_j is the descriptor value for scale j, z_j(s_i) is the value of scale
+   j for the amino acid at position i and L is the length of the sequence. With
+   domains > 1 the sequence is split into that many near-equal segments and the
+   means of each segment are concatenated.
 
 .. code-block:: python
 
@@ -1449,8 +1550,21 @@ Mean of the FASGAI factor scales over the sequence (optionally per domain).
 
 .. code-block:: text
 
-   Calculate the mean fasgai factor-scale descriptor of a protein sequence (factor analysis scales of generalized amino acid information).
-   See ``aa_scale_descriptors`` for the formula.
+   Calculate Factor Analysis Scales of Generalized Amino Acid Information (FASGAI)
+   of protein sequence. The FASGAI scales are 6 factors obtained from a factor
+   analysis of amino acid properties, describing hydrophobicity, alpha and turn
+   propensities, bulky properties, compositional characteristics, local flexibility
+   and electronic properties.
+
+   Each amino acid in the sequence is replaced by its 6 FASGAI factors and the mean
+   of each is taken over the sequence, calculated as:
+
+   S_j = (1/L) * sum_i z_j(s_i)
+
+   where S_j is the descriptor value for scale j, z_j(s_i) is the value of scale
+   j for the amino acid at position i and L is the length of the sequence. With
+   domains > 1 the sequence is split into that many near-equal segments and the
+   means of each segment are concatenated.
 
 .. code-block:: python
 
@@ -1470,8 +1584,20 @@ Mean of the BLOSUM62-derived indices over the sequence (optionally per domain).
 
 .. code-block:: text
 
-   Calculate the mean blosum_indices factor-scale descriptor of a protein sequence (BLOSUM62-derived indices).
-   See ``aa_scale_descriptors`` for the formula.
+   Calculate BLOSUM Indices (BLOSUM) of protein sequence. The BLOSUM indices are 10
+   factors derived from the BLOSUM62 substitution matrix by principal component
+   analysis and VARIMAX rotation, so they describe the evolutionary similarity of
+   amino acids.
+
+   Each amino acid in the sequence is replaced by its 10 BLOSUM indices and the
+   mean of each is taken over the sequence, calculated as:
+
+   S_j = (1/L) * sum_i z_j(s_i)
+
+   where S_j is the descriptor value for scale j, z_j(s_i) is the value of scale
+   j for the amino acid at position i and L is the length of the sequence. With
+   domains > 1 the sequence is split into that many near-equal segments and the
+   means of each segment are concatenated.
 
 .. code-block:: python
 
@@ -1491,8 +1617,20 @@ Mean of the MS-WHIM scores over the sequence (optionally per domain).
 
 .. code-block:: text
 
-   Calculate the mean ms_whim factor-scale descriptor of a protein sequence (MS-WHIM scores).
-   See ``aa_scale_descriptors`` for the formula.
+   Calculate Molecular Surface Weighted Holistic Invariant Molecular Scores (MS-
+   WHIM) of protein sequence. The MS-WHIM scores are 3 principal components of 3D
+   descriptors calculated from the molecular electrostatic potential on the surface
+   of each amino acid.
+
+   Each amino acid in the sequence is replaced by its 3 MS-WHIM scores and the mean
+   of each is taken over the sequence, calculated as:
+
+   S_j = (1/L) * sum_i z_j(s_i)
+
+   where S_j is the descriptor value for scale j, z_j(s_i) is the value of scale
+   j for the amino acid at position i and L is the length of the sequence. With
+   domains > 1 the sequence is split into that many near-equal segments and the
+   means of each segment are concatenated.
 
 .. code-block:: python
 
@@ -1512,15 +1650,19 @@ Auto/cross-covariance of an amino-acid scale: sum z_j(i) z_k(i+l) / (L-l).
 
 .. code-block:: text
 
-   Calculate the auto- and cross-covariance (ACC) transform of an amino-acid
-   scale. For lag l and scale dimensions j, k:
+   Calculate Auto Cross Covariance (ACC) of protein sequence. ACC transforms the
+   amino acid scale values of a sequence into a fixed-length vector that
+   describes the covariance between the scale dimensions of residues separated
+   by l positions, for each lag l in the range 1..lag. It is calculated as:
 
-   ACC_{j,k}(l) = sum_{i=1}^{L-l} z_{j,i} x z_{k,i+l} / (L - l)
+   ACC_jk(l) = sum_{i=1}^{L-l} z_j(s_i) * z_k(s_i+l) / (L - l)
 
-   ``mode="acc"`` returns every (j, k) pair, ``"ac"`` only j = k (auto
-   covariance) and ``"cc"`` only j != k (cross covariance). ``scale`` may be a
-   protpy factor-scale family (used as published) or an AAindex1 code / list
-   of codes, which are standardised over the 20 amino acids.
+   where ACC_jk(l) is the covariance between dimensions j and k at lag l, z_j(s_i)
+   is the value of dimension j for the amino acid at position i and L is the length
+   of the sequence. When j = k this is the auto covariance and when j != k the cross
+   covariance. The scale can be one of the factor-scale families, which are used as
+   published, or one or more AAindex accession numbers, whose values are first
+   standardised over the 20 amino acids.
 
 .. code-block:: python
 
@@ -1540,10 +1682,17 @@ Physicochemical distance transformation: mean squared difference of standardised
 
 .. code-block:: text
 
-   Calculate the Physicochemical Distance Transformation (PDT). For each
-   AAindex property P_j (standardised over the 20 amino acids) and lag l:
+   Calculate Physicochemical Distance Transformation (PDT) of protein sequence.
+   PDT describes how much a physicochemical property changes between residues
+   separated by l positions, for each lag l in the range 1..lag. For each
+   AAindex property it is calculated as:
 
-   PDT_j(l) = sum_{i=1}^{L-l} (P_j(s_i) - P_j(s_{i+l}))^2 / (L - l)
+   PDT_j(l) = sum_{i=1}^{L-l} (P_j(s_i) - P_j(s_i+l))^2 / (L - l)
+
+   where PDT_j(l) is the descriptor value for property j at lag l, P_j(s_i) is the
+   value of property j for the amino acid at position i, standardised over the 20
+   amino acids, and L is the length of the sequence. By default the same 8 AAindex
+   properties as the autocorrelation descriptors are used.
 
 .. code-block:: python
 
@@ -1563,13 +1712,21 @@ Fraction of charged residues (FCR), positive/negative fractions and charge asymm
 
 .. code-block:: text
 
-   Calculate the charge fractions of a protein sequence:
+   Calculate the Charge Fractions (FCR) of protein sequence. The fraction of
+   charged residues (FCR), the fractions of positive and negative residues and
+   the overall charge asymmetry (sigma) describe the charge content of a protein
+   sequence, and are key parameters of the conformations of intrinsically
+   disordered proteins. They are calculated as:
 
-   FCR    = (n+ + n-) / L          fraction of charged residues
-   FPlus  = n+ / L,  FMinus = n- / L
-   Sigma  = NCPR^2 / FCR           overall charge asymmetry (0 if FCR = 0)
+   FCR = (n+ + n-) / L
 
-   where n+ counts K/R and n- counts D/E (H is neutral). Values are fractions.
+   FPlus = n+ / L, FMinus = n- / L
+
+   Sigma = NCPR^2 / FCR
+
+   where n+ is the number of positive residues (K, R), n- the number of negative
+   residues (D, E), L is the length of the sequence and NCPR = (n+ - n-) / L. His
+   is treated as neutral and sigma is 0 when there are no charged residues.
 
 .. code-block:: python
 
@@ -1589,11 +1746,13 @@ Net charge per residue: (n+ - n-) / L with K/R positive and D/E negative.
 
 .. code-block:: text
 
-   Calculate the Net Charge Per Residue (NCPR) of a protein sequence:
+   Calculate the Net Charge Per Residue (NCPR) of protein sequence. NCPR is the
+   net charge of a protein sequence divided by its length, calculated as:
 
    NCPR = (n+ - n-) / L
 
-   with n+ counting K/R and n- counting D/E.
+   where n+ is the number of positive residues (K, R), n- the number of negative
+   residues (D, E) and L is the length of the sequence.
 
 .. code-block:: python
 
@@ -1613,24 +1772,26 @@ Das-Pappu kappa: normalised blob charge-asymmetry deviation measuring segregatio
 
 .. code-block:: text
 
-   Calculate the kappa charge-patterning parameter of Das & Pappu. For blob
-   size g, the sequence is split into the L - g + 1 overlapping blobs and
+   Calculate the Kappa (Kappa) charge patterning parameter of protein sequence.
+   Kappa describes how well oppositely charged residues are mixed or segregated
+   along a protein sequence, which strongly affects the conformations of
+   intrinsically disordered proteins. The sequence is split into overlapping
+   blobs of g residues and kappa is calculated as:
 
-   sigma_b = (f+ - f-)^2 / (f+ + f-)        per blob (0 if uncharged)
-   delta_g = mean over blobs of (sigma_b - sigma)^2
+   sigma_b = (f+ - f-)^2 / (f+ + f-)
+
+   delta_g = mean over all blobs of (sigma_b - sigma)^2
+
    kappa_g = delta_g / delta_max,g
 
-   where sigma = NCPR^2 / FCR of the whole sequence and delta_max,g is the
-   largest delta over the maximally segregated arrangements of the same
-   composition (a positive block and a negative block with the neutral residues
-   distributed over the three surrounding gaps; every distinct arrangement is
-   evaluated). kappa is the mean of kappa_g
-   over ``blob_sizes`` (5 and 6 in); 0 means well mixed and 1 fully
-   segregated. Charges: K, R = +1; D, E = -1; H = 0.
-
-   kappa is reported as 0 (not NaN) when the sequence has no charges or only one
-   charge type, where oppositely charged residues cannot be segregated. A blob
-   size longer than the sequence is reduced to the sequence length.
+   where sigma_b is the charge asymmetry of a blob, f+ and f- are its fractions of
+   positive (K, R) and negative (D, E) residues, sigma = NCPR^2 / FCR is the charge
+   asymmetry of the whole sequence and delta_max,g is the largest delta over the
+   most segregated arrangements of the same composition. The final kappa is the
+   mean of kappa_g over the blob sizes (5 and 6 by default). Kappa ranges from 0
+   (well mixed) to 1 (fully segregated). It is reported as 0 when the sequence has
+   no charged residues or only one type of charge, and blobs longer than the
+   sequence are reduced to its length.
 
 .. code-block:: python
 
@@ -1650,12 +1811,16 @@ Sequence charge decoration: (1/L) sum_{m>n} q_m q_n sqrt(m-n).
 
 .. code-block:: text
 
-   Calculate the Sequence Charge Decoration (SCD) of Sawle & Ghosh:
+   Calculate the Sequence Charge Decoration (SCD) of protein sequence. SCD
+   describes the patterning of charges along a protein sequence, weighting each
+   pair of charges by the square root of their separation. It is calculated as:
 
-   SCD = (1/L) sum_{m=2}^{L} sum_{n=1}^{m-1} q_m q_n (m - n)^{1/2}
+   SCD = (1/L) * sum_{m=2}^{L} sum_{n=1}^{m-1} q_m * q_n * (m - n)^(1/2)
 
-   with q = +1 for K/R, -1 for D/E and 0 otherwise. More negative values
-   indicate more segregated opposite charges; uncharged sequences give 0.
+   where q_m and q_n are the charges of the residues at positions m and n (+1 for
+   K and R, -1 for D and E, 0 otherwise) and L is the length of the sequence. More
+   negative values indicate more segregated opposite charges and uncharged
+   sequences have an SCD of 0.
 
 .. code-block:: python
 
@@ -1675,11 +1840,14 @@ Net charge at the given pH divided by molecular weight (charges per Da).
 
 .. code-block:: text
 
-   Calculate the charge density of a protein sequence: the net charge at
-   ``ph`` (from ``charge_distribution``) divided by the molecular weight (from
-   ``molecular_weight``), in charges per Da.
+   Calculate the Charge Density of protein sequence. Charge density is the net
+   charge of a protein sequence at a given pH divided by its molecular weight,
+   calculated as:
 
    ChargeDensity = NetCharge(pH) / MW
+
+   where NetCharge(pH) is calculated using the charge_distribution function and MW
+   using the molecular_weight function.
 
 .. code-block:: python
 
@@ -1699,13 +1867,20 @@ Summary statistics of a sliding-window hydrophobicity profile (ProtScale-style e
 
 .. code-block:: text
 
-   Summarise a sliding-window hydrophobicity profile. Each residue is
-   replaced by its scale value and a window of length ``window`` is slid along
-   the sequence; ``edge < 1`` weights the window ends linearly down to ``edge``
-   (ExPASy ProtScale semantics). The profile is reduced to its mean, max, min
-   and standard deviation, plus the fraction of windows above ``threshold``
-   when one is given (e.g. 1.6 for Kyte-Doolittle transmembrane segments).
-   Windows longer than the sequence use the whole sequence.
+   Calculate the Hydrophobicity Profile (HP) of protein sequence. Each amino acid
+   in the sequence is replaced by its value on a hydrophobicity scale and the
+   values are averaged over a sliding window, giving a profile along the sequence
+   . The profile is summarised by its mean, maximum, minimum and standard
+   deviation, and optionally the fraction of windows above a threshold, e.g. 1.6
+   for transmembrane segments with the Kyte-Doolittle scale. The window value
+   is calculated as:
+
+   HP(i) = sum_j w_j * H(s_i+j) / sum_j w_j
+
+   where H is the hydrophobicity scale and w_j are the window weights. With
+   edge=1.0 all weights are 1 (a plain mean); with edge < 1 the weights fall
+   linearly from 1 at the centre of the window to edge at its ends, as in ExPASy
+   ProtScale. Windows longer than the sequence use the whole sequence.
 
 .. code-block:: python
 
@@ -1725,10 +1900,14 @@ APD hydrophobic ratio: percentage of L, I, V, F, M, A, C, W residues.
 
 .. code-block:: text
 
-   Calculate the hydrophobic ratio of the Antimicrobial Peptide Database (APD)
-   : the percentage of residues that are L, I, V, F, M, A, C or W.
+   Calculate the Hydrophobic Ratio of protein sequence. The hydrophobic ratio is
+   the percentage of hydrophobic residues in a protein sequence, as defined by
+   the Antimicrobial Peptide Database (APD), calculated as:
 
-   HydrophobicRatio = N(LIVFMACW) / L x 100
+   HydrophobicRatio = N(LIVFMACW) / L * 100
+
+   where N(LIVFMACW) is the number of L, I, V, F, M, A, C and W residues and L
+   is the length of the sequence.
 
 .. code-block:: python
 
@@ -1748,14 +1927,15 @@ N-end rule half-life (hours) in mammalian, yeast and E. coli systems from the N-
 
 .. code-block:: text
 
-   Estimate the in vivo half-life of a protein from its N-terminal residue by
-   the N-end rule, as tabulated by ExPASy ProtParam: mammalian
-   reticulocytes (in vitro), yeast and E. coli (in vivo).
-
-   Values are in hours. Lower bounds in the source (">20 h" in yeast, ">10 h"
-   in E. coli, ">20 h" for mammalian Pro) are reported as the bound. The E. coli
-   value for an N-terminal Pro is unknown in the source and returned as NaN.
-   Not applicable to N-terminally modified proteins.
+   Calculate the estimated Half Life of protein sequence. The half-life is a
+   prediction of the time it takes for half of the amount of a protein in a cell
+   to disappear after its synthesis. It is estimated from the N-terminal residue
+   using the N-end rule, for 3 model systems: mammalian reticulocytes
+   (in vitro), yeast and E. coli (in vivo), using the values tabulated by ExPASy
+   ProtParam. Values given as lower bounds in ProtParam (">20 hours" for yeast,
+   ">10 hours" for E. coli) are reported as the bound. The E. coli value for an
+   N-terminal proline is unknown in ProtParam and returned as NaN. The estimate is
+   not applicable to N-terminally modified proteins.
 
 .. code-block:: python
 
@@ -1775,11 +1955,15 @@ Fraction of I, V, Y, W, R, E, L residues (thermophilic adaptation index).
 
 .. code-block:: text
 
-   Calculate the IVYWREL index of Zeldovich et al.: the fraction of residues
-   that are I, V, Y, W, R, E or L, which correlates with optimal growth
-   temperature.
+   Calculate the IVYWREL Index of protein sequence. The IVYWREL index is the
+   fraction of I, V, Y, W, R, E and L residues in a protein sequence, which
+   correlates with the optimal growth temperature of the organism. It is
+   calculated as:
 
    IVYWREL = N(IVYWREL) / L
+
+   where N(IVYWREL) is the number of I, V, Y, W, R, E and L residues and L is the
+   length of the sequence.
 
 .. code-block:: python
 
@@ -1799,10 +1983,13 @@ Charged versus polar bias: %(D+E+K+R) - %(N+Q+S+T).
 
 .. code-block:: text
 
-   Calculate the charged-versus-polar (CvP) bias of Suhre & Claverie, an
-   indicator of hyperthermostability:
+   Calculate the Charged versus Polar Bias (CvP) of protein sequence. The CvP bias
+   is the difference between the percentages of charged and polar residues in a
+   protein sequence, an indicator of hyperthermostability, calculated as:
 
    CvP = %(D + E + K + R) - %(N + Q + S + T)
+
+   where %(X) is the percentage of residues of type X in the sequence.
 
 .. code-block:: python
 
@@ -1822,17 +2009,16 @@ Summary statistics of the Vihinen average-B-value flexibility profile (window 9,
 
 .. code-block:: text
 
-   Summarise the flexibility profile of Vihinen et al.. Average normalised
-   B-values (Vihinen's "average" parameter set, AAindex VINM940101) are averaged
-   over a window of 9 whose end weights fall linearly to 0.25 (weights 0.25,
-   0.4375, 0.625, 0.8125, 1, ..., 0.25; sum 5.25), and the profile is reduced
-   to its mean, max, min and standard deviation.
-
-   The neighbour-dependent parameter sets of (residues with 0, 1 or 2 rigid
-   neighbours) are not used. Compared with Biopython's
-   ``ProteinAnalysis.flexibility``, which uses the same values and weights,
-   protpy centres each window on its middle residue and includes the last
-   window; Biopython takes the residue after the centre and omits the last window.
+   Calculate the Flexibility (Flex) profile of protein sequence. Each amino acid
+   in the sequence is replaced by its normalised flexibility parameter (B-value)
+   and the values are averaged over a sliding window of 9 residues whose end
+   weights fall linearly to 0.25 (weights 0.25, 0.4375, 0.625, 0.8125, 1, ...,
+   0.25), as in Vihinen et al.. The profile is summarised by its mean,
+   maximum, minimum and standard deviation. The average B-values of Vihinen et
+   al. are used; their parameter sets for residues with 0, 1 or 2 rigid
+   neighbours are not. Compared with Biopython's ProteinAnalysis.flexibility,
+   which uses the same values and weights, each window is centred on its middle
+   residue and the last window is included.
 
 .. code-block:: python
 
@@ -1852,17 +2038,22 @@ Wootton-Federhen local complexity (K1, K2) over sliding windows and the SEG-trig
 
 .. code-block:: text
 
-   Calculate Wootton-Federhen local compositional complexity. For every
-   window of length W with residue counts n_i:
+   Calculate the Wootton-Federhen Complexity (WF) of protein sequence. The
+   Wootton-Federhen measures describe the local compositional complexity of a
+   protein sequence over a sliding window, and are the basis of the SEG program
+   for finding low-complexity regions. For each window of W residues
+   they are calculated as:
 
-   K1 = (1/W) log_20( W! / prod_i n_i! )             (complexity state, 0-1)
-   K2 = -sum_i (n_i/W) log2(n_i/W)                   (Shannon entropy, bits)
+   K1 = (1/W) * log_20(W! / prod_i n_i!)
 
-   The low-complexity fraction is the fraction of residues covered by at least
-   one window with K2 <= ``k2_trigger``. This is the SEG trigger stage only:
-   SEG's extension to the K2 extension threshold and its interval merging and
-   optimisation are not performed. A window longer than the sequence uses the
-   whole sequence.
+   K2 = -sum_i (n_i / W) * log2(n_i / W)
+
+   where K1 is the complexity state, K2 is the Shannon entropy of the window in
+   bits and n_i is the number of residues of amino acid i in the window. The
+   low-complexity fraction is the fraction of residues covered by at least one
+   window with K2 <= k2_trigger. This is the trigger stage of SEG only; SEG's
+   extension and merging of low-complexity segments are not performed. A window
+   longer than the sequence uses the whole sequence.
 
 .. code-block:: python
 
@@ -1882,15 +2073,17 @@ Linguistic complexity: distinct subwords observed / maximum possible (ratio of s
 
 .. code-block:: text
 
-   Calculate the linguistic complexity (LC) of a protein sequence: the
-   number of distinct subwords (k-mers) observed, over the maximum number
-   possible for a sequence of that length over the 20-letter alphabet:
+   Calculate the Linguistic Complexity (LC) of protein sequence. Linguistic
+   complexity describes how repetitive a sequence is, as the number of distinct
+   subwords (k-mers) it contains relative to the maximum possible number for a
+   sequence of its length. It is calculated as:
 
    LC = sum_{k=1}^{K} U_k / sum_{k=1}^{K} min(20^k, L - k + 1)
 
-   where U_k is the number of distinct k-mers and K = ``max_k`` (default L, i.e.
-   all subwords). This is the ratio-of-sums form, counting all subwords as in
-   ; repetitive sequences have low LC.
+   where U_k is the number of distinct k-mers in the sequence, L is the length of
+   the sequence and K is the longest subword length (by default L, i.e. all
+   subwords). Repetitive sequences have a low LC and random sequences an LC
+   close to 1.
 
 .. code-block:: python
 
@@ -1910,15 +2103,16 @@ Lempel-Ziv (LZ76) complexity c(n) and its normalised value c(n)·log20(n)/n.
 
 .. code-block:: text
 
-   Calculate the Lempel-Ziv (LZ76) complexity of a protein sequence: the
-   number c(n) of new components found when the sequence is parsed from left to
-   right, each component being the shortest substring not producible by
-   copying from the preceding history. The normalised value for a 20-letter
-   alphabet is
+   Calculate the Lempel-Ziv Complexity (LZ) of protein sequence. The Lempel-Ziv
+   (LZ76) complexity is the number of new patterns, c(n), found when a sequence is
+   read from left to right, each pattern being the shortest substring that cannot
+   be copied from the preceding part of the sequence. As c(n) grows with the
+   length of the sequence, a normalised value is also calculated as:
 
-   LZ_Normalized = c(n) x log_20(n) / n
+   LZ_Normalized = c(n) * log_20(n) / n
 
-   (0 for a single residue).
+   where n is the length of the sequence and 20 is the size of the amino acid
+   alphabet. The normalised value is 0 for a single residue.
 
 .. code-block:: python
 
@@ -1938,16 +2132,19 @@ Mean power of the FFT spectrum of a mean-centred property signal (default EIIP) 
 
 .. code-block:: text
 
-   Calculate a length-invariant binned power spectrum of a property signal, as
-   in the resonant recognition model of Cosic. Each residue is replaced by
-   its scale value (default: electron-ion interaction potential, EIIP), the
-   signal is mean-centred, and its power spectrum is
+   Calculate Fast Fourier Transform (FFT) descriptors of protein sequence. Each
+   amino acid in the sequence is replaced by its value on a property scale, by
+   default the electron-ion interaction potential (EIIP) used in the resonant
+   recognition model, and the power spectrum of the mean-centred signal is
+   calculated as:
 
-   P(f) = abs(FFT(x)(f))^2 / L,   f = 0 .. 0.5 cycles/residue
+   P(f) = abs(FFT(x)(f))^2 / L
 
-   The normalised frequency range 0-0.5 is divided into ``n_bins`` equal-width
-   bins (the last bin includes 0.5) and the mean power in each bin is returned;
-   bins containing no frequency are 0.
+   where x is the property signal, f is the frequency in cycles per residue
+   (0 to 0.5) and L is the length of the sequence. To give the same number of
+   features for any sequence length, the frequency range 0-0.5 is split into
+   n_bins equal-width bins and the mean power in each bin is returned; bins
+   containing no frequencies are 0.
 
 .. code-block:: python
 
@@ -1967,13 +2164,18 @@ First n orthonormal DCT-II coefficients of a mean-centred property signal (defau
 
 .. code-block:: text
 
-   Calculate the first ``n_coeffs`` coefficients of the orthonormal type-II
-   discrete cosine transform (DCT-II) of a mean-centred property signal:
+   Calculate Discrete Cosine Transform (DCT) descriptors of protein sequence.
+   Each amino acid in the sequence is replaced by its value on a property scale,
+   by default the Kyte-Doolittle hydropathy, and the first n_coeffs coefficients
+   of the orthonormal type-II DCT of the mean-centred signal are returned. The
+   DCT compresses a sequence-length signal into a fixed number of coefficients
+   , calculated as:
 
-   X_k = s_k sum_{n=0}^{L-1} x_n cos(pi k (2n + 1) / (2L)),
-   s_0 = sqrt(1/L), s_k = sqrt(2/L) for k > 0
+   X_k = s_k * sum_{n=0}^{L-1} x_n * cos(pi * k * (2n + 1) / (2L))
 
-   X_0 is 0 because the signal is mean-centred.
+   where X_k is coefficient k, x_n is the property value at position n, L is the
+   length of the sequence, and s_0 = sqrt(1/L) and s_k = sqrt(2/L) for k > 0. X_0
+   is 0 because the signal is mean-centred.
 
 .. code-block:: python
 
@@ -1993,29 +2195,27 @@ AGGRESCAN aggregation hot-spot descriptors from the a3v propensity profile (hot 
 
 .. code-block:: text
 
-   Calculate AGGRESCAN aggregation "hot spot" descriptors. Each residue is
-   given its experimental aggregation propensity a3v; the a4v profile (AP) is the
-   a3v mean over a sliding window, assigned to the window's central residue.
-   Off-centre N- and C-terminal residues take the first and last window values.
-   A hot spot (HS) is a run of >= 5 residues with a4v above the hot-spot
-   threshold HST = -0.02 and containing no proline. Areas use trapezoidal
-   integration of the AP with HST as the zero axis.
+   Calculate AGGRESCAN (AGG) aggregation descriptors of protein sequence.
+   AGGRESCAN predicts aggregation "hot spots", short stretches that promote
+   protein aggregation, from experimental aggregation propensities (a3v) of the
+   20 amino acids. The a3v values are averaged over a sliding window, giving
+   the aggregation profile (a4v), with each window value assigned to its central
+   residue and the off-centre N- and C-terminal residues given the first and last
+   window values. A hot spot is a run of 5 or more residues with an a4v above the
+   hot-spot threshold (HST) of -0.02 and containing no proline. Areas are
+   calculated by trapezoidal integration of the profile, with HST as the zero axis.
 
-   Outputs::
-       a3vSA   mean a3v over the sequence
-       nHS     number of hot spots;     NnHS = nHS / L x 100
-       AAT     area of the AP above HST over the whole sequence;  AATr = AAT / L
-       THSA    total hot-spot area (sum of HSA);                   THSAr = THSA / L
-       TA      total area of the AP (HST as zero axis, signed)
-       a4vSS   sum of a4v;              Na4vSS = a4vSS / L x 100
-       a4vAHS  mean a4v inside hot spots (mean over hot spots; 0 if none)
-       HSA_max largest single hot-spot area (0 if none)
+   The 12 output values are: the mean a3v of the sequence (a3vSA); the number of
+   hot spots (nHS) and the number per 100 residues (NnHS); the area of the profile
+   above HST (AAT) and per residue (AATr); the total area of the hot spots (THSA)
+   and per residue (THSAr); the total area of the profile (TA); the sum of a4v
+   (a4vSS) and per 100 residues (Na4vSS); the mean a4v in the hot spots (a4vAHS,
+   0 if there are none); and the largest single hot-spot area (HSA_max).
 
-   AGGRESCAN chooses the window (5, 7, 9 or 11) from the sequence length and
-   gives the two extreme residues specific charge-corrected values; neither
-   rule is given in the published supplementary material, so ``window`` is a
-   parameter (default 5) and the extreme residues are treated like the other
-   off-centre residues.
+   AGGRESCAN chooses a window of 5, 7, 9 or 11 residues from the sequence length
+   and gives the two extreme residues specific values; neither rule is given in
+   the published supplementary material, so the window is a parameter and the
+   extreme residues are treated like the other off-centre residues.
 
 .. code-block:: python
 
@@ -2035,14 +2235,21 @@ Uversky mean hydropathy <H>, mean net charge <R> and boundary distance HQ = 2.78
 
 .. code-block:: text
 
-   Calculate the charge-hydropathy descriptors of Uversky et al.:
+   Calculate the Uversky Charge-Hydropathy (UV) descriptors of protein sequence.
+   Uversky et al. showed that natively unfolded proteins can be separated from
+   folded proteins by their mean net charge and mean hydropathy. These are
+   calculated as:
 
-   <H> = mean of (KD + 4.5) / 9            (Kyte-Doolittle rescaled to 0-1)
-   <R> = abs(n+ - n-) / L                  (K/R positive, D/E negative)
-   HQ  = 2.785 <H> - <R> - 1.151
+   <H> = mean of (KD + 4.5) / 9
 
-   The boundary <R> = 2.785 <H> - 1.151 separates natively unfolded from folded
-   proteins (as restated in); ``UV_Unfolded`` is 1 when HQ < 0.
+   <R> = abs(n+ - n-) / L
+
+   HQ = 2.785 <H> - <R> - 1.151
+
+   where KD is the Kyte-Doolittle hydropathy of each residue, n+ and n- are the
+   numbers of positive (K, R) and negative (D, E) residues and L is the length
+   of the sequence. HQ is the distance from the boundary <R> = 2.785 <H> - 1.151
+   (as restated in); the protein is predicted to be unfolded when HQ < 0.
 
 .. code-block:: python
 
@@ -2062,15 +2269,17 @@ FoldIndex profile summary: windowed 2.785<H> - abs(<R>) - 1.151 and disordered-r
 
 .. code-block:: text
 
-   Calculate FoldIndex profile descriptors. For each window of length
-   ``window``:
+   Calculate the FoldIndex (FI) of protein sequence. FoldIndex applies the
+   Uversky charge-hydropathy boundary over a sliding window to find disordered
+   regions of a protein sequence. For each window it is calculated as:
 
    FI = 2.785 <H> - abs(<R>) - 1.151
 
-   with <H> and <R> as in ``uversky_charge_hydropathy`` but computed over the
-   window. Residues covered by at least one window with FI < 0 are counted as
-   disordered. A window longer than the sequence uses the whole sequence, so
-   FI then equals ``UV_HQ``.
+   where <H> is the mean Kyte-Doolittle hydropathy of the window rescaled to 0-1
+   and <R> is the mean net charge of the window (K, R positive; D, E negative).
+   Residues covered by at least one window with FI < 0 are counted as disordered.
+   A window longer than the sequence uses the whole sequence, so FI then equals
+   UV_HQ from uversky_charge_hydropathy.
 
 .. code-block:: python
 
@@ -2090,10 +2299,18 @@ Fractions of disorder- and order-promoting residues and mean TOP-IDP value.
 
 .. code-block:: text
 
-   Calculate disorder-propensity descriptors: the fractions of
-   disorder-promoting (A, R, G, Q, S, P, E, K) and order-promoting
-   (W, C, F, I, Y, V, L, N) residues, and the mean TOP-IDP value
-   (higher = more disorder-prone).
+   Calculate the Disorder Propensity (DP) of protein sequence. Intrinsically
+   disordered proteins are enriched in disorder-promoting residues (A, R, G, Q,
+   S, P, E, K) and depleted in order-promoting residues (W, C, F, I, Y, V, L, N)
+   . The descriptor gives the fraction of each, together with the mean value of
+   the TOP-IDP scale, a scale of amino acid propensity for intrinsic disorder,
+   calculated as:
+
+   DP_TOP_IDP_mean = sum_i TOP-IDP(s_i) / L
+
+   where TOP-IDP(s_i) is the TOP-IDP value of the amino acid at position i and L
+   is the length of the sequence. Higher values indicate a higher propensity for
+   disorder.
 
 .. code-block:: python
 
@@ -2113,20 +2330,17 @@ Kyte-Doolittle transmembrane-segment heuristics (segment count, max hydropathy, 
 
 .. code-block:: text
 
-   Calculate heuristic transmembrane-segment features from the Kyte-Doolittle
-   hydropathy profile. Windows of length ``window`` with mean hydropathy
-   above ``kd_threshold`` (1.6 for 19-residue windows in) mark putative
-   transmembrane segments; overlapping windows are merged into segments.
-
-   Columns::
-
-       TM_n_segments            number of merged segments
-       TM_max_KD                maximum window hydropathy
-       TM_frac_in_TM            fraction of residues inside a segment
-       TM_positive_inside_bias  (K+R in the 15 residues before the first segment)
-                                - (K+R in the 15 residues after it); 0 if no segment
-
-   This is a hydropathy heuristic, not a topology predictor.
+   Calculate Transmembrane (TM) segment features of protein sequence. Putative
+   transmembrane segments are found from the Kyte-Doolittle hydropathy profile:
+   windows of 19 residues with a mean hydropathy above 1.6 indicate a likely
+   transmembrane segment, and overlapping windows are merged into segments.
+   The positive-inside rule states that the cytoplasmic side of a transmembrane
+   segment is enriched in positive residues. The 4 output values are: the
+   number of segments; the maximum window hydropathy; the fraction of residues
+   inside a segment; and the positive-inside bias, the number of K and R residues
+   in the 15 residues before the first segment minus the number in the 15 residues
+   after it (0 if there is no segment). This is a hydropathy heuristic and not a
+   topology predictor.
 
 .. code-block:: python
 
@@ -2146,15 +2360,12 @@ N-terminal signal-peptide heuristics: n-region net charge and maximum 8-residue 
 
 .. code-block:: text
 
-   Calculate simple signal-peptide features of the N-terminus:
-
-   Columns::
-
-       SP_nregion_charge  net charge of the first 5 residues (K/R +1, D/E -1)
-       SP_hregion_maxKD   maximum mean Kyte-Doolittle hydropathy over 8-residue
-                          windows within the first ``n_term`` residues
-
-   The von Heijne cleavage-site weight matrix is not included.
+   Calculate Signal Peptide (SP) features of protein sequence. Signal peptides
+   have a positively charged N-terminal n-region followed by a hydrophobic
+   h-region. The 2 output values are: the net charge of the first 5 residues
+   (K and R +1, D and E -1); and the maximum mean Kyte-Doolittle hydropathy over
+   8-residue windows within the first n_term residues. The von Heijne
+   cleavage-site weight matrix is not included.
 
 .. code-block:: python
 
@@ -2174,11 +2385,14 @@ Counts and per-100-residue densities of PROSITE N-glycosylation, ER-retention an
 
 .. code-block:: text
 
-   Count functional sequence motifs and their density per 100 residues:
-   N-glycosylation sites (PROSITE PS00001), the C-terminal ER-retention signal
-   (PS00014) and peroxisomal targeting signal 1 (PS00342), and tryptic
-   cleavage sites (after K/R, not before P). Overlapping matches are
-   counted. These complement the default motifs of ``motif_composition``.
+   Calculate Functional Site (FS) counts of protein sequence. The number of each
+   functional sequence motif, and its density per 100 residues, is counted for:
+   N-glycosylation sites (PROSITE PS00001, N-{P}-[ST]-{P}), the C-terminal
+   endoplasmic reticulum retention signal (PS00014, [KRHQSA]-[DENQ]-E-L at the
+   C-terminus), the C-terminal peroxisomal targeting signal 1 (PS00342,
+   [STAGCN]-[RKH]-[LIVMAFY] at the C-terminus) and tryptic cleavage sites
+   (after K or R, not before P). Overlapping matches are counted. These motifs
+   complement the default motifs of motif_composition.
 
 .. code-block:: python
 
@@ -2198,20 +2412,23 @@ PLAAC prion-like domain scores: max window LLR, HMM core score, PrD length and p
 
 .. code-block:: text
 
-   Calculate prion-like domain descriptors with the PLAAC model, ported from
-   the PLAAC source (MIT License; S. cerevisiae parameters, alpha = 1). Each
-   residue has the log-likelihood ratio LLR = ln(f_prion / f_background).
+   Calculate the Prion-Like Amino Acid Composition (PLAAC) descriptors of protein
+   sequence. PLAAC identifies prion-like domains, whose composition resembles
+   that of yeast prion domains, using the amino acid frequencies of prion domains
+   and of the S. cerevisiae proteome. Each residue has a log-likelihood ratio:
 
-   Columns::
+   LLR(s_i) = ln(f_prion(s_i) / f_background(s_i))
 
-       PLAAC_LLR        maximum LLR sum over any window of ``core_length`` residues
-       PLAAC_COREscore  maximum LLR sum over a ``core_length`` window lying inside a
-                        prion-like run of the two-state HMM Viterbi parse
-       PLAAC_PrD_length length of the prion-like run containing the best core
-       PLAAC_has_PrD    1 if a prion-like run of >= ``core_length`` residues exists
-
-   As in PLAAC, LLR and COREscore are NaN when undefined (sequence shorter than
-   ``core_length`` / no prion-like run of that length); PrD_length is then 0.
+   The 4 output values are: the maximum sum of LLR over any window of core_length
+   residues (PLAAC_LLR); the maximum sum of LLR over a window of core_length
+   residues lying entirely inside a prion-like region of the two-state hidden
+   Markov model Viterbi parse (PLAAC_COREscore); the length of the prion-like
+   region containing that core (PLAAC_PrD_length); and whether the sequence has a
+   prion-like region of at least core_length residues (PLAAC_has_PrD). As in
+   PLAAC, PLAAC_LLR and PLAAC_COREscore are NaN when they are undefined (a
+   sequence shorter than core_length, or no prion-like region of that length).
+   The parameters are ported from the PLAAC source code (MIT License), using the
+   S. cerevisiae background (alpha = 1).
 
 .. code-block:: python
 
@@ -2231,11 +2448,14 @@ Profile statistics of the Parker hydrophilicity and Janin surface scales over 7-
 
 .. code-block:: text
 
-   Summarise hydrophilicity/surface profiles associated with antigenic sites:
-   the Parker HPLC hydrophilicity scale averaged over 7-residue windows and
-   the Janin free energy of transfer from inside to outside of a globular
-   protein over the same window. Each profile is reduced to its mean, max,
-   min and standard deviation.
+   Calculate the Antigenicity and Surface (Antigenicity) profiles of protein
+   sequence. Antigenic sites tend to be hydrophilic and exposed on the protein
+   surface. Each amino acid in the sequence is replaced by its value on the
+   Parker hydrophilicity scale, derived from HPLC peptide retention times,
+   and on the Janin scale of free energy of transfer from the inside to the
+   outside of a globular protein. Each is averaged over a sliding window of 7
+   residues, as used by Parker et al., and the profile is summarised by its mean,
+   maximum, minimum and standard deviation.
 
 .. code-block:: python
 
@@ -2255,14 +2475,12 @@ Cysteine count, fraction, parity, maximum disulfides, CxxC motifs and mean spaci
 
 .. code-block:: text
 
-   Calculate cysteine features:
-
-   Cys_count          number of C
-   Cys_frac           C / L
-   Cys_even           1 if the count is even
-   Cys_max_disulfides floor(count / 2)
-   Cys_CxxC           overlapping C-x-x-C motifs
-   Cys_mean_spacing   mean gap between consecutive cysteines (0 if fewer than 2)
+   Calculate Cysteine (Cys) features of protein sequence. Cysteines form
+   disulfide bonds and functional motifs such as the CxxC motif of thiol
+   oxidoreductases. The 6 output values are: the number of cysteines; their
+   fraction; whether the number is even; the maximum number of disulfide bonds
+   (the number of cysteines // 2); the number of overlapping C-x-x-C motifs; and
+   the mean gap between consecutive cysteines (0 if there are fewer than 2).
 
 .. code-block:: python
 
