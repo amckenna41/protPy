@@ -1202,6 +1202,40 @@ _DESCRIPTOR_REGISTRY: dict[str, dict] = {
         "descriptor_sets": ["extended", "all"],
         "in_default_set": False,
     },
+    "fft_descriptors": {
+        "description": "Mean power of the FFT spectrum of a mean-centred property signal (default EIIP) in equal-width frequency bins.",
+        "module": "signal",
+        "category": "Signal",
+        "abbreviation": "FFT",
+        "parameters": {
+            "sequence": "str — protein sequence",
+            "scale": "str | dict (default='eiip') — single-value scale, AAindex code or dict",
+            "n_bins": "int (default=10) — number of frequency bins",
+        },
+        "output_shape": "1 x n_bins  (default 1 x 10)",
+        "speed": "Fast",
+        "reference": "Cosic (1994). IEEE Trans. Biomed. Eng., 41(12), 1101-1114.",
+        "doi": "10.1109/10.335859",
+        "descriptor_sets": ["extended", "all"],
+        "in_default_set": False,
+    },
+    "dct_descriptors": {
+        "description": "First n orthonormal DCT-II coefficients of a mean-centred property signal (default Kyte-Doolittle).",
+        "module": "signal",
+        "category": "Signal",
+        "abbreviation": "DCT",
+        "parameters": {
+            "sequence": "str — protein sequence",
+            "scale": "str | dict (default='kyte_doolittle') — single-value scale, AAindex code or dict",
+            "n_coeffs": "int (default=10) — number of coefficients (<= L)",
+        },
+        "output_shape": "1 x n_coeffs  (default 1 x 10)",
+        "speed": "Fast",
+        "reference": "Wang et al. (2017). PLoS ONE, 12(9), e0185587.",
+        "doi": "10.1371/journal.pone.0185587",
+        "descriptor_sets": ["extended", "all"],
+        "in_default_set": False,
+    },
 }
 
 #speed rating display symbols for pretty-printing

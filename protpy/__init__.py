@@ -6,6 +6,7 @@ from .sequence_order import *
 from .scales import *
 from .physicochemical import *
 from .complexity import *
+from .signal import *
 from .utils import get_descriptor_info, list_descriptors, print_descriptor_info
 from .encode import all_descriptors, encode_dataset, read_sequences_from_file
 
@@ -50,4 +51,5 @@ descriptor_names = ["amino_acid_composition", "dipeptide_composition", "tripepti
     "charge_fractions", "ncpr", "kappa", "sequence_charge_decoration", "charge_density",
     "hydrophobicity_profile", "hydrophobic_ratio", "half_life", "ivywrel_index", "cvp_bias", "flexibility",
     "wootton_federhen_complexity", "linguistic_complexity", "lempel_ziv_complexity",
+    "fft_descriptors", "dct_descriptors",
     ]

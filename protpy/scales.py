@@ -211,7 +211,8 @@ def auto_cross_covariance(sequence: str, scale: str | list[str] = "z_scales_5", 
     values, columns = [], []
     for l in range(1, lag + 1):
         #cov[j, k] = mean over i of z[i, j] * z[i + l, k]
-        cov = z[:-l].T @ z[l:] / (len(sequence) - l)
+        #einsum instead of matmul: macOS Accelerate BLAS raises spurious float warnings
+        cov = np.einsum("ij,ik->jk", z[:-l], z[l:]) / (len(sequence) - l)
         values += [cov[j, k] for j, k in pairs]
         columns += [f"ACC_{j + 1}_{k + 1}_lag{l}" for j, k in pairs]
     return _to_df(values, columns)
