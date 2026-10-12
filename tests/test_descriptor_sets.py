@@ -68,6 +68,23 @@ class ProtpyDescriptorSetTests(unittest.TestCase):
         #only documented NaNs: PLAAC LLR/COREscore for sequences shorter than the core length
         self.assertEqual(sorted(df.columns[df.isnull().any()]), ["PLAAC_COREscore", "PLAAC_LLR"])
 
+    def test_new_descriptors_on_very_short_sequences(self):
+        #every v1.5 descriptor either works or raises its documented ValueError on tiny inputs
+        documented = {"dde": "at least 2 residues", "auto_cross_covariance": "lag",
+                      "physicochemical_distance_transformation": "lag", "dct_descriptors": "n_coeffs"}
+        for name, meta in _DESCRIPTOR_REGISTRY.items():
+            if meta["in_default_set"]:
+                continue
+            for seq in ("A", "AC", "MKTAYIAK"):
+                with self.subTest(name=name, seq=seq):
+                    try:
+                        df = getattr(protpy, name)(seq)
+                    except ValueError as e:
+                        self.assertIn(name, documented)
+                        self.assertIn(documented[name], str(e))
+                        continue
+                    self.assertEqual(df.shape[0], 1)
+
     def test_encode_dataset_passthrough(self):
         with tempfile.TemporaryDirectory() as tmp:
             out = os.path.join(tmp, "enc.csv")

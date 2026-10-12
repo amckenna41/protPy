@@ -1557,7 +1557,7 @@ def amphiphilic_pseudo_amino_acid_composition(sequence: str, lamda: int = 30, we
         rank of correlation. Number of calculable descriptors depends on lambda value.
     :weight: float
         weighting factor.
-    :properties: list[dict] | None (default=None → [hydrophobicity_, hydrophilicity_])
+    :properties: list[dict] | None (default=None → [``hydrophobicity_``, ``hydrophilicity_``])
         list of property dicts mapping each amino acid to a float value.
         When None the default hydrophobicity and hydrophilicity scales are used.
 
@@ -1629,7 +1629,7 @@ def amphiphilic_sequence_order_correlation_factor(sequence: str, k: int = 1,
         protein sequence.
     :k: int (default=1)
         gap between amino acids in the sequence.
-    :properties: list[dict] | None (default=None → [hydrophobicity_, hydrophilicity_])
+    :properties: list[dict] | None (default=None → [``hydrophobicity_``, ``hydrophilicity_``])
         list of property dicts. Pre-normalized once per call.
 
     Returns

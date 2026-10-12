@@ -96,6 +96,12 @@ class ProtpyRegistryTests(unittest.TestCase):
                 self.assertIn("doi", meta)
                 self.assertIn("in_default_set", meta)
 
+    def test_registry_parameters_match_signatures(self):
+        import inspect
+        for name, meta in _DESCRIPTOR_REGISTRY.items():
+            with self.subTest(name=name):
+                self.assertEqual(list(inspect.signature(getattr(protpy, name)).parameters), list(meta["parameters"]))
+
     def test_registry_dois_in_bib(self):
         with open(os.path.join(ROOT, "docs", "references.bib")) as f:
             bib = {d.lower() for d in re.findall(r"doi\s*=\s*\{([^}]*)\}", f.read(), flags=re.I)}

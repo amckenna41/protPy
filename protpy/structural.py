@@ -93,7 +93,7 @@ def aggrescan(sequence: str, window: int = 5) -> pd.DataFrame:
     threshold HST = -0.02 and containing no proline. Areas use trapezoidal
     integration of the AP with HST as the zero axis.
 
-    Outputs:
+    Outputs::
         a3vSA   mean a3v over the sequence
         nHS     number of hot spots;     NnHS = nHS / L x 100
         AAT     area of the AP above HST over the whole sequence;  AATr = AAT / L
@@ -162,7 +162,7 @@ def uversky_charge_hydropathy(sequence: str) -> pd.DataFrame:
     Calculate the charge-hydropathy descriptors of Uversky et al. [2]:
 
     <H> = mean of (KD + 4.5) / 9            (Kyte-Doolittle rescaled to 0-1)
-    <R> = |n+ - n-| / L                     (K/R positive, D/E negative)
+    <R> = abs(n+ - n-) / L                  (K/R positive, D/E negative)
     HQ  = 2.785 <H> - <R> - 1.151
 
     The boundary <R> = 2.785 <H> - 1.151 separates natively unfolded from folded
@@ -192,7 +192,7 @@ def fold_index(sequence: str, window: int = 51) -> pd.DataFrame:
     Calculate FoldIndex profile descriptors [3]. For each window of length
     ``window``:
 
-    FI = 2.785 <H> - |<R>| - 1.151
+    FI = 2.785 <H> - abs(<R>) - 1.151
 
     with <H> and <R> as in ``uversky_charge_hydropathy`` but computed over the
     window. Residues covered by at least one window with FI < 0 are counted as
@@ -266,11 +266,13 @@ def transmembrane_features(sequence: str, window: int = 19, kd_threshold: float 
     above ``kd_threshold`` (1.6 for 19-residue windows in [6]) mark putative
     transmembrane segments; overlapping windows are merged into segments.
 
-    TM_n_segments            number of merged segments
-    TM_max_KD                maximum window hydropathy
-    TM_frac_in_TM            fraction of residues inside a segment
-    TM_positive_inside_bias  (K+R in the 15 residues before the first segment)
-                             - (K+R in the 15 residues after it); 0 if no segment
+    Columns::
+
+        TM_n_segments            number of merged segments
+        TM_max_KD                maximum window hydropathy
+        TM_frac_in_TM            fraction of residues inside a segment
+        TM_positive_inside_bias  (K+R in the 15 residues before the first segment)
+                                 - (K+R in the 15 residues after it); 0 if no segment
 
     This is a hydropathy heuristic, not a topology predictor.
 
@@ -311,9 +313,11 @@ def signal_peptide_features(sequence: str, n_term: int = 30) -> pd.DataFrame:
     """
     Calculate simple signal-peptide features of the N-terminus [8]:
 
-    SP_nregion_charge  net charge of the first 5 residues (K/R +1, D/E -1)
-    SP_hregion_maxKD   maximum mean Kyte-Doolittle hydropathy over 8-residue
-                       windows within the first ``n_term`` residues
+    Columns::
+
+        SP_nregion_charge  net charge of the first 5 residues (K/R +1, D/E -1)
+        SP_hregion_maxKD   maximum mean Kyte-Doolittle hydropathy over 8-residue
+                           windows within the first ``n_term`` residues
 
     The von Heijne cleavage-site weight matrix is not included.
 
@@ -420,11 +424,13 @@ def plaac(sequence: str, core_length: int = 60) -> pd.DataFrame:
     the PLAAC source (MIT License; S. cerevisiae parameters, alpha = 1). Each
     residue has the log-likelihood ratio LLR = ln(f_prion / f_background).
 
-    PLAAC_LLR        maximum LLR sum over any window of ``core_length`` residues
-    PLAAC_COREscore  maximum LLR sum over a ``core_length`` window lying inside a
-                     prion-like run of the two-state HMM Viterbi parse
-    PLAAC_PrD_length length of the prion-like run containing the best core
-    PLAAC_has_PrD    1 if a prion-like run of >= ``core_length`` residues exists
+    Columns::
+
+        PLAAC_LLR        maximum LLR sum over any window of ``core_length`` residues
+        PLAAC_COREscore  maximum LLR sum over a ``core_length`` window lying inside a
+                         prion-like run of the two-state HMM Viterbi parse
+        PLAAC_PrD_length length of the prion-like run containing the best core
+        PLAAC_has_PrD    1 if a prion-like run of >= ``core_length`` residues exists
 
     As in PLAAC, LLR and COREscore are NaN when undefined (sequence shorter than
     ``core_length`` / no prion-like run of that length); PrD_length is then 0.

@@ -1268,7 +1268,7 @@ _DESCRIPTOR_REGISTRY: dict[str, dict] = {
         "in_default_set": False,
     },
     "fold_index": {
-        "description": "FoldIndex profile summary: windowed 2.785<H> - |<R>| - 1.151 and disordered-residue statistics.",
+        "description": "FoldIndex profile summary: windowed 2.785<H> - abs(<R>) - 1.151 and disordered-residue statistics.",
         "module": "structural",
         "category": "Structural",
         "abbreviation": "FI",

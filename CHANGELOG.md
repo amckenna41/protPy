@@ -22,10 +22,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Data files** with provenance (`name`, `values`, `reference`, `doi`, `source_note`): `protpy/data/aa_scales.json`, `reduced_alphabets.json`, `residue_tables.json`, `structural_params.json`.
 - Internal helpers in `protpy/_helpers.py`. The registry gains `doi`, `in_default_set` and `descriptor_sets`, and `print_descriptor_info` prints the DOI. New registry categories: Scales, Physicochemical, Complexity, Signal, Structural.
 - `docs/references.bib` with BibTeX for every registry DOI.
-- Tests: golden backwards-compatibility snapshot of every v1.4.2 default output (`tests/test_backwards_compat.py`), helper/registry tests, one test module per new module, descriptor-set tests, and an opt-in performance test (`PROTPY_PERF=1`).
+- Tests: golden backwards-compatibility snapshot of every v1.4.2 default output (`tests/test_backwards_compat.py`), helper/registry tests (including registry parameters matching every function signature and registry DOIs present in `docs/references.bib`), one test module per new module, descriptor-set tests (including every v1.5.0 descriptor on 1-8 residue sequences), and an opt-in performance test (`PROTPY_PERF=1`).
 - Plan items that could not be implemented without unverifiable source data (e.g. PseKRAAC, Kidera factors, GOR, COILS, Chou–Fasman) are listed with reasons in `planning/BLOCKED.md`.
 
+### Documentation
+- `docs/conf.py` converts protpy's `:name: type` parameter style to numpy style before napoleon runs. Parameter names, types and defaults now render correctly throughout the API docs; previously napoleon emitted nameless `:param :` fields. The Sphinx build is now warning-free (previously 39 warnings).
+- `docs/index.rst` lists the v1.5.0 descriptor categories; `docs/api.rst` documents the new modules and `encode_dataset`; `docs/usage.rst` covers `descriptor_set` / `include` / `exclude`; `docs/descriptors.rst` and `DESCRIPTORS.md` have a v1.5.0 section generated from the registry and docstrings.
+- `tests/README.md` lists every test module and test data file; `protpy/data/README.md` describes the new data files.
+
 ### Changed
+- pytest now collects only `tests/` (`testpaths`) and skips `build/`, `dist/` and `*.egg-info`, so stale local build copies of the package are no longer collected.
 - `encode_dataset(verbose=False)` now also suppresses the descriptor-list line printed for the first sequence.
 - `hydrophobic_moment` docstring now names the source of its default scale (Eisenberg, Schwarz, Komarony & Wall 1984).
 

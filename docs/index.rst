@@ -68,6 +68,71 @@ Sequence Order Descriptors (5)
 * **Quasi Sequence Order (QSO)**
 * **Quasi Sequence Order — all matrices**
 
+v1.5.0 Composition Descriptors (7)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+* **cksaap** (CKSAAP)
+* **cksaagp** (CKSAAGP)
+* **dde** (DDE)
+* **asdc** (ASDC)
+* **distance_pair** (DP)
+* **natural_vector** (NV)
+* **atomic_composition** (ATC)
+
+v1.5.0 Scales Descriptors (11)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+* **z_scales_5** (Z5)
+* **vhse** (VHSE)
+* **atchley_factors** (AF)
+* **t_scales** (T)
+* **st_scales** (ST)
+* **protfp** (ProtFP)
+* **fasgai** (FASGAI)
+* **blosum_indices** (BLOSUM)
+* **ms_whim** (MSWHIM)
+* **auto_cross_covariance** (ACC)
+* **physicochemical_distance_transformation** (PDT)
+
+v1.5.0 Physicochemical Descriptors (11)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+* **charge_fractions** (FCR)
+* **ncpr** (NCPR)
+* **kappa** (Kappa)
+* **sequence_charge_decoration** (SCD)
+* **charge_density** (ChargeDensity)
+* **hydrophobicity_profile** (HP)
+* **hydrophobic_ratio** (HydrophobicRatio)
+* **half_life** (HalfLife)
+* **ivywrel_index** (IVYWREL)
+* **cvp_bias** (CvP)
+* **flexibility** (Flex)
+
+v1.5.0 Complexity Descriptors (3)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+* **wootton_federhen_complexity** (WF)
+* **linguistic_complexity** (LC)
+* **lempel_ziv_complexity** (LZ)
+
+v1.5.0 Signal Descriptors (2)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+* **fft_descriptors** (FFT)
+* **dct_descriptors** (DCT)
+
+v1.5.0 Structural Descriptors (10)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+* **aggrescan** (AGG)
+* **uversky_charge_hydropathy** (UV)
+* **fold_index** (FI)
+* **disorder_propensity** (DP)
+* **transmembrane_features** (TM)
+* **signal_peptide_features** (SP)
+* **functional_site_counts** (FS)
+* **plaac** (PLAAC)
+* **antigenicity_surface** (Antigenicity)
+* **cysteine_features** (Cys)
+
+The v1.5.0 descriptors are added to ``all_descriptors`` with ``descriptor_set="extended"`` or ``"all"``;
+see :doc:`usage` and :doc:`descriptors`.
+
 .. note::
 
    A demo of the software is available `on Colab <https://colab.research.google.com/drive/12E3ayovpZOf6Gv-8ILwkN1zReKslEksB?usp=sharing>`_

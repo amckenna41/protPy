@@ -82,4 +82,5 @@ where = ["."]
 "protpy.data" = ["*.json"]
 
 [tool.pytest.ini_options]
-norecursedirs = ["docs/_build"]
+testpaths = ["tests"]
+norecursedirs = ["docs/_build", "build", "dist", "*.egg-info"]

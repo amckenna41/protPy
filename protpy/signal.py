@@ -45,7 +45,7 @@ def fft_descriptors(sequence: str, scale: str | dict = "eiip", n_bins: int = 10)
     its scale value (default: electron-ion interaction potential, EIIP), the
     signal is mean-centred, and its power spectrum is
 
-    P(f) = |FFT(x)(f)|^2 / L,   f = 0 .. 0.5 cycles/residue
+    P(f) = abs(FFT(x)(f))^2 / L,   f = 0 .. 0.5 cycles/residue
 
     The normalised frequency range 0-0.5 is divided into ``n_bins`` equal-width
     bins (the last bin includes 0.5) and the mean power in each bin is returned;
