@@ -7,6 +7,7 @@ from __future__ import annotations
 import re
 import itertools
 from collections import Counter
+import numpy as np
 import pandas as pd
 import math
 from aaindex import aaindex1
@@ -62,9 +63,42 @@ References
 [19] Eisenberg, D., Weiss, R. M., & Terwilliger, T. C. (1982). The helical
     hydrophobic moment: a measure of the amphiphilicity of a helix. Nature,
     299, 371-374. https://doi.org/10.1038/299371a0
+[20] Chen, K., Kurgan, L. A., & Ruan, J. (2007). Prediction of flexible/rigid
+    regions from protein sequences using k-spaced amino acid pairs. BMC
+    Structural Biology, 7, 25. https://doi.org/10.1186/1472-6807-7-25
+[21] Chen, Z. et al. (2018). iFeature: a Python package and web server for
+    features extraction and selection from protein and peptide sequences.
+    Bioinformatics, 34(14), 2499-2502. https://doi.org/10.1093/bioinformatics/bty140
+[22] Saravanan, V., & Gautham, N. (2015). Harnessing computational biology for
+    exact linear B-cell epitope prediction: a novel amino acid composition-based
+    feature descriptor. OMICS, 19(10), 648-658. https://doi.org/10.1089/omi.2015.0095
+[23] Wei, L. et al. (2018). ACPred-FL: a sequence-based predictor using effective
+    feature representation to improve the prediction of anti-cancer peptides.
+    Bioinformatics, 34(23), 4007-4016. https://doi.org/10.1093/bioinformatics/bty451
+[24] Liu, B. et al. (2014). iDNA-Prot|dis: identifying DNA-binding proteins by
+    incorporating amino acid distance-pairs and reduced alphabet profile into
+    the general pseudo amino acid composition. PLoS ONE, 9(9), e106691.
+    https://doi.org/10.1371/journal.pone.0106691
+[25] Cannata, N. et al. (2002). Simplifying amino acid alphabets by means of a
+    branch and bound algorithm and substitution matrices. Bioinformatics, 18(8),
+    1102-1108. https://doi.org/10.1093/bioinformatics/18.8.1102
+[26] Yu, C. et al. (2013). Protein space: a natural method for realizing the
+    nature of protein universe. Journal of Theoretical Biology, 318, 197-204.
+    https://doi.org/10.1016/j.jtbi.2012.11.005
+[27] Pande, A. et al. (2023). Computing wide range of protein/peptide features
+    from their sequence and structure. Journal of Computational Biology, 30(2),
+    204-222. https://doi.org/10.1089/cmb.2022.0241
+[28] Kumar, M., Verma, R., & Raghava, G. P. S. (2006). Prediction of
+    mitochondrial proteins using support vector machine and hidden Markov
+    model. Journal of Biological Chemistry, 281(9), 5357-5363.
+    https://doi.org/10.1074/jbc.M511061200
+[29] Lata, S., Sharma, B. K., & Raghava, G. P. S. (2007). Analysis and
+    prediction of antibacterial peptides. BMC Bioinformatics, 8, 263.
+    https://doi.org/10.1186/1471-2105-8-263
 """
 #list of amino acids
 from ._constants import amino_acids, _validate_sequence, _validate_int, _validate_weight
+from ._helpers import _load_json_table, _read_json, _gapped_pair_counts, _kmer_counts, _to_df
 
 #physicochemical values for all amino acids for hydrophobicity, hydrophilicty and residue mass
 #values taken from http://www.csbio.sjtu.edu.cn/bioinf/PseAAC/ParaValue.htm
@@ -92,7 +126,7 @@ residue_mass_ = {
 
 ################################# Amino Acid Composition ##################################
 
-def amino_acid_composition(sequence: str) -> pd.DataFrame:
+def amino_acid_composition(sequence: str, region: str | None = None, n: int = 25) -> pd.DataFrame:
     """
     Calculate Amino Acid Composition (AAComp) of protein sequence. AAComp
     describes the fraction of each amino acid type within a protein sequence,
@@ -108,6 +142,14 @@ def amino_acid_composition(sequence: str) -> pd.DataFrame:
     ==========
     :sequence: str
         protein sequence.
+    :region: str | None (default=None)
+        restrict the calculation to part of the sequence: None (whole sequence),
+        "nterm" (first ``n`` residues, columns prefixed ``NT_``), "cterm" (last
+        ``n`` residues, ``CT_``) or "split" (N-terminal, middle and C-terminal
+        blocks concatenated, prefixed ``NT_``, ``MID_``, ``CT_``; split
+        composition [28, 29]).
+    :n: int (default=25)
+        terminal block length used by ``region``.
 
     Returns
     =======
@@ -119,22 +161,24 @@ def amino_acid_composition(sequence: str) -> pd.DataFrame:
     """
     #validate input protein sequence
     sequence = _validate_sequence(sequence)
+    if region is not None:
+        return _regional(amino_acid_composition, sequence, region, n)
 
-    amino_acid_composition = {}
+    aa_composition = {}
 
     #iterate through each amino acid, calculating each composition
     for aa in amino_acids:
-        amino_acid_composition[aa] = round(float(sequence.count(aa)) / len(sequence) * 100, 3)
+        aa_composition[aa] = round(float(sequence.count(aa)) / len(sequence) * 100, 3)
 
     #transform values and columns to DataFrame
-    amino_acid_composition_df = pd.DataFrame([list(amino_acid_composition.values())], 
-        columns=list(amino_acid_composition.keys()))
+    amino_acid_composition_df = pd.DataFrame([list(aa_composition.values())], 
+        columns=list(aa_composition.keys()))
 
     return amino_acid_composition_df
 
 ################################## Dipeptide Composition ##################################
 
-def dipeptide_composition(sequence: str) -> pd.DataFrame:
+def dipeptide_composition(sequence: str, region: str | None = None, n: int = 25) -> pd.DataFrame:
     """
     Calculate Dipeptide Composition (DPComp) for protein sequence.
     Dipeptide composition is the fraction of each dipeptide type within a
@@ -153,6 +197,14 @@ def dipeptide_composition(sequence: str) -> pd.DataFrame:
     ==========
     :sequence: str
         protein sequence.
+    :region: str | None (default=None)
+        restrict the calculation to part of the sequence: None (whole sequence),
+        "nterm" (first ``n`` residues, columns prefixed ``NT_``), "cterm" (last
+        ``n`` residues, ``CT_``) or "split" (N-terminal, middle and C-terminal
+        blocks concatenated, prefixed ``NT_``, ``MID_``, ``CT_``; split
+        composition [28, 29]).
+    :n: int (default=25)
+        terminal block length used by ``region``.
 
     Returns
     =======
@@ -164,8 +216,10 @@ def dipeptide_composition(sequence: str) -> pd.DataFrame:
     """
     #validate input protein sequence
     sequence = _validate_sequence(sequence)
+    if region is not None:
+        return _regional(dipeptide_composition, sequence, region, n)
 
-    dipeptide_composition = {}
+    dipep_composition = {}
 
     #count overlapping dipeptides with a sliding window (str.count misses overlaps, e.g. "AA" in "AAA")
     total_dipeptides = len(sequence) - 1
@@ -175,14 +229,30 @@ def dipeptide_composition(sequence: str) -> pd.DataFrame:
     for i in amino_acids:
         for j in amino_acids:
             dipep = i + j
-            dipeptide_composition[dipep] = round(
+            dipep_composition[dipep] = round(
                 counts[dipep] / total_dipeptides * 100, 2) if total_dipeptides > 0 else 0.0
 
     #transform values and columns to DataFrame
-    dipeptide_composition_df = pd.DataFrame([list(dipeptide_composition.values())], 
-        columns=list(dipeptide_composition.keys()))
+    dipeptide_composition_df = pd.DataFrame([list(dipep_composition.values())], 
+        columns=list(dipep_composition.keys()))
 
     return dipeptide_composition_df
+
+def _regional(func, sequence: str, region: str, n: int) -> pd.DataFrame:
+    """Apply ``func`` to the N-terminal, C-terminal or split (N/middle/C) regions of ``sequence``."""
+    n = _validate_int("n", n, 1)
+    parts = {"nterm": [("NT_", sequence[:n])], "cterm": [("CT_", sequence[-n:])],
+             "split": [("NT_", sequence[:n]), ("MID_", sequence[n:-n]), ("CT_", sequence[-n:])]}
+    if region not in parts:
+        raise ValueError(f"Invalid region '{region}'. Valid regions are: None, {list(parts)}.")
+    #the middle block of a split must be non-empty
+    if region == "split" and len(sequence) <= 2 * n:
+        raise ValueError(f"region='split' needs a sequence longer than 2n ({2 * n}), got length {len(sequence)}.")
+    frames = []
+    for prefix, part in parts[region]:
+        df = func(part)
+        frames.append(df.add_prefix(prefix))
+    return pd.concat(frames, axis=1)
 
 ################################## Tripeptide Composition #################################
 
@@ -706,47 +776,87 @@ reduced_alphabets_ = {
     ]
 }
 
-def reduced_alphabet_composition(sequence: str, alphabet_size: int = 6) -> pd.DataFrame:
+def reduced_alphabet_composition(sequence: str, alphabet_size: int = 6, alphabet: str | None = None,
+    k: int = 1) -> pd.DataFrame:
     """
     Calculate Reduced Alphabet Composition of a protein sequence. The 20 standard
     amino acids are clustered into a smaller alphabet of physicochemically similar
-    groups. The fraction of residues belonging to each group is returned [1].
+    groups. The percentage of residues belonging to each group is returned [1].
 
     Supported alphabet sizes: 2, 3, 4, 6 (default=6).
     Invalid sizes are reset to 6.
+
+    A named alphabet can be used instead with ``alphabet``. ``alphabet="ifeature5"``
+    (aliphatic GAVLMI, aromatic FYW, positive KRH, negative DE, uncharged STCPNQ)
+    gives grouped amino acid composition (GAAC, k=1, 1 x 5), grouped dipeptide
+    composition (GDPC, k=2, 1 x 25) and grouped tripeptide composition (GTPC,
+    k=3, 1 x 125) [21]. The cluster profiles "cp13", "cp14", "cp19" and "cp20" [24]
+    are also accepted. With k > 1 overlapping k-mers of groups are counted and
+    divided by (L - k + 1):
+
+    GkPC(g1..gk) = N(g1..gk) / (L - k + 1) x 100
 
     Parameters
     ==========
     :sequence: str
         protein sequence.
     :alphabet_size: int (default=6)
-        number of amino acid groups (2, 3, 4 or 6).
+        number of amino acid groups (2, 3, 4 or 6); ignored when ``alphabet`` is set.
+    :alphabet: str | None (default=None)
+        named alphabet: "ifeature5", "cp13", "cp14", "cp19" or "cp20".
+    :k: int (default=1)
+        group k-mer length, 1-3.
 
     Returns
     =======
     :reduced_alphabet_df: pd.DataFrame
-        pandas DataFrame of shape 1 x alphabet_size.
+        pandas DataFrame of shape 1 x G^k, where G is the number of groups. Values
+        are percentages.
     """
     #validate input protein sequence
     sequence = _validate_sequence(sequence)
+    k = _validate_int("k", k, 1)
+    if k > 3:
+        raise ValueError(f"k must be 1, 2 or 3, got {k}.")
 
-    #default to 6 if an unsupported size is requested
-    if alphabet_size not in reduced_alphabets_:
-        alphabet_size = 6
+    if alphabet is None:
+        #default to 6 if an unsupported size is requested
+        if alphabet_size not in reduced_alphabets_:
+            alphabet_size = 6
+        groups = [(str(idx + 1), group) for idx, group in enumerate(reduced_alphabets_[alphabet_size])]
+        prefix = "ReducedAlphabet"
+    else:
+        groups = _named_alphabet(alphabet)
+        prefix = {1: "GAAC", 2: "GDPC", 3: "GTPC"}[k] if alphabet == "ifeature5" else f"RA_{alphabet}"
 
-    groups = reduced_alphabets_[alphabet_size]
     n = len(sequence)
-    values = []
-    col_names = []
-    #compute fractional composition for each group
-    for idx, group in enumerate(groups):
-        freq = round(sum(1 for aa in sequence if aa in group) / n * 100, 3)
-        values.append(freq)
-        col_names.append(f"ReducedAlphabet_{idx + 1}")
+    if k == 1 and alphabet is None:
+        values = []
+        col_names = []
+        #compute percentage composition for each group
+        for label, group in groups:
+            values.append(round(sum(1 for aa in sequence if aa in group) / n * 100, 3))
+            col_names.append(f"{prefix}_{label}")
+        return pd.DataFrame([values], columns=col_names)
 
-    reduced_alphabet_df = pd.DataFrame([values], columns=col_names)
+    mapping = {aa: label for label, group in groups for aa in group}
+    counts = _kmer_counts(sequence, k, mapping)
+    total = n - k + 1
+    labels = [label for label, _ in groups]
+    combos = list(itertools.product(labels, repeat=k))
+    values = [counts[c] / total * 100 if total > 0 else 0.0 for c in combos]
+    return _to_df(values, [f"{prefix}_" + ".".join(c) for c in combos])
 
-    return reduced_alphabet_df
+
+def _named_alphabet(alphabet: str) -> list[tuple[str, str]]:
+    """Return [(label, residues), ...] for a named partition alphabet in reduced_alphabets.json."""
+    valid = ["ifeature5", "cp13", "cp14", "cp19", "cp20"]
+    if alphabet not in valid:
+        raise ValueError(f"Invalid alphabet '{alphabet}'. Valid alphabets are: {valid}.")
+    values = _load_json_table("reduced_alphabets.json", alphabet)["values"]
+    if isinstance(values, dict):
+        return list(values.items())
+    return [(group, group) for group in values]
 
 ############################## Motif Composition ##########################################
 
@@ -1502,3 +1612,289 @@ def amphiphilic_correllation_function(Ri: str = "S", Rj: str = "D",
         normalized_props = [normalize_property(hydrophobicity_),
                             normalize_property(hydrophilicity_)]
     return [round(prop[Ri] * prop[Rj], 3) for prop in normalized_props]
+####################### Composition of k-Spaced Amino Acid Pairs ######################
+
+def cksaap(sequence: str, gap: int = 5) -> pd.DataFrame:
+    """
+    Calculate the Composition of k-Spaced Amino Acid Pairs (CKSAAP) of a protein
+    sequence [20]. For each spacing g = 0..gap, every residue pair (s_i, s_{i+g+1})
+    is counted and divided by the number of such pairs:
+
+    CKSAAP(XY, g) = N_g(XY) / (L - g - 1) x 100
+
+    g = 0 is the dipeptide composition. Values are percentages; a spacing with no
+    pairs (L - g - 1 <= 0) gives zeros.
+
+    Parameters
+    ==========
+    :sequence: str
+        protein sequence.
+    :gap: int (default=5)
+        maximum number of residues between the two residues of a pair.
+
+    Returns
+    =======
+    :cksaap_df: pd.DataFrame
+        pandas DataFrame of shape 1 x 400·(gap+1), columns ``CKSAAP_{XY}_gap{g}``.
+    """
+    #validate input protein sequence
+    sequence = _validate_sequence(sequence)
+    gap = _validate_int("gap", gap)
+
+    pairs = list(itertools.product(amino_acids, repeat=2))
+    values, columns = [], []
+    for g in range(gap + 1):
+        counts = _gapped_pair_counts(sequence, g)
+        total = len(sequence) - g - 1
+        values += [counts[p] / total * 100 if total > 0 else 0.0 for p in pairs]
+        columns += [f"CKSAAP_{x}{y}_gap{g}" for x, y in pairs]
+    return _to_df(values, columns)
+
+################# Composition of k-Spaced Amino Acid Group Pairs #######################
+
+def cksaagp(sequence: str, gap: int = 5) -> pd.DataFrame:
+    """
+    Calculate the Composition of k-Spaced Amino Acid Group Pairs (CKSAAGP) [21].
+    As CKSAAP, but residues are first mapped to the five iFeature groups:
+    aliphatic (GAVLMI), aromatic (FYW), positive (KRH), negative (DE) and
+    uncharged (STCPNQ).
+
+    CKSAAGP(G1G2, g) = N_g(G1G2) / (L - g - 1) x 100
+
+    Values are percentages and the 25 values for each spacing sum to 100
+    (0 when the spacing has no pairs).
+
+    Parameters
+    ==========
+    :sequence: str
+        protein sequence.
+    :gap: int (default=5)
+        maximum number of residues between the two residues of a pair.
+
+    Returns
+    =======
+    :cksaagp_df: pd.DataFrame
+        pandas DataFrame of shape 1 x 25·(gap+1), columns ``CKSAAGP_{G1}.{G2}_gap{g}``.
+    """
+    #validate input protein sequence
+    sequence = _validate_sequence(sequence)
+    gap = _validate_int("gap", gap)
+
+    groups = _named_alphabet("ifeature5")
+    mapping = {aa: label for label, residues in groups for aa in residues}
+    pairs = list(itertools.product([label for label, _ in groups], repeat=2))
+    values, columns = [], []
+    for g in range(gap + 1):
+        counts = _gapped_pair_counts(sequence, g, mapping)
+        total = len(sequence) - g - 1
+        values += [counts[p] / total * 100 if total > 0 else 0.0 for p in pairs]
+        columns += [f"CKSAAGP_{a}.{b}_gap{g}" for a, b in pairs]
+    return _to_df(values, columns)
+
+############################ Dipeptide Deviation from Expected Mean ######################
+
+def dde(sequence: str) -> pd.DataFrame:
+    """
+    Calculate the Dipeptide Deviation from Expected Mean (DDE) [22]. The observed
+    dipeptide composition is standardised against the composition expected from
+    the number of codons coding each residue:
+
+    Dc(XY) = N(XY) / (L - 1)
+    Tm(XY) = (C_X / 61) x (C_Y / 61)
+    Tv(XY) = Tm(XY) x (1 - Tm(XY)) / (L - 1)
+    DDE(XY) = (Dc(XY) - Tm(XY)) / sqrt(Tv(XY))
+
+    where C_X is the number of sense codons for residue X in the standard genetic
+    code (61 in total). DDE is a standardised statistic, not a percentage.
+
+    Parameters
+    ==========
+    :sequence: str
+        protein sequence, at least 2 residues.
+
+    Returns
+    =======
+    :dde_df: pd.DataFrame
+        pandas DataFrame of shape 1 x 400, columns ``DDE_{XY}``.
+    """
+    #validate input protein sequence
+    sequence = _validate_sequence(sequence)
+    if len(sequence) < 2:
+        raise ValueError("DDE needs a sequence of at least 2 residues.")
+
+    codons = _load_json_table("residue_tables.json", "codon_counts")["values"]
+    counts = _gapped_pair_counts(sequence, 0)
+    total = len(sequence) - 1
+    values, columns = [], []
+    for x, y in itertools.product(amino_acids, repeat=2):
+        tm = (codons[x] / 61) * (codons[y] / 61)
+        tv = tm * (1 - tm) / total
+        values.append((counts[(x, y)] / total - tm) / math.sqrt(tv))
+        columns.append(f"DDE_{x}{y}")
+    return _to_df(values, columns)
+
+################################ Adaptive Skip Dipeptide Composition #####################
+
+def asdc(sequence: str) -> pd.DataFrame:
+    """
+    Calculate the Adaptive Skip Dipeptide Composition (ASDC) [23]: the composition
+    of every ordered residue pair (s_i, s_j) with i < j, over all gaps:
+
+    ASDC(XY) = sum_g N_g(XY) / sum_g sum_XY N_g(XY) x 100
+
+    The denominator is the total number of ordered pairs, L(L-1)/2. Values are
+    percentages and sum to 100 (zeros for a single residue).
+
+    Parameters
+    ==========
+    :sequence: str
+        protein sequence.
+
+    Returns
+    =======
+    :asdc_df: pd.DataFrame
+        pandas DataFrame of shape 1 x 400, columns ``ASDC_{XY}``.
+    """
+    #validate input protein sequence
+    sequence = _validate_sequence(sequence)
+
+    index = {aa: i for i, aa in enumerate(amino_acids)}
+    #integer matmul: exact counts, and avoids spurious BLAS float warnings
+    onehot = np.zeros((len(sequence), 20), dtype=np.int64)
+    onehot[np.arange(len(sequence)), [index[aa] for aa in sequence]] = 1
+    #rows of `before` count each residue type strictly before position j
+    before = np.cumsum(onehot, axis=0) - onehot
+    pair_counts = before.T @ onehot
+    total = len(sequence) * (len(sequence) - 1) / 2
+    values = (pair_counts / total * 100).ravel() if total else np.zeros(400)
+    return _to_df(list(values), [f"ASDC_{x}{y}" for x, y in itertools.product(amino_acids, repeat=2)])
+
+#################################### Distance Pair #######################################
+
+def distance_pair(sequence: str, rng: int = 3, alphabet: str = "cp14") -> pd.DataFrame:
+    """
+    Calculate the PseAAC of distance-pairs over a reduced amino acid alphabet
+    (iDNA-Prot|dis) [24, 25]. Residues are mapped to the clusters of a cluster
+    profile cp(n) and the vector is
+
+    [f^0(1..G), f^1(1..G^2), ..., f^d(1..G^2)]
+
+    where f^0 is the cluster composition (count / L) and f^d, d = 1..rng, is the
+    composition of cluster pairs (s_i, s_{i+d}) (count / (L - d)); d = 1 is the
+    nearest-neighbour pair. This follows Eqs. 5-12 of [24], giving G + G^2·rng
+    values (e.g. 14 + 14x14x3 = 602 for cp14, rng=3). Values are percentages.
+
+    Alphabets: cp13, cp14, cp19, cp20 (no reduction) from Eq. 10 of [24]. The
+    printed cp(14) lists E twice; the stray E in the first cluster is dropped,
+    the only reading with 14 clusters.
+
+    Parameters
+    ==========
+    :sequence: str
+        protein sequence.
+    :rng: int (default=3)
+        maximum pair distance d.
+    :alphabet: str (default="cp14")
+        cluster profile: "cp13", "cp14", "cp19" or "cp20".
+
+    Returns
+    =======
+    :distance_pair_df: pd.DataFrame
+        pandas DataFrame of shape 1 x (G + G^2·rng), columns ``DP_{c}`` and
+        ``DP_{c1}.{c2}_d{d}`` where c are cluster labels (their residues).
+    """
+    #validate input protein sequence
+    sequence = _validate_sequence(sequence)
+    rng = _validate_int("rng", rng)
+    if alphabet not in ("cp13", "cp14", "cp19", "cp20"):
+        raise ValueError(f"Invalid alphabet '{alphabet}'. Valid alphabets are: ['cp13', 'cp14', 'cp19', 'cp20'].")
+
+    labels = [label for label, _ in _named_alphabet(alphabet)]
+    mapping = {aa: label for label in labels for aa in label}
+    comp = Counter(mapping[aa] for aa in sequence)
+    values = [comp[c] / len(sequence) * 100 for c in labels]
+    columns = [f"DP_{c}" for c in labels]
+    pairs = list(itertools.product(labels, repeat=2))
+    for d in range(1, rng + 1):
+        counts = _gapped_pair_counts(sequence, d - 1, mapping)
+        total = len(sequence) - d
+        values += [counts[p] / total * 100 if total > 0 else 0.0 for p in pairs]
+        columns += [f"DP_{a}.{b}_d{d}" for a, b in pairs]
+    return _to_df(values, columns)
+
+#################################### Natural Vector ######################################
+
+def natural_vector(sequence: str) -> pd.DataFrame:
+    """
+    Calculate the Natural Vector of a protein sequence [26]. For each amino acid k:
+
+    n_k  = number of occurrences of k
+    mu_k = mean (1-based) position of k
+    D2_k = sum_i (pos_i - mu_k)^2 / (n_k x L)
+
+    mu_k and D2_k are 0 when k does not occur. Values are not percentages.
+
+    Parameters
+    ==========
+    :sequence: str
+        protein sequence.
+
+    Returns
+    =======
+    :natural_vector_df: pd.DataFrame
+        pandas DataFrame of shape 1 x 60, columns ``NV_n_{X}``, ``NV_mu_{X}`` and
+        ``NV_D2_{X}``.
+    """
+    #validate input protein sequence
+    sequence = _validate_sequence(sequence)
+
+    L = len(sequence)
+    positions = {aa: [] for aa in amino_acids}
+    for i, aa in enumerate(sequence, start=1):
+        positions[aa].append(i)
+    n = [len(positions[aa]) for aa in amino_acids]
+    mu = [sum(positions[aa]) / len(positions[aa]) if positions[aa] else 0.0 for aa in amino_acids]
+    d2 = [sum((p - m) ** 2 for p in positions[aa]) / (len(positions[aa]) * L) if positions[aa] else 0.0
+          for aa, m in zip(amino_acids, mu)]
+    columns = ([f"NV_n_{aa}" for aa in amino_acids] + [f"NV_mu_{aa}" for aa in amino_acids]
+               + [f"NV_D2_{aa}" for aa in amino_acids])
+    return _to_df(n + mu + d2, columns)
+
+#################################### Atomic Composition ##################################
+
+def atomic_composition(sequence: str, subtract_water: bool = False) -> pd.DataFrame:
+    """
+    Calculate the Atomic Composition (ATC) of a protein sequence [27]: the
+    percentage of C, H, N, O and S atoms, summed over the molecular formulas of
+    the residues' free amino acids.
+
+    ATC(e) = N_e / (N_C + N_H + N_N + N_O + N_S) x 100
+
+    By default free amino-acid formulas are summed without removing water,
+    matching Pfeature [27]. With ``subtract_water=True``, (L - 1) H2O are removed
+    for the peptide bonds, giving the formula of the linear peptide (e.g. "GG"
+    -> C4H8N2O3).
+
+    Parameters
+    ==========
+    :sequence: str
+        protein sequence.
+    :subtract_water: bool (default=False)
+        remove one H2O per peptide bond.
+
+    Returns
+    =======
+    :atomic_composition_df: pd.DataFrame
+        pandas DataFrame of shape 1 x 5, columns ``ATC_C``, ``ATC_H``, ``ATC_N``,
+        ``ATC_O`` and ``ATC_S``. Values are percentages.
+    """
+    #validate input protein sequence
+    sequence = _validate_sequence(sequence)
+
+    formulas = _load_json_table("residue_tables.json", "atomic_formulas")["values"]
+    atoms = {e: sum(formulas[aa][e] for aa in sequence) for e in "CHNOS"}
+    if subtract_water:
+        atoms["H"] -= 2 * (len(sequence) - 1)
+        atoms["O"] -= len(sequence) - 1
+    total = sum(atoms.values())
+    return _to_df([atoms[e] / total * 100 for e in "CHNOS"], [f"ATC_{e}" for e in "CHNOS"])

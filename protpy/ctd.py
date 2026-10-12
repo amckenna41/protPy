@@ -11,6 +11,7 @@ from difflib import get_close_matches
 
 #list of amino acids
 from ._constants import amino_acids, _validate_sequence
+from ._helpers import _load_json_table
 
 """
 References
@@ -23,6 +24,9 @@ References
     classification. Proteins: Structure, Function and Genetics, 1999, 35, 401-407.
 [3] Gromiha, M. M. (2010). Protein Sequence Analysis. In M. M. Gromiha (Ed.), 
     Protein Bioinformatics (pp. 29–62). Elsevier.
+[4] Chen, Z. et al. (2018). iFeature: a Python package and web server for features
+    extraction and selection from protein and peptide sequences. Bioinformatics,
+    34(14), 2499-2502. https://doi.org/10.1093/bioinformatics/bty140
 """
 
 hydrophobicity = {"name": "hydrophobicity", "1": "RKEDQN", "2": "GASTPHY", "3": "CLVIMFW"}
@@ -56,6 +60,22 @@ ctd_properties = {
     "solvent_accessibility": solvent_accessibility,
     "polarizability": polarizability
     }
+
+#six extra hydrophobicity partitions used by iFeature's 13-property CTD [4]; kept out of
+#ctd_properties so the default 7-property outputs are unchanged
+ctd_properties_ifeature_extra = {
+    name: {"name": name, **groups}
+    for name, groups in _load_json_table("reduced_alphabets.json", "ctd_ifeature_extra")["values"].items()
+    }
+
+#property sets accepted by ctd_(property_set=...)
+ctd_property_sets = {
+    "default": ctd_properties,
+    "ifeature13": {**ctd_properties, **ctd_properties_ifeature_extra},
+    }
+
+#every property accepted by the single-property CTD functions
+_all_ctd_properties = ctd_property_sets["ifeature13"]
 
 def str_to_num(sequence: str, property: dict[str, str]) -> str:
     """
@@ -115,13 +135,13 @@ def ctd_composition(sequence: str, property: str = "hydrophobicity") -> pd.DataF
     sequence = _validate_sequence(sequence)
 
     #get closest matched CTD property - using cutoff of 0.8
-    property_matches = get_close_matches(property, ctd_properties.keys(), cutoff=0.8)
+    property_matches = get_close_matches(property, _all_ctd_properties.keys(), cutoff=0.8)
 
     #raise error if no matching property found
     if (property_matches != []):
-        prop = ctd_properties[property_matches[0]]
+        prop = _all_ctd_properties[property_matches[0]]
     else:
-        raise ValueError(f"Invalid property '{property}'. Available properties are: {list(ctd_properties.keys())}.")
+        raise ValueError(f"Invalid property '{property}'. Available properties are: {list(_all_ctd_properties.keys())}.")
     
     #convert sequence to number
     seq = str_to_num(sequence, prop)
@@ -166,13 +186,13 @@ def ctd_transition(sequence: str, property: str = "hydrophobicity") -> pd.DataFr
     sequence = _validate_sequence(sequence)
 
     #get closest matched CTD property  - using cutoff of 0.8
-    property_matches = get_close_matches(property, ctd_properties.keys(), cutoff=0.8)
+    property_matches = get_close_matches(property, _all_ctd_properties.keys(), cutoff=0.8)
 
     #raise error if no matching property found
     if (property_matches != []):
-        prop = ctd_properties[property_matches[0]]
+        prop = _all_ctd_properties[property_matches[0]]
     else:
-        raise ValueError(f"Invalid property '{property}'. Available properties are: {list(ctd_properties.keys())}.")
+        raise ValueError(f"Invalid property '{property}'. Available properties are: {list(_all_ctd_properties.keys())}.")
 
     #convert sequence to number
     seq = str_to_num(sequence, prop)
@@ -224,13 +244,13 @@ def ctd_distribution(sequence: str, property: str = "hydrophobicity") -> pd.Data
     sequence = _validate_sequence(sequence)
 
     #get closest matched CTD property - using cutoff of 0.8
-    property_matches = get_close_matches(property, ctd_properties.keys(), cutoff=0.8)
+    property_matches = get_close_matches(property, _all_ctd_properties.keys(), cutoff=0.8)
 
     #raise error if no matching property found
     if (property_matches != []):
-        prop = ctd_properties[property_matches[0]]
+        prop = _all_ctd_properties[property_matches[0]]
     else:
-        raise ValueError(f"Invalid property '{property}'. Available properties are: {list(ctd_properties.keys())}.")
+        raise ValueError(f"Invalid property '{property}'. Available properties are: {list(_all_ctd_properties.keys())}.")
 
     #convert sequence to number
     seq = str_to_num(sequence, prop)
@@ -276,7 +296,8 @@ def ctd_distribution(sequence: str, property: str = "hydrophobicity") -> pd.Data
 
     return ctd_distribution_df
 
-def ctd_(sequence: str, property: str = "hydrophobicity", all_ctd: bool = True) -> pd.DataFrame:
+def ctd_(sequence: str, property: str = "hydrophobicity", all_ctd: bool = True,
+    property_set: str = "default") -> pd.DataFrame:
     """
     Calculate all Composition, Transition and Distribution (CTD) features of protein sequences.
     Composition is the number of amino acids of a particular property (e.g., hydrophobicity)
@@ -299,8 +320,12 @@ def ctd_(sequence: str, property: str = "hydrophobicity", all_ctd: bool = True) 
         protein sequence.
     :property: str (default="hydrophocity")
         physicochemical property name to use when calculating descriptor.
-    :ctd: bool
+    :all_ctd: bool (default=True)
         calculate all CTD descriptors and concatenate together.
+    :property_set: str (default="default")
+        property set used when ``all_ctd=True``: "default" (the 7 properties
+        above, 1 x 147) or "ifeature13" (adds the six AAindex hydrophobicity
+        partitions used by iFeature, 13 properties, 1 x 273) [4].
 
     Returns
     =======
@@ -311,7 +336,9 @@ def ctd_(sequence: str, property: str = "hydrophobicity", all_ctd: bool = True) 
     """
     #validate input protein sequence
     sequence = _validate_sequence(sequence)
-    
+    if property_set not in ctd_property_sets:
+        raise ValueError(f"Invalid property_set '{property_set}'. Available sets are: {list(ctd_property_sets)}.")
+
     #initialise ctd dataframes
     comp_df = pd.DataFrame()
     trans_df = pd.DataFrame()
@@ -324,7 +351,7 @@ def ctd_(sequence: str, property: str = "hydrophobicity", all_ctd: bool = True) 
         distr_df = ctd_distribution(sequence, property=property)
     else:
         #if using all calculable properties, calculate CTD descriptors for each property
-        for prop in ctd_properties:
+        for prop in ctd_property_sets[property_set]:
             comp = ctd_composition(sequence, property=prop)
             comp_df = pd.concat([comp_df, comp], axis=1)
             trans = ctd_transition(sequence, property=prop)

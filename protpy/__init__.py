@@ -39,5 +39,7 @@ descriptor_names = ["amino_acid_composition", "dipeptide_composition", "tripepti
     "conjoint_triad", "ctd_composition", "ctd_transition", "ctd_distribution", "ctd_",
     "sequence_order_coupling_number_", "sequence_order_coupling_number",
     "sequence_order_coupling_number_all", "quasi_sequence_order", "quasi_sequence_order_all",
-    "shannon_entropy"
+    "shannon_entropy",
+    #v1.5.0
+    "cksaap", "cksaagp", "dde", "asdc", "distance_pair", "natural_vector", "atomic_composition",
     ]

@@ -47,8 +47,13 @@ class ProtpyTests(unittest.TestCase):
 
     def test_valid_descriptors(self):
         """ Testing correct list of available descriptors is included in package attribute. """
-        self.assertEqual(len(protpy.descriptor_names), 36, 
-            "Expected there to be 36 total descriptors, got {}.".format(len(protpy.descriptor_names)))
+        from protpy.utils import _DESCRIPTOR_REGISTRY
+        #every exported descriptor is registered (and vice versa) and callable
+        self.assertEqual(sorted(protpy.descriptor_names), sorted(_DESCRIPTOR_REGISTRY),
+            "descriptor_names and the descriptor registry should list the same descriptors.")
+        self.assertEqual(len(set(protpy.descriptor_names)), len(protpy.descriptor_names))
+        for name in protpy.descriptor_names:
+            self.assertTrue(callable(getattr(protpy, name)), name)
         self.assertIsInstance(protpy.descriptor_names, list, 
             "all_descriptors should be of type list, got {}.".format(type(protpy.descriptor_names)))
         # composition descriptors
