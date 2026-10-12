@@ -108,5 +108,75 @@ class ProtpyChargeTests(unittest.TestCase):
                                        IsoelectricPoint(seq).pi(), delta=0.01)
 
 
+class ProtpyHydrophobicityStabilityTests(unittest.TestCase):
+
+    def test_hydrophobicity_profile(self):
+        df = protpy.hydrophobicity_profile(SEQ)
+        self.assertEqual(list(df.columns), [f"HP_kyte_doolittle_w9_{s}" for s in ("mean", "max", "min", "std")])
+        self.assertEqual(protpy.hydrophobicity_profile(SEQ, threshold=1.6).shape, (1, 5))
+        self.assertEqual(protpy.hydrophobicity_profile(SEQ, scale="HOPT810101").shape, (1, 4))
+        #window longer than sequence -> one window = GRAVY
+        self.assertEqual(protpy.hydrophobicity_profile("ACD", window=9)["HP_kyte_doolittle_w9_mean"].iloc[0],
+                         protpy.gravy("ACD")["GRAVY"].iloc[0])
+        with self.assertRaises(ValueError):
+            protpy.hydrophobicity_profile(SEQ, edge=2)
+        with self.assertRaises(ValueError):
+            protpy.hydrophobicity_profile(SEQ, scale="vhse")
+        with self.assertRaises(ValueError):
+            protpy.hydrophobicity_profile(SEQ, window=0)
+
+    def test_hydrophobicity_profile_matches_biopython(self):
+        from Bio.SeqUtils.ProtParam import ProteinAnalysis
+        from Bio.SeqUtils.ProtParamData import kd
+        for edge in (1.0, 0.4):
+            ref = ProteinAnalysis(SEQ).protein_scale(kd, 9, edge)
+            df = protpy.hydrophobicity_profile(SEQ, window=9, edge=edge)
+            self.assertAlmostEqual(df["HP_kyte_doolittle_w9_mean"].iloc[0], round(np.mean(ref), 3), places=3)
+            self.assertAlmostEqual(df["HP_kyte_doolittle_w9_max"].iloc[0], round(max(ref), 3), places=3)
+
+    def test_hydrophobic_ratio(self):
+        #APD example: TP10 is 61% hydrophobic (13 of 21 residues)
+        self.assertEqual(protpy.hydrophobic_ratio("AGYLLGKINLKALAALAKKIL")["HydrophobicRatio"].iloc[0], round(13 / 21 * 100, 3))
+        self.assertEqual(protpy.hydrophobic_ratio("GGKK")["HydrophobicRatio"].iloc[0], 0.0)
+
+    def test_half_life(self):
+        df = protpy.half_life("MKT")
+        self.assertEqual(df.values[0].tolist(), [30.0, 20.0, 10.0])
+        self.assertEqual(protpy.half_life("RAA").values[0].tolist(), [1.0, round(2 / 60, 3), round(2 / 60, 3)])
+        self.assertTrue(np.isnan(protpy.half_life("PAA")["HalfLife_Ecoli_h"].iloc[0]))
+
+    def test_ivywrel_cvp(self):
+        self.assertEqual(protpy.ivywrel_index("IVYWRELA")["IVYWREL"].iloc[0], round(7 / 8, 3))
+        self.assertEqual(protpy.cvp_bias("DEKRNQST")["CvP_Bias"].iloc[0], 0.0)
+        self.assertEqual(protpy.cvp_bias("DDAA")["CvP_Bias"].iloc[0], 50.0)
+
+    def test_flexibility(self):
+        df = protpy.flexibility(SEQ)
+        self.assertEqual(list(df.columns), ["Flex_mean", "Flex_max", "Flex_min", "Flex_std"])
+        #Biopython uses the same table and weights (but an off-by-one centre and drops the last window)
+        from Bio.SeqUtils.ProtParam import ProteinAnalysis
+        ref = ProteinAnalysis(SEQ).flexibility()
+        self.assertAlmostEqual(df["Flex_mean"].iloc[0], np.mean(ref), delta=0.01)
+
+    def test_extensions(self):
+        self.assertEqual(list(protpy.gravy(SEQ).columns), ["GRAVY"])
+        hw = protpy.gravy("AD", scale="hopp_woods")
+        self.assertEqual(list(hw.columns), ["GRAVY_hopp_woods"])
+        self.assertEqual(hw.iloc[0, 0], (-0.5 + 3.0) / 2)
+        self.assertEqual(protpy.hydrophobic_moment(SEQ, angle="helix").values.tolist(),
+                         protpy.hydrophobic_moment(SEQ).values.tolist())
+        self.assertEqual(protpy.hydrophobic_moment(SEQ, angle="sheet").values.tolist(),
+                         protpy.hydrophobic_moment(SEQ, angle=160).values.tolist())
+        self.assertNotEqual(protpy.hydrophobic_moment(SEQ, scale="eisenberg").values.tolist(),
+                            protpy.hydrophobic_moment(SEQ).values.tolist())
+        with self.assertRaises(ValueError):
+            protpy.hydrophobic_moment(SEQ, angle="coil")
+        ext = protpy.extinction_coefficient(SEQ + "W", absorbance=True)
+        self.assertEqual(ext.shape, (1, 4))
+        mw = protpy.molecular_weight(SEQ + "W").iloc[0, 0]
+        self.assertAlmostEqual(ext["Abs01_Reduced"].iloc[0], round(ext["ExtCoeff_Reduced"].iloc[0] / mw, 3))
+        self.assertEqual(protpy.extinction_coefficient(SEQ).shape, (1, 2))
+
+
 if __name__ == "__main__":
     unittest.main()

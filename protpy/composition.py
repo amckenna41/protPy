@@ -98,7 +98,7 @@ References
 """
 #list of amino acids
 from ._constants import amino_acids, _validate_sequence, _validate_int, _validate_weight
-from ._helpers import _load_json_table, _read_json, _gapped_pair_counts, _kmer_counts, _to_df
+from ._helpers import _load_json_table, _read_json, _gapped_pair_counts, _kmer_counts, _to_df, _property_matrix
 
 #physicochemical values for all amino acids for hydrophobicity, hydrophilicty and residue mass
 #values taken from http://www.csbio.sjtu.edu.cn/bioinf/PseAAC/ParaValue.htm
@@ -319,7 +319,7 @@ kyte_doolittle_ = {
     "W": -0.9, "Y": -1.3
 }
 
-def gravy(sequence: str) -> pd.DataFrame:
+def gravy(sequence: str, scale: str = "kyte_doolittle") -> pd.DataFrame:
     """
     Calculate the Grand Average of Hydropathy (GRAVY) for a protein sequence.
     GRAVY is the sum of the Kyte-Doolittle hydropathy values of all residues
@@ -330,10 +330,16 @@ def gravy(sequence: str) -> pd.DataFrame:
     A positive GRAVY value indicates an overall hydrophobic protein; a negative
     value indicates an overall hydrophilic protein.
 
+    Another single-value scale can be averaged with ``scale`` ("hopp_woods",
+    "eisenberg", "wimley_white", "engelman", "domcut" or any AAindex1 accession
+    code); the column is then named ``GRAVY_{scale}``.
+
     Parameters
     ==========
     :sequence: str
         protein sequence.
+    :scale: str (default="kyte_doolittle")
+        hydrophobicity scale to average.
 
     Returns
     =======
@@ -343,6 +349,12 @@ def gravy(sequence: str) -> pd.DataFrame:
     """
     #validate input protein sequence
     sequence = _validate_sequence(sequence)
+
+    if scale != "kyte_doolittle":
+        values = _property_matrix(sequence, scale)
+        if values.shape[1] != 1:
+            raise ValueError(f"Scale '{scale}' is multi-dimensional; use a single-value scale.")
+        return _to_df([values.mean()], [f"GRAVY_{scale}"])
 
     #sum Kyte-Doolittle hydropathy values and divide by sequence length
     gravy_score = round(sum(kyte_doolittle_[aa] for aa in sequence) / len(sequence), 3)
@@ -1027,7 +1039,7 @@ def aliphatic_index(sequence: str) -> pd.DataFrame:
 
 ############################### Extinction Coefficient ####################################
 
-def extinction_coefficient(sequence: str) -> pd.DataFrame:
+def extinction_coefficient(sequence: str, absorbance: bool = False) -> pd.DataFrame:
     """
     Calculate the molar Extinction Coefficient of a protein sequence at 280 nm.
     The coefficient is derived from the number of Trp (W), Tyr (Y) and
@@ -1038,15 +1050,20 @@ def extinction_coefficient(sequence: str) -> pd.DataFrame:
     where SS is the number of disulfide bonds (Cys_count // 2) for the
     oxidised form, and 0 for the reduced form. Both are returned.
 
+    With ``absorbance=True`` the A280 of a 1 g/L (0.1%) solution is added,
+    Abs 0.1% = EC / MW, for both forms (Pace et al. 1995, Gill & von Hippel 1989).
+
     Parameters
     ==========
     :sequence: str
         protein sequence.
+    :absorbance: bool (default=False)
+        also return ``Abs01_Reduced`` and ``Abs01_Oxidized``.
 
     Returns
     =======
     :extinction_coefficient_df: pd.DataFrame
-        pandas DataFrame of shape 1 x 2 with columns
+        pandas DataFrame of shape 1 x 2 (1 x 4 with ``absorbance``) with columns
         ``ExtCoeff_Reduced`` and ``ExtCoeff_Oxidized`` (M⁻¹cm⁻¹).
     """
     #validate input protein sequence
@@ -1065,6 +1082,11 @@ def extinction_coefficient(sequence: str) -> pd.DataFrame:
         [[ec_reduced, ec_oxidized]],
         columns=["ExtCoeff_Reduced", "ExtCoeff_Oxidized"]
     )
+
+    if absorbance:
+        mw = molecular_weight(sequence)["MolecularWeight"].iloc[0]
+        extinction_coefficient_df["Abs01_Reduced"] = round(ec_reduced / mw, 3)
+        extinction_coefficient_df["Abs01_Oxidized"] = round(ec_oxidized / mw, 3)
 
     return extinction_coefficient_df
 
@@ -1217,7 +1239,8 @@ def shannon_entropy(sequence: str) -> pd.DataFrame:
 
 ############################### Hydrophobic Moment ########################################
 
-def hydrophobic_moment(sequence: str, window: int = 11, angle: float = 100) -> pd.DataFrame:
+def hydrophobic_moment(sequence: str, window: int = 11, angle: float | str = 100,
+    scale: str | None = None) -> pd.DataFrame:
     """
     Calculate the mean and maximum Hydrophobic Moment of a protein sequence.
     The hydrophobic moment measures the amphiphilicity of a helical segment —
@@ -1228,9 +1251,14 @@ def hydrophobic_moment(sequence: str, window: int = 11, angle: float = 100) -> p
 
         mu = sqrt( (sum H_i * sin(i * angle))^2 + (sum H_i * cos(i * angle))^2 ) / window
 
-    where H_i is the Eisenberg hydrophobicity of residue i and angle is in
-    degrees. Default angle of 100° corresponds to an alpha-helix; 160° is
-    commonly used for beta-strands.
+    where H_i is the hydrophobicity of residue i and angle is in degrees.
+    Default angle of 100° corresponds to an alpha-helix; 160° is used for
+    beta-strands (Eisenberg et al. 1984).
+
+    By default H is protpy's normalised hydrophobicity table (the values used
+    for PseAAC, A = 0.62, also widely quoted as the "Eisenberg consensus" scale).
+    ``scale`` selects another single-value scale, e.g. "eisenberg" (AAindex
+    EISD840101, Eisenberg 1984, A = 0.25), "kyte_doolittle" or any AAindex1 code.
 
     Parameters
     ==========
@@ -1238,8 +1266,10 @@ def hydrophobic_moment(sequence: str, window: int = 11, angle: float = 100) -> p
         protein sequence.
     :window: int (default=11)
         sliding window length in residues.
-    :angle: float (default=100)
-        residue rotation angle in degrees (100° = alpha-helix).
+    :angle: float | str (default=100)
+        residue rotation angle in degrees, or "helix" (100) / "sheet" (160).
+    :scale: str | None (default=None)
+        hydrophobicity scale; None uses protpy's default table.
 
     Returns
     =======
@@ -1251,6 +1281,17 @@ def hydrophobic_moment(sequence: str, window: int = 11, angle: float = 100) -> p
     sequence = _validate_sequence(sequence)
 
     window = _validate_int("window", window, 1)
+    if isinstance(angle, str):
+        if angle not in ("helix", "sheet"):
+            raise ValueError(f"angle must be a number, 'helix' or 'sheet', got '{angle}'.")
+        angle = {"helix": 100, "sheet": 160}[angle]
+    if scale is None:
+        h_scale = hydrophobicity_
+    else:
+        values = _property_matrix("".join(amino_acids), scale)
+        if values.shape[1] != 1:
+            raise ValueError(f"Scale '{scale}' is multi-dimensional; use a single-value scale.")
+        h_scale = dict(zip(amino_acids, values[:, 0]))
 
     n = len(sequence)
     #use full sequence as single window when shorter than default window
@@ -1261,8 +1302,8 @@ def hydrophobic_moment(sequence: str, window: int = 11, angle: float = 100) -> p
     #compute hydrophobic moment for each window position using Eisenberg scale
     for i in range(n - effective_window + 1):
         seg = sequence[i:i + effective_window]
-        hsin = sum(hydrophobicity_[aa] * math.sin(j * angle_rad) for j, aa in enumerate(seg))
-        hcos = sum(hydrophobicity_[aa] * math.cos(j * angle_rad) for j, aa in enumerate(seg))
+        hsin = sum(h_scale[aa] * math.sin(j * angle_rad) for j, aa in enumerate(seg))
+        hcos = sum(h_scale[aa] * math.cos(j * angle_rad) for j, aa in enumerate(seg))
         mu = math.sqrt(hsin ** 2 + hcos ** 2) / effective_window
         moments.append(mu)
 

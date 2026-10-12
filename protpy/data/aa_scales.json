@@ -1786,5 +1786,33 @@
     "reference": "Atchley W.R. et al. (2005). Solving the protein sequence metric problem. PNAS, 102(18), 6395-6400.",
     "doi": "10.1073/pnas.0408677102",
     "source_note": "Table 2 of the primary paper (PMC1088356), transcribed programmatically 2026-10-12. Cross-checked: agrees with peptides.py to the 3 dp published."
+  },
+  "vihinen_flexibility": {
+    "name": "Normalized flexibility parameters (B-values), average (Vihinen et al., 1994)",
+    "values": {
+      "A": 0.984,
+      "C": 0.906,
+      "D": 1.068,
+      "E": 1.094,
+      "F": 0.915,
+      "G": 1.031,
+      "H": 0.95,
+      "I": 0.927,
+      "K": 1.102,
+      "L": 0.935,
+      "M": 0.952,
+      "N": 1.048,
+      "P": 1.049,
+      "Q": 1.037,
+      "R": 1.008,
+      "S": 1.046,
+      "T": 0.997,
+      "V": 0.931,
+      "W": 0.904,
+      "Y": 0.929
+    },
+    "reference": "Vihinen, M., Torkkila, E. and Riikonen, P. 'Accuracy of protein flexibility predictions' Proteins 19, 141-149 (1994)",
+    "doi": "10.1002/prot.340190207",
+    "source_note": "AAindex1 record VINM940101 (average normalised B-values of Vihinen et al. 1994; identical to Biopython ProtParamData.Flex); copied 2026-10-12."
   }
 }

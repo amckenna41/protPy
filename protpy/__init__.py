@@ -47,4 +47,5 @@ descriptor_names = ["amino_acid_composition", "dipeptide_composition", "tripepti
     "z_scales_5", "vhse", "atchley_factors", "t_scales", "st_scales", "protfp", "fasgai",
     "blosum_indices", "ms_whim", "auto_cross_covariance", "physicochemical_distance_transformation",
     "charge_fractions", "ncpr", "kappa", "sequence_charge_decoration", "charge_density",
+    "hydrophobicity_profile", "hydrophobic_ratio", "half_life", "ivywrel_index", "cvp_bias", "flexibility",
     ]

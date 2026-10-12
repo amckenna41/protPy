@@ -26,17 +26,42 @@ References
 [4] Müller, A. T., Gabernet, G., Hiss, J. A., & Schneider, G. (2017). modlAMP:
     Python for antimicrobial peptides. Bioinformatics, 33(17), 2753-2755.
     https://doi.org/10.1093/bioinformatics/btx285
+[5] Kyte, J., & Doolittle, R. F. (1982). A simple method for displaying the
+    hydropathic character of a protein. J Mol Biol, 157(1), 105-132.
+    https://doi.org/10.1016/0022-2836(82)90515-0
+[6] Gasteiger, E. et al. (2005). Protein identification and analysis tools on the
+    ExPASy server. In The Proteomics Protocols Handbook (pp. 571-607). Humana
+    Press. https://doi.org/10.1385/1-59259-890-0:571
+[7] Wang, G. (2020). The antimicrobial peptide database provides a platform for
+    decoding the design principles of naturally occurring antimicrobial peptides.
+    Protein Sci, 29(1), 8-18. https://doi.org/10.1002/pro.3702
+[8] Bachmair, A., Finley, D., & Varshavsky, A. (1986). In vivo half-life of a
+    protein is a function of its amino-terminal residue. Science, 234(4773),
+    179-186. https://doi.org/10.1126/science.3018930
+[9] Gonda, D. K. et al. (1989). Universality and structure of the N-end rule.
+    J Biol Chem, 264(28), 16700-16712. https://doi.org/10.1016/S0021-9258(19)84762-2
+[10] Tobias, J. W. et al. (1991). The N-end rule in bacteria. Science, 254(5036),
+    1374-1377. https://doi.org/10.1126/science.1962196
+[11] Zeldovich, K. B., Berezovsky, I. N., & Shakhnovich, E. I. (2007). Protein and
+    DNA sequence determinants of thermophilic adaptation. PLoS Comput Biol, 3(1),
+    e5. https://doi.org/10.1371/journal.pcbi.0030005
+[12] Suhre, K., & Claverie, J.-M. (2003). Genomic correlates of hyperthermostability,
+    an update. J Biol Chem, 278(19), 17198-17202. https://doi.org/10.1074/jbc.M301327200
+[13] Vihinen, M., Torkkila, E., & Riikonen, P. (1994). Accuracy of protein
+    flexibility predictions. Proteins, 19(2), 141-149.
+    https://doi.org/10.1002/prot.340190207
 """
 
 import numpy as np
 import pandas as pd
 
 from ._constants import _validate_sequence, _validate_int
-from ._helpers import _charge_vector, _to_df
+from ._helpers import _charge_vector, _to_df, _property_matrix, _sliding_windows, _profile_stats, _load_json_table
 from .composition import charge_distribution, molecular_weight
 
 __all__ = [
     "charge_fractions", "ncpr", "kappa", "sequence_charge_decoration", "charge_density",
+    "hydrophobicity_profile", "hydrophobic_ratio", "half_life", "ivywrel_index", "cvp_bias", "flexibility",
 ]
 
 ################################## Charge Fractions #######################################
@@ -247,3 +272,191 @@ def charge_density(sequence: str, ph: float = 7.4) -> pd.DataFrame:
     net = charge_distribution(sequence, ph=ph)["NetCharge"].iloc[0]
     mw = molecular_weight(sequence)["MolecularWeight"].iloc[0]
     return pd.DataFrame([[round(net / mw, 6)]], columns=["ChargeDensity"])
+
+############################### Hydrophobicity Profile ####################################
+
+def hydrophobicity_profile(sequence: str, scale: str = "kyte_doolittle", window: int = 9, edge: float = 1.0,
+    threshold: float | None = None) -> pd.DataFrame:
+    """
+    Summarise a sliding-window hydrophobicity profile [5, 6]. Each residue is
+    replaced by its scale value and a window of length ``window`` is slid along
+    the sequence; ``edge < 1`` weights the window ends linearly down to ``edge``
+    (ExPASy ProtScale semantics). The profile is reduced to its mean, max, min
+    and standard deviation, plus the fraction of windows above ``threshold``
+    when one is given (e.g. 1.6 for Kyte-Doolittle transmembrane segments).
+    Windows longer than the sequence use the whole sequence.
+
+    Parameters
+    ==========
+    :sequence: str
+        protein sequence.
+    :scale: str (default="kyte_doolittle")
+        single-value scale: "kyte_doolittle", "hopp_woods", "eisenberg",
+        "wimley_white", "engelman", "domcut", or any AAindex1 accession code.
+    :window: int (default=9)
+        window length.
+    :edge: float (default=1.0)
+        relative weight of the window ends, 0-1.
+    :threshold: float | None (default=None)
+        if set, add the fraction of windows with a value above it.
+
+    Returns
+    =======
+    :profile_df: pd.DataFrame
+        pandas DataFrame of shape 1 x 4 (1 x 5 with ``threshold``), columns
+        ``HP_{scale}_w{window}_{mean,max,min,std[,frac_above]}``.
+    """
+    #validate input protein sequence
+    sequence = _validate_sequence(sequence)
+    window = _validate_int("window", window, 1)
+    if not 0 <= edge <= 1:
+        raise ValueError(f"edge must be between 0 and 1, got {edge}.")
+
+    values = _property_matrix(sequence, scale)
+    if values.shape[1] != 1:
+        raise ValueError(f"Scale '{scale}' is multi-dimensional; use a single-value scale.")
+    profile = _sliding_windows(values[:, 0], window, edge)
+    stats = _profile_stats(profile, f"HP_{scale}_w{window}", threshold=threshold)
+    return _to_df(list(stats.values()), list(stats))
+
+################################ Hydrophobic Ratio ########################################
+
+#hydrophobic residues as defined by the APD [7]
+_apd_hydrophobic = frozenset("LIVFMACW")
+
+def hydrophobic_ratio(sequence: str) -> pd.DataFrame:
+    """
+    Calculate the hydrophobic ratio of the Antimicrobial Peptide Database (APD)
+    [7]: the percentage of residues that are L, I, V, F, M, A, C or W.
+
+    HydrophobicRatio = N(LIVFMACW) / L x 100
+
+    Parameters
+    ==========
+    :sequence: str
+        protein sequence.
+
+    Returns
+    =======
+    :hydrophobic_ratio_df: pd.DataFrame
+        pandas DataFrame of shape 1 x 1, column ``HydrophobicRatio`` (percentage).
+    """
+    #validate input protein sequence
+    sequence = _validate_sequence(sequence)
+    return _to_df([sum(aa in _apd_hydrophobic for aa in sequence) / len(sequence) * 100], ["HydrophobicRatio"])
+
+#################################### Half Life ############################################
+
+def half_life(sequence: str) -> pd.DataFrame:
+    """
+    Estimate the in vivo half-life of a protein from its N-terminal residue by
+    the N-end rule [8, 9, 10], as tabulated by ExPASy ProtParam [6]: mammalian
+    reticulocytes (in vitro), yeast and E. coli (in vivo).
+
+    Values are in hours. Lower bounds in the source (">20 h" in yeast, ">10 h"
+    in E. coli, ">20 h" for mammalian Pro) are reported as the bound. The E. coli
+    value for an N-terminal Pro is unknown in the source and returned as NaN.
+    Not applicable to N-terminally modified proteins.
+
+    Parameters
+    ==========
+    :sequence: str
+        protein sequence.
+
+    Returns
+    =======
+    :half_life_df: pd.DataFrame
+        pandas DataFrame of shape 1 x 3, columns ``HalfLife_Mammal_h``,
+        ``HalfLife_Yeast_h`` and ``HalfLife_Ecoli_h``.
+    """
+    #validate input protein sequence
+    sequence = _validate_sequence(sequence)
+
+    row = _load_json_table("residue_tables.json", "n_end_half_life")["values"][sequence[0]]
+    values = [np.nan if row[k] is None else row[k] for k in ("mammal", "yeast", "ecoli")]
+    return _to_df(values, ["HalfLife_Mammal_h", "HalfLife_Yeast_h", "HalfLife_Ecoli_h"])
+
+################################## IVYWREL Index ##########################################
+
+def ivywrel_index(sequence: str) -> pd.DataFrame:
+    """
+    Calculate the IVYWREL index of Zeldovich et al. [11]: the fraction of residues
+    that are I, V, Y, W, R, E or L, which correlates with optimal growth
+    temperature.
+
+    IVYWREL = N(IVYWREL) / L
+
+    Parameters
+    ==========
+    :sequence: str
+        protein sequence.
+
+    Returns
+    =======
+    :ivywrel_df: pd.DataFrame
+        pandas DataFrame of shape 1 x 1, column ``IVYWREL`` (fraction).
+    """
+    #validate input protein sequence
+    sequence = _validate_sequence(sequence)
+    return _to_df([sum(aa in "IVYWREL" for aa in sequence) / len(sequence)], ["IVYWREL"])
+
+#################################### CvP Bias #############################################
+
+def cvp_bias(sequence: str) -> pd.DataFrame:
+    """
+    Calculate the charged-versus-polar (CvP) bias of Suhre & Claverie [12], an
+    indicator of hyperthermostability:
+
+    CvP = %(D + E + K + R) - %(N + Q + S + T)
+
+    Parameters
+    ==========
+    :sequence: str
+        protein sequence.
+
+    Returns
+    =======
+    :cvp_df: pd.DataFrame
+        pandas DataFrame of shape 1 x 1, column ``CvP_Bias`` (percentage points).
+    """
+    #validate input protein sequence
+    sequence = _validate_sequence(sequence)
+    charged = sum(aa in "DEKR" for aa in sequence)
+    polar = sum(aa in "NQST" for aa in sequence)
+    return _to_df([(charged - polar) / len(sequence) * 100], ["CvP_Bias"])
+
+################################### Flexibility ###########################################
+
+def flexibility(sequence: str, window: int = 9) -> pd.DataFrame:
+    """
+    Summarise the flexibility profile of Vihinen et al. [13]. Average normalised
+    B-values (Vihinen's "average" parameter set, AAindex VINM940101) are averaged
+    over a window of 9 whose end weights fall linearly to 0.25 (weights 0.25,
+    0.4375, 0.625, 0.8125, 1, ..., 0.25; sum 5.25), and the profile is reduced
+    to its mean, max, min and standard deviation.
+
+    The neighbour-dependent parameter sets of [13] (residues with 0, 1 or 2 rigid
+    neighbours) are not used. Compared with Biopython's
+    ``ProteinAnalysis.flexibility``, which uses the same values and weights,
+    protpy centres each window on its middle residue and includes the last
+    window; Biopython takes the residue after the centre and omits the last window.
+
+    Parameters
+    ==========
+    :sequence: str
+        protein sequence.
+    :window: int (default=9)
+        window length (the parameters were optimised for 9).
+
+    Returns
+    =======
+    :flexibility_df: pd.DataFrame
+        pandas DataFrame of shape 1 x 4, columns ``Flex_{mean,max,min,std}``.
+    """
+    #validate input protein sequence
+    sequence = _validate_sequence(sequence)
+    window = _validate_int("window", window, 1)
+
+    profile = _sliding_windows(_property_matrix(sequence, "vihinen_flexibility")[:, 0], window, edge=0.25)
+    stats = _profile_stats(profile, "Flex")
+    return _to_df(list(stats.values()), list(stats))
