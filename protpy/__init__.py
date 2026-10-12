@@ -4,6 +4,7 @@ from .conjoint_triad import *
 from .ctd import *
 from .sequence_order import *
 from .scales import *
+from .physicochemical import *
 from .utils import get_descriptor_info, list_descriptors, print_descriptor_info
 from .encode import all_descriptors, encode_dataset, read_sequences_from_file
 
@@ -45,4 +46,5 @@ descriptor_names = ["amino_acid_composition", "dipeptide_composition", "tripepti
     "cksaap", "cksaagp", "dde", "asdc", "distance_pair", "natural_vector", "atomic_composition",
     "z_scales_5", "vhse", "atchley_factors", "t_scales", "st_scales", "protfp", "fasgai",
     "blosum_indices", "ms_whim", "auto_cross_covariance", "physicochemical_distance_transformation",
+    "charge_fractions", "ncpr", "kappa", "sequence_charge_decoration", "charge_density",
     ]

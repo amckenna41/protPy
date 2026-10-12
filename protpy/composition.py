@@ -494,16 +494,32 @@ pka_values_ = {
     "N_term": 8.0, "C_term": 3.1
 }
 
-def isoelectric_point(sequence: str) -> pd.DataFrame:
+def _pka_set(pka_scale: str) -> dict:
+    """Return the pKa set named ``pka_scale`` from residue_tables.json."""
+    sets = _load_json_table("residue_tables.json", "pka_sets")["values"]
+    if pka_scale not in sets:
+        raise ValueError(f"Invalid pka_scale '{pka_scale}'. Valid scales are: {list(sets)}.")
+    return sets[pka_scale]
+
+def isoelectric_point(sequence: str, pka_scale: str = "protpy") -> pd.DataFrame:
     """
     Calculate the theoretical Isoelectric Point (pI) of a protein sequence.
     pI is the pH at which the net charge of the protein is zero. It is computed
     by bisecting the pH range 0-14 until positive and negative charges balance [11].
 
+    ``pka_scale`` selects the pKa values: "protpy" (default, unchanged), "emboss"
+    (EMBOSS Epk.dat), "bjellqvist" (Bjellqvist 1993/1994, including the
+    residue-specific N-terminal pKa values for A, M, S, P, T, V, E and C-terminal
+    values for D and E) or "ipc_protein" (Kozlowski 2016). The same charge model
+    (K, R, H, N-terminus positive; D, E, C, Y, C-terminus negative) is used for
+    every scale.
+
     Parameters
     ==========
     :sequence: str
         protein sequence.
+    :pka_scale: str (default="protpy")
+        pKa value set: "protpy", "emboss", "bjellqvist" or "ipc_protein".
 
     Returns
     =======
@@ -513,19 +529,27 @@ def isoelectric_point(sequence: str) -> pd.DataFrame:
     #validate input protein sequence
     sequence = _validate_sequence(sequence)
 
+    if pka_scale == "protpy":
+        pka = pka_values_
+    else:
+        pka = dict(_pka_set(pka_scale))
+        #residue-specific terminal pKa values (Bjellqvist)
+        pka["N_term"] = pka.get("N_term_by_residue", {}).get(sequence[0], pka["N_term"])
+        pka["C_term"] = pka.get("C_term_by_residue", {}).get(sequence[-1], pka["C_term"])
+
     #count ionisable residues
     counts = {aa: sequence.count(aa) for aa in "DEHCYKR"}
 
     def _net_charge(ph: float) -> float:
-        pos = (counts["K"] / (1 + 10 ** (ph - pka_values_["K"])) +
-               counts["R"] / (1 + 10 ** (ph - pka_values_["R"])) +
-               counts["H"] / (1 + 10 ** (ph - pka_values_["H"])) +
-               1.0 / (1 + 10 ** (ph - pka_values_["N_term"])))
-        neg = (counts["D"] / (1 + 10 ** (pka_values_["D"] - ph)) +
-               counts["E"] / (1 + 10 ** (pka_values_["E"] - ph)) +
-               counts["C"] / (1 + 10 ** (pka_values_["C"] - ph)) +
-               counts["Y"] / (1 + 10 ** (pka_values_["Y"] - ph)) +
-               1.0 / (1 + 10 ** (pka_values_["C_term"] - ph)))
+        pos = (counts["K"] / (1 + 10 ** (ph - pka["K"])) +
+               counts["R"] / (1 + 10 ** (ph - pka["R"])) +
+               counts["H"] / (1 + 10 ** (ph - pka["H"])) +
+               1.0 / (1 + 10 ** (ph - pka["N_term"])))
+        neg = (counts["D"] / (1 + 10 ** (pka["D"] - ph)) +
+               counts["E"] / (1 + 10 ** (pka["E"] - ph)) +
+               counts["C"] / (1 + 10 ** (pka["C"] - ph)) +
+               counts["Y"] / (1 + 10 ** (pka["Y"] - ph)) +
+               1.0 / (1 + 10 ** (pka["C_term"] - ph)))
         return pos - neg
 
     #net charge decreases monotonically with pH, so bisect over the full 0-14 range
@@ -582,7 +606,7 @@ def molecular_weight(sequence: str) -> pd.DataFrame:
 
 ############################## Charge Distribution ########################################
 
-def charge_distribution(sequence: str, ph: float = 7.4) -> pd.DataFrame:
+def charge_distribution(sequence: str, ph: float = 7.4, pka_scale: str = "protpy") -> pd.DataFrame:
     """
     Calculate Charge Distribution of a protein sequence at a given pH. Positive
     charge is contributed by Lys (K), Arg (R) and His (H); negative charge by
@@ -598,6 +622,9 @@ def charge_distribution(sequence: str, ph: float = 7.4) -> pd.DataFrame:
         protein sequence.
     :ph: float (default=7.4)
         pH at which to evaluate charges.
+    :pka_scale: str (default="protpy")
+        pKa value set for K, R, H, D and E: "protpy", "emboss", "bjellqvist" or
+        "ipc_protein" (see ``isoelectric_point``). Termini are not included.
 
     Returns
     =======
@@ -610,6 +637,8 @@ def charge_distribution(sequence: str, ph: float = 7.4) -> pd.DataFrame:
 
     #pKa values for charged residues
     pka_charged_ = {"K": 10.5, "R": 12.5, "H": 6.0, "D": 3.9, "E": 4.1}
+    if pka_scale != "protpy":
+        pka_charged_ = {aa: _pka_set(pka_scale)[aa] for aa in pka_charged_}
 
     #compute positive charge (K, R, H) using Henderson-Hasselbalch
     pos = sum(sequence.count(aa) / (1 + 10 ** (ph - pka_charged_[aa])) for aa in ("K", "R", "H"))

@@ -174,5 +174,70 @@
     "reference": "Pande A. et al. (2023). Computing wide range of protein/peptide features from their sequence and structure. J Comput Biol, 30(2), 204-222.",
     "doi": "10.1089/cmb.2022.0241",
     "source_note": "Standard free amino-acid formulas; cross-checked against Pfeature's Standalone/Data/atom.csv. Pfeature sums free amino-acid formulas without removing water (protpy's default convention). Its table over-counts H by one for W (C11H13N2O2) and Y (C9H12NO3); the correct formulas C11H12N2O2 and C9H11NO3 are used here, so W/Y-containing sequences differ slightly from Pfeature output. Transcribed 2026-10-12."
+  },
+  "pka_sets": {
+    "name": "pKa sets for isoelectric point / charge calculations",
+    "values": {
+      "protpy": {
+        "D": 3.9,
+        "E": 4.1,
+        "H": 6.0,
+        "C": 8.3,
+        "Y": 10.1,
+        "K": 10.5,
+        "R": 12.5,
+        "N_term": 8.0,
+        "C_term": 3.1
+      },
+      "emboss": {
+        "N_term": 7.5,
+        "C_term": 3.6,
+        "C": 8.5,
+        "D": 3.9,
+        "E": 4.1,
+        "H": 6.5,
+        "K": 10.8,
+        "R": 12.5,
+        "Y": 10.1
+      },
+      "bjellqvist": {
+        "N_term": 7.5,
+        "C_term": 3.55,
+        "K": 10.0,
+        "R": 12.0,
+        "H": 5.98,
+        "D": 4.05,
+        "E": 4.45,
+        "C": 9.0,
+        "Y": 10.0,
+        "N_term_by_residue": {
+          "A": 7.59,
+          "M": 7.0,
+          "S": 6.93,
+          "P": 8.36,
+          "T": 6.82,
+          "V": 7.44,
+          "E": 7.7
+        },
+        "C_term_by_residue": {
+          "D": 4.55,
+          "E": 4.75
+        }
+      },
+      "ipc_protein": {
+        "N_term": 9.094,
+        "C_term": 2.869,
+        "C": 7.555,
+        "D": 3.872,
+        "E": 4.412,
+        "H": 5.637,
+        "K": 9.052,
+        "R": 11.84,
+        "Y": 10.85
+      }
+    },
+    "reference": "protpy: v1.4 defaults. emboss: Rice P. et al. (2000) EMBOSS, Trends Genet 16(6):276-277. bjellqvist: Bjellqvist B. et al. (1993) Electrophoresis 14:1023-1031 and (1994) Electrophoresis 15:529-539. ipc_protein: Kozlowski L.P. (2016) IPC - Isoelectric Point Calculator. Biol Direct 11:55.",
+    "doi": "10.1186/s13062-016-0159-9",
+    "source_note": "Transcribed programmatically 2026-10-12. emboss: EMBOSS 6.6.0 data file emboss/data/Epk.dat (values only; N_term 7.5, whereas Kozlowski 2016 Table 1 lists 8.6 for EMBOSS). ipc_protein: Table 1 of Kozlowski 2016 (PMC5075173). bjellqvist: Biopython IsoelectricPoint.py tables (attribution; BSD-3), cross-checked against the Bjellqvist row of Kozlowski 2016 Table 1; residue-specific terminal values from Bjellqvist 1994 via Biopython."
   }
 }
