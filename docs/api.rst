@@ -34,7 +34,14 @@ Composition
       boman_index,
       aggregation_propensity,
       hydrophobic_moment,
-      shannon_entropy
+      shannon_entropy,
+      cksaap,
+      cksaagp,
+      dde,
+      asdc,
+      distance_pair,
+      natural_vector,
+      atomic_composition
    :undoc-members:
    :show-inheritance:
 
@@ -82,11 +89,51 @@ Sequence Order
    :undoc-members:
    :show-inheritance:
 
+Scales
+------
+
+.. automodule:: protpy.scales
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Physicochemical
+---------------
+
+.. automodule:: protpy.physicochemical
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Complexity
+----------
+
+.. automodule:: protpy.complexity
+   :members: wootton_federhen_complexity, linguistic_complexity, lempel_ziv_complexity
+   :undoc-members:
+   :show-inheritance:
+
+Signal
+------
+
+.. automodule:: protpy.signal
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Structural
+----------
+
+.. automodule:: protpy.structural
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Encode
 ------
 
 .. automodule:: protpy.encode
-   :members: all_descriptors
+   :members: all_descriptors, encode_dataset
    :undoc-members:
    :show-inheritance:
 

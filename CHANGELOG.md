@@ -7,9 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [Unreleased]
+## [1.5.0] - 2026-10-12
 
-### Fixed
+### Added
+- **44 new registered descriptor functions** (plus the generic `aa_scale_descriptors`) with literature references (DOIs in the registry and `docs/references.bib`):
+  - Composition: `cksaap`, `cksaagp`, `dde`, `asdc`, `distance_pair` (cp13/cp14/cp19/cp20), `natural_vector`, `atomic_composition`.
+  - Scales (`protpy/scales.py`): `aa_scale_descriptors` with wrappers `z_scales_5`, `vhse`, `atchley_factors`, `t_scales`, `st_scales`, `protfp`, `fasgai`, `blosum_indices`, `ms_whim` (all with `domains=`); `auto_cross_covariance`; `physicochemical_distance_transformation`.
+  - Physicochemical (`protpy/physicochemical.py`): `charge_fractions`, `ncpr`, `kappa` (reproduces the published Das & Pappu values), `sequence_charge_decoration`, `charge_density`, `hydrophobicity_profile`, `hydrophobic_ratio`, `half_life`, `ivywrel_index`, `cvp_bias`, `flexibility`.
+  - Complexity (`protpy/complexity.py`): `wootton_federhen_complexity`, `linguistic_complexity`, `lempel_ziv_complexity` (`shannon_entropy` re-exported).
+  - Signal (`protpy/signal.py`, numpy only): `fft_descriptors`, `dct_descriptors`.
+  - Structural (`protpy/structural.py`): `aggrescan`, `uversky_charge_hydropathy`, `fold_index`, `disorder_propensity`, `transmembrane_features`, `signal_peptide_features`, `functional_site_counts`, `plaac` (port of the MIT-licensed PLAAC; reproduces its reference output), `antigenicity_surface`, `cysteine_features`.
+- **Extensions to existing functions** (defaults unchanged): `reduced_alphabet_composition(alphabet=, k=)` (GAAC/GDPC/GTPC), `conjoint_triad(gap=)` (KSCTriad), `ctd_(property_set="ifeature13")`, `amino_acid_composition`/`dipeptide_composition(region=, n=)` (split composition), `isoelectric_point`/`charge_distribution(pka_scale=)` ("emboss", "bjellqvist", "ipc_protein"), `gravy(scale=)`, `hydrophobic_moment(scale=, angle="helix"/"sheet")`, `extinction_coefficient(absorbance=True)`.
+- **`descriptor_set`, `include`, `exclude`** for `all_descriptors` and `encode_dataset`: `"classic"` (default, unchanged), `"extended"` (adds the new descriptors with ≤150 columns) and `"all"`. Set membership comes from the registry's new `descriptor_sets` field. Every parameterised v1.5.0 descriptor is accepted in `params`.
+- **Data files** with provenance (`name`, `values`, `reference`, `doi`, `source_note`): `protpy/data/aa_scales.json`, `reduced_alphabets.json`, `residue_tables.json`, `structural_params.json`.
+- Internal helpers in `protpy/_helpers.py`. The registry gains `doi`, `in_default_set` and `descriptor_sets`, and `print_descriptor_info` prints the DOI. New registry categories: Scales, Physicochemical, Complexity, Signal, Structural.
+- `docs/references.bib` with BibTeX for every registry DOI.
+- Tests: golden backwards-compatibility snapshot of every v1.4.2 default output (`tests/test_backwards_compat.py`), helper/registry tests, one test module per new module, descriptor-set tests, and an opt-in performance test (`PROTPY_PERF=1`).
+- Plan items that could not be implemented without unverifiable source data (e.g. PseKRAAC, Kidera factors, GOR, COILS, Chou–Fasman) are listed with reasons in `planning/BLOCKED.md`.
+
+### Changed
+- `encode_dataset(verbose=False)` now also suppresses the descriptor-list line printed for the first sequence.
+- `hydrophobic_moment` docstring now names the source of its default scale (Eisenberg, Schwarz, Komarony & Wall 1984).
+
+### Fixed (post-1.4.2 audit)
 - **Autocorrelation crash on fresh installs**: `aaindex1[code]` can return a new record on each access, so `.values.pop('-')` was lost and all three autocorrelation descriptors (and `all_descriptors`/`encode_dataset`) raised `IndexError`. Property values are now copied and filtered to the 20 canonical amino acids; aaindex records are no longer mutated.
 - **Moran autocorrelation formula**: multiplied by the property variance instead of dividing by it.
 - **CTD groups**: `polarity` groups 2/3 were copied from polarizability (A, D, G, S, T unassigned; 8 residues duplicated) — now `LIFWCMVY / PAGST / HQRKNED`. `normalized_vdwv` group 1 was missing C.
@@ -28,12 +48,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **APAAComp properties parameter ignored (Bug 3)**: `amphiphilic_pseudo_amino_acid_composition` accepted a `properties` parameter but the underlying helpers `amphiphilic_correllation_function` and `amphiphilic_sequence_order_correlation_factor` hardcoded `hydrophobicity_` and `hydrophilicity_`, silently ignoring any user-supplied properties. Fixed by threading `properties` through all three functions and pre-normalizing once per call.
 - **`JSONDecodeError` constructor misuse (Bug 5)**: `sequence_order_coupling_number_` raised `json.JSONDecodeError(msg)` which fails at runtime with `TypeError` because `JSONDecodeError` requires `(msg, doc, pos)` positional arguments. Changed to `raise ValueError(...)`.
 
-### Performance
+### Performance (post-1.4.2 audit)
 - `kmer_composition`, dipeptide/tripeptide/pair composition count k-mers in one pass; QSO computes each SOCN once; PseAAC normalizes properties once per gap instead of per residue pair.
 - **`sequence_order_coupling_number_` disk I/O (Issue 6)**: Added `@functools.lru_cache(maxsize=2)` loader `_load_distance_matrix` in `sequence_order.py`. The distance matrix JSON was read from disk on every call; for a sequence with `lag=30`, that was 30 file reads per descriptor invocation. Now both matrices are cached in memory after the first load.
 - **`normalize_property` O(n²) (Issue 7)**: Refactored to compute `mean` and `std` once before the loop, reducing from O(n²) to O(n) for the 20-amino-acid property dictionaries used in PseAAC and APAAComp descriptors.
 
-### Changed
+### Changed (post-1.4.2 audit)
 - Invalid `lag`, `lamda`, `k`, `window` (non-integer or negative) and `weight` (non-numeric or negative) now raise `ValueError` instead of being silently replaced by defaults. `lag`/`lamda` larger than the sequence still fall back to 30.
 - `all_descriptors` no longer writes `descriptors.csv` by default (`output_file=None`).
 - `all_descriptors` no longer includes `amino_acid_pair_composition` (it duplicated dipeptide composition's 400 values).

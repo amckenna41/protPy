@@ -13,7 +13,7 @@ sys.path.insert(0, os.path.abspath('..'))
 project = 'protpy'
 copyright = '2026, AJ McKenna'
 author = 'AJ McKenna'
-release = '1.4.2'
+release = '1.5.0'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

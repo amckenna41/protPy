@@ -492,6 +492,31 @@ The descriptors that accept custom parameters and their available keyword argume
 
 Passing an unrecognised descriptor name or a descriptor that takes no extra parameters will
 raise a ``ValueError``. Passing a non-dict value for ``params`` will raise a ``TypeError``.
+Every v1.5.0 descriptor that takes parameters can also be configured through ``params``
+(see ``protpy.get_descriptor_info(name)["parameters"]``).
+
+**Descriptor sets** — ``descriptor_set`` chooses how much is computed. ``"classic"`` (the
+default) is the v1.4 set above with an unchanged output; ``"extended"`` adds every v1.5.0
+descriptor whose default output has at most 150 columns (factor scales, charge patterning,
+hydrophobicity/stability, complexity, signal and structural heuristics); ``"all"`` also adds
+the high-dimensional ones (CKSAAP, DDE, ASDC, distance pair, auto/cross covariance).
+``include`` and ``exclude`` add or remove individual descriptors by name:
+
+.. code-block:: python
+
+   df = protpy.all_descriptors(protein_seq, descriptor_set="extended")
+   df = protpy.all_descriptors(protein_seq, descriptor_set="all")
+   df = protpy.all_descriptors(protein_seq,
+                               include=["kappa", "plaac"],
+                               exclude=["tripeptide_composition"],
+                               params={"kappa": {"blob_sizes": (5,)}})
+
+   # the same arguments work for whole datasets
+   df = protpy.encode_dataset(sequences, descriptor_set="extended", output_file=None)
+
+A few extended descriptors are ``NaN`` where their method leaves them undefined:
+``plaac`` LLR/COREscore for sequences shorter than the core length or without a
+prion-like domain, and ``half_life`` (E. coli) for an N-terminal proline.
 
 .. note::
    A demo of the software is available `here <https://colab.research.google.com/drive/12E3ayovpZOf6Gv-8ILwkN1zReKslEksB?usp=sharing>`_.

@@ -111,6 +111,24 @@ The descriptors available in `protpy` include:
 
 </details>
 
+### New in v1.5.0
+
+| Category | New descriptors |
+|---|---|
+| Composition | `cksaap`, `cksaagp`, `dde`, `asdc`, `distance_pair`, `natural_vector`, `atomic_composition` |
+| Scales | `z_scales_5`, `vhse`, `atchley_factors`, `t_scales`, `st_scales`, `protfp`, `fasgai`, `blosum_indices`, `ms_whim`, `auto_cross_covariance`, `physicochemical_distance_transformation` |
+| Physicochemical | `charge_fractions`, `ncpr`, `kappa`, `sequence_charge_decoration`, `charge_density`, `hydrophobicity_profile`, `hydrophobic_ratio`, `half_life`, `ivywrel_index`, `cvp_bias`, `flexibility` |
+| Complexity | `wootton_federhen_complexity`, `linguistic_complexity`, `lempel_ziv_complexity` |
+| Signal | `fft_descriptors`, `dct_descriptors` |
+| Structural | `aggrescan`, `uversky_charge_hydropathy`, `fold_index`, `disorder_propensity`, `transmembrane_features`, `signal_peptide_features`, `functional_site_counts`, `plaac`, `antigenicity_surface`, `cysteine_features` |
+| Extensions | GAAC/GDPC/GTPC (`reduced_alphabet_composition(alphabet="ifeature5", k=...)`), KSCTriad (`conjoint_triad(gap=...)`), 13-property CTD (`ctd_(property_set="ifeature13")`), split AAC/DPC (`region=`), `pka_scale=` for pI/charge, `scale=` for GRAVY/hydrophobic moment, A280 absorbance |
+
+`all_descriptors` and `encode_dataset` take `descriptor_set="classic"` (default, unchanged output), `"extended"` or `"all"`, plus `include=` / `exclude=` lists:
+
+```python
+df = protpy.all_descriptors(protein_seq, descriptor_set="extended")
+```
+
 More detail of each descriptor is listed in the markdown file: [`DESCRIPTORS.md`](https://github.com/amckenna41/protPy/blob/main/DESCRIPTORS.md)
 
 

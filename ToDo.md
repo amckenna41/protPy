@@ -56,7 +56,7 @@
 - [X] In "Parameters' and 'returns' , remove space between colon.
 - [X] Read over code.
 - [X] Create demo
-- [ ] Add equations of descriptors to markdown file. https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-015-0554-8#Sec10 - https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-8-300
+- [x] Add equations of descriptors to markdown file (v1.5.0 descriptors in DESCRIPTORS.md). https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-015-0554-8#Sec10 - https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-8-300
 - [X] Remove python 3.7 references, 3.8 minimum.
 - [X] In descriptor comments, dimensions of output should be 1 x N rather than N x 1 (N=# of features).
 - [X] Remove biopython from requirments & setup.py - required for testing.
