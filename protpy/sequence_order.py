@@ -32,6 +32,7 @@ References
 
 #list of amino acids
 from ._constants import amino_acids, _validate_sequence, _validate_int, _validate_weight
+from ._helpers import _minmax
 
 @functools.lru_cache(maxsize=2)
 def _load_distance_matrix(name: str) -> dict:
@@ -48,7 +49,8 @@ def _load_distance_matrix(name: str) -> dict:
 
 ############################# Sequence Order Coupling Number ##############################
 
-def sequence_order_coupling_number_(sequence: str, d: int = 1, distance_matrix: str = "schneider-wrede") -> float:
+def sequence_order_coupling_number_(sequence: str, d: int = 1, distance_matrix: str = "schneider-wrede",
+    normalized: bool = False) -> float:
     """
     Calculate Sequence Order Coupling Number (SOCN) features for input protein sequence.
     SOCN computes the dissimilarity between amino acid pairs. The distance between 
@@ -69,6 +71,9 @@ def sequence_order_coupling_number_(sequence: str, d: int = 1, distance_matrix: 
         gap between two amino acids.
     :distance_matrix: str (default="schneider-wrede")
         physicochemical distance matrix to use; accepts "schneider-wrede" or "grantham".
+    :normalized: bool (default=False)
+        rescale to [0, 1] by the maximum possible value (N - d) x max(distance)^2
+        (tau sums N - d squared distances); 0 when N <= d. Rounded to 6 dp.
 
     Returns
     =======
@@ -98,10 +103,13 @@ def sequence_order_coupling_number_(sequence: str, d: int = 1, distance_matrix: 
         next_aa = sequence[aa + d]
         tau = tau + math.pow(distance_matrix_data[current_aa + next_aa], 2)
 
+    if normalized:
+        bound = (len(sequence) - d) * max(distance_matrix_data.values()) ** 2
+        return round(tau / bound, 6) if bound > 0 else 0.0
     return round(tau, 3)
 
 def sequence_order_coupling_number(sequence: str, lag: int = 30,
-    distance_matrix: str = "schneider-wrede") -> pd.DataFrame:
+    distance_matrix: str = "schneider-wrede", normalized: bool = False) -> pd.DataFrame:
     """
     Calculate Sequence Order Coupling Number (SOCN) features for input protein sequence.
     SOCN computes the dissimilarity between amino acid pairs. The distance between 
@@ -118,6 +126,9 @@ def sequence_order_coupling_number(sequence: str, lag: int = 30,
         maximum gap between 2 amino acids; the protein length should be larger than lag.
     :distance_matrix: str (default="schneider-wrede")
         physicochemical distance matrix to use; accepts "schneider-wrede" or "grantham".
+    :normalized: bool (default=False)
+        rescale every SOCN to [0, 1] as in ``sequence_order_coupling_number_``;
+        columns get a ``_norm`` suffix.
 
     Returns
     =======
@@ -149,17 +160,17 @@ def sequence_order_coupling_number(sequence: str, lag: int = 30,
 
     #iterate over sequence with lag, calculating SOCN using input distance matrix values
     for i in range(lag):
-        tau = sequence_order_coupling_number_(sequence, i+1, distance_matrix)
+        tau = sequence_order_coupling_number_(sequence, i+1, distance_matrix, normalized=normalized)
 
         #append SOCN column and value to dict
-        seq_order[col_prefix + str(i + 1)] = round(tau, 3)
+        seq_order[col_prefix + str(i + 1) + ("_norm" if normalized else "")] = tau if normalized else round(tau, 3)
 
     #transform SOCN data into pandas dataframe
     sequence_order_df = pd.DataFrame([list(seq_order.values())], columns=list(seq_order.keys()))
 
     return sequence_order_df
 
-def sequence_order_coupling_number_all(sequence: str, lag: int = 30) -> pd.DataFrame:
+def sequence_order_coupling_number_all(sequence: str, lag: int = 30, normalized: bool = False) -> pd.DataFrame:
     """
     Calculate Sequence Order Coupling Number (SOCN) descriptor values of input protein 
     sequence using both matrices (schneider-wrede & grantham) [3]. The distance between 
@@ -175,6 +186,9 @@ def sequence_order_coupling_number_all(sequence: str, lag: int = 30) -> pd.DataF
         protein sequence.
     :lag: int (default=30)
         maximum gap between 2 amino acids; the protein length should be larger than lag.
+    :normalized: bool (default=False)
+        rescale every SOCN to [0, 1] (see ``sequence_order_coupling_number_``);
+        columns get a ``_norm`` suffix.
 
     Returns
     =======
@@ -196,10 +210,10 @@ def sequence_order_coupling_number_all(sequence: str, lag: int = 30) -> pd.DataF
         lag = 30
 
     #calculate SOCN using schneider-wrede distance matrix
-    socn_schneider = sequence_order_coupling_number(sequence, lag, "schneider-wrede")
+    socn_schneider = sequence_order_coupling_number(sequence, lag, "schneider-wrede", normalized)
     
     #calculate SOCN using grantham distance matrix
-    socn_grantham = sequence_order_coupling_number(sequence, lag, "grantham")
+    socn_grantham = sequence_order_coupling_number(sequence, lag, "grantham", normalized)
 
     #merge 2 dataframes 
     socn_all = pd.concat([socn_schneider, socn_grantham], axis=1)
@@ -209,7 +223,7 @@ def sequence_order_coupling_number_all(sequence: str, lag: int = 30) -> pd.DataF
 ################################## Quasi Sequence Order ###################################
 
 def quasi_sequence_order(sequence: str, lag: int = 30, weight: float = 0.1,
-    distance_matrix: str = "schneider-wrede") -> pd.DataFrame:
+    distance_matrix: str = "schneider-wrede", normalized: bool = False) -> pd.DataFrame:
     """
     Calculate Quasi Sequence Order (QSO) features for the protein sequences.
     The quasi-sequence-order descriptors were proposed by K.C. Chou, et.al. [1].
@@ -231,6 +245,11 @@ def quasi_sequence_order(sequence: str, lag: int = 30, weight: float = 0.1,
         weighting factor.
     :distance_matrix: str (default="schneider-wrede")
         physicochemical distance matrix to use; accepts "schneider-wrede" or "grantham".
+    :normalized: bool (default=False)
+        rescale to [0, 1]: the first 20 components (amino-acid percentages over
+        1 + w x sum(tau), at most 100) are divided by 100 and the lag components
+        (w x tau_d / (1 + w x sum(tau)), always below 1) are kept; columns get a
+        ``_norm`` suffix.
 
     Returns
     =======
@@ -283,9 +302,13 @@ def quasi_sequence_order(sequence: str, lag: int = 30, weight: float = 0.1,
     quasi_sequence_order_df = pd.DataFrame([list(quasi_sequence_order.values())], 
         columns=list(quasi_sequence_order.keys()))
     
+    if normalized:
+        #first 20 components: amino-acid percentages / (1 + w sum(tau)) <= 100;
+        #lag components: w tau_d / (1 + w sum(tau)) < 1
+        return _minmax(quasi_sequence_order_df, 0.0, [100.0] * 20 + [1.0] * (quasi_sequence_order_df.shape[1] - 20))
     return quasi_sequence_order_df
 
-def quasi_sequence_order_all(sequence: str, lag: int = 30, weight: float = 0.1) -> pd.DataFrame:
+def quasi_sequence_order_all(sequence: str, lag: int = 30, weight: float = 0.1, normalized: bool = False) -> pd.DataFrame:
     """
     Calculate Quasi Sequence Order features for input protein sequence using 
     both physicochemical distance matrices. Concatenate into one output dataframe. 
@@ -303,6 +326,8 @@ def quasi_sequence_order_all(sequence: str, lag: int = 30, weight: float = 0.1) 
         maximum gap between 2 amino acids; the protein length should be larger than lag.
     :weight: float (default=0.1)
         weighting factor.
+    :normalized: bool (default=False)
+        see ``quasi_sequence_order``; columns get a ``_norm`` suffix.
 
     Returns
     =======
@@ -327,11 +352,11 @@ def quasi_sequence_order_all(sequence: str, lag: int = 30, weight: float = 0.1) 
 
     #calculate quasi seq order using schneider distance matrix
     quasi_schneider = quasi_sequence_order(sequence, lag, weight=weight, 
-        distance_matrix="schneider-wrede")
+        distance_matrix="schneider-wrede", normalized=normalized)
     
     #calculate quasi seq order using schneider distance matrix
     quasi_grantham = quasi_sequence_order(sequence, lag, weight=weight, 
-        distance_matrix="grantham")
+        distance_matrix="grantham", normalized=normalized)
 
     #concat quasi sequence order dataframes
     quasi_sequence_order_all_df = pd.concat([quasi_schneider, quasi_grantham], axis=1)

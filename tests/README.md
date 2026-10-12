@@ -23,6 +23,7 @@ Unit tests
 * `test_complexity.py` - Wootton-Federhen, linguistic and Lempel-Ziv complexity.
 * `test_signal.py` - FFT and DCT descriptors.
 * `test_structural.py` - AGGRESCAN, Uversky/FoldIndex, disorder propensity, TM and signal-peptide features, functional sites, PLAAC (against PLAAC's reference output), antigenicity and cysteine features.
+* `test_normalization.py` - `normalized=True`: default outputs unchanged, `_norm` column suffixes, outputs within [0, 1] for random, homopolymer and very short sequences (with clipping disabled, to prove the bounds), bounds reached by extreme sequences, and the option through `all_descriptors(params=...)`.
 * `test_encode.py` - `all_descriptors`, `encode_dataset` and `read_sequences_from_file`.
 * `test_descriptor_sets.py` - `descriptor_set`, `include` and `exclude`, and every v1.5.0 descriptor on 1-8 residue sequences.
 * `test_utils.py` - descriptor registry and metadata functions.

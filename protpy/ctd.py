@@ -11,7 +11,7 @@ from difflib import get_close_matches
 
 #list of amino acids
 from ._constants import amino_acids, _validate_sequence
-from ._helpers import _load_json_table
+from ._helpers import _load_json_table, _minmax
 
 """
 References
@@ -110,7 +110,7 @@ def str_to_num(sequence: str, property: dict[str, str]) -> str:
 
 ##################################### CTD Composition #####################################
 
-def ctd_composition(sequence: str, property: str = "hydrophobicity") -> pd.DataFrame:
+def ctd_composition(sequence: str, property: str = "hydrophobicity", normalized: bool = False) -> pd.DataFrame:
     """
     Calculate composition physicochemical/structural descriptor. Composition 
     is determined as the number of amino acids of a particular property 
@@ -123,6 +123,9 @@ def ctd_composition(sequence: str, property: str = "hydrophobicity") -> pd.DataF
         protein sequence.
     :property: str (default="hydrophocity")
         physicochemical property name to use when calculating descriptor.
+    :normalized: bool (default=False)
+        composition values are already fractions in [0, 1]; they are returned
+        unchanged with a ``_norm`` column suffix, for consistency.
 
     Returns
     =======
@@ -156,11 +159,13 @@ def ctd_composition(sequence: str, property: str = "hydrophobicity") -> pd.DataF
     #transform values and columns to DataFrame
     ctd_composition_df = pd.DataFrame([list(ctd_composition_.values())], columns=list(ctd_composition_.keys()))
 
+    if normalized:
+        return _minmax(ctd_composition_df, 0.0, 1.0)
     return ctd_composition_df
 
 ##################################### CTD Transition ######################################
 
-def ctd_transition(sequence: str, property: str = "hydrophobicity") -> pd.DataFrame:
+def ctd_transition(sequence: str, property: str = "hydrophobicity", normalized: bool = False) -> pd.DataFrame:
     """
     Calculate transition physicochemical/structural descriptor. Transition 
     is determined as the number of transitions from a particular property 
@@ -174,6 +179,9 @@ def ctd_transition(sequence: str, property: str = "hydrophobicity") -> pd.DataFr
         protein sequence.
     :property: str (default="hydrophocity")
         physicochemical property name to use when calculating descriptor.
+    :normalized: bool (default=False)
+        transition values are already fractions in [0, 1]; they are returned
+        unchanged with a ``_norm`` column suffix, for consistency.
 
     Returns
     =======
@@ -215,11 +223,13 @@ def ctd_transition(sequence: str, property: str = "hydrophobicity") -> pd.DataFr
     #transform values and columns to DataFrame
     ctd_transition_df = pd.DataFrame([list(ctd_transition_.values())], columns=list(ctd_transition_.keys()))
 
+    if normalized:
+        return _minmax(ctd_transition_df, 0.0, 1.0)
     return ctd_transition_df
 
 #################################### CTD Distribution #####################################
 
-def ctd_distribution(sequence: str, property: str = "hydrophobicity") -> pd.DataFrame:
+def ctd_distribution(sequence: str, property: str = "hydrophobicity", normalized: bool = False) -> pd.DataFrame:
     """
     Calculate distribution physicochemical/structural descriptor. Distribution 
     is the chain length within which the first, 25%, 50%, 75% and 100% of the 
@@ -232,6 +242,9 @@ def ctd_distribution(sequence: str, property: str = "hydrophobicity") -> pd.Data
         protein sequence.
     :property: str (default="hydrophocity")
         physicochemical property name to use when calculating descriptor.
+    :normalized: bool (default=False)
+        rescale the distribution percentages to [0, 1] (/ 100); columns get a
+        ``_norm`` suffix.
 
     Returns
     =======
@@ -294,10 +307,12 @@ def ctd_distribution(sequence: str, property: str = "hydrophobicity") -> pd.Data
     #transform values and columns to DataFrame
     ctd_distribution_df = pd.DataFrame([list(ctd_distribution_.values())], columns=list(ctd_distribution_.keys()))
 
+    if normalized:
+        return _minmax(ctd_distribution_df, 0.0, 100.0)
     return ctd_distribution_df
 
 def ctd_(sequence: str, property: str = "hydrophobicity", all_ctd: bool = True,
-    property_set: str = "default") -> pd.DataFrame:
+    property_set: str = "default", normalized: bool = False) -> pd.DataFrame:
     """
     Calculate all Composition, Transition and Distribution (CTD) features of protein sequences.
     Composition is the number of amino acids of a particular property (e.g., hydrophobicity)
@@ -326,6 +341,9 @@ def ctd_(sequence: str, property: str = "hydrophobicity", all_ctd: bool = True,
         property set used when ``all_ctd=True``: "default" (the 7 properties
         above, 1 x 147) or "ifeature13" (adds the six AAindex hydrophobicity
         partitions used by iFeature, 13 properties, 1 x 273) [4].
+    :normalized: bool (default=False)
+        rescale to [0, 1] (composition and transition unchanged, distribution
+        / 100); columns get a ``_norm`` suffix.
 
     Returns
     =======
@@ -346,17 +364,17 @@ def ctd_(sequence: str, property: str = "hydrophobicity", all_ctd: bool = True,
 
     #if using single property, calculate each of the CTD descriptors individually
     if not all_ctd:
-        comp_df = ctd_composition(sequence, property=property)
-        trans_df = ctd_transition(sequence, property=property)
-        distr_df = ctd_distribution(sequence, property=property)
+        comp_df = ctd_composition(sequence, property=property, normalized=normalized)
+        trans_df = ctd_transition(sequence, property=property, normalized=normalized)
+        distr_df = ctd_distribution(sequence, property=property, normalized=normalized)
     else:
         #if using all calculable properties, calculate CTD descriptors for each property
         for prop in ctd_property_sets[property_set]:
-            comp = ctd_composition(sequence, property=prop)
+            comp = ctd_composition(sequence, property=prop, normalized=normalized)
             comp_df = pd.concat([comp_df, comp], axis=1)
-            trans = ctd_transition(sequence, property=prop)
+            trans = ctd_transition(sequence, property=prop, normalized=normalized)
             trans_df = pd.concat([trans_df, trans], axis=1)
-            distr = ctd_distribution(sequence, property=prop)
+            distr = ctd_distribution(sequence, property=prop, normalized=normalized)
             distr_df = pd.concat([distr_df, distr], axis=1)
 
     #concatenate all descriptors

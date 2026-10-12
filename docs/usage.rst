@@ -410,6 +410,70 @@ Calculate **Quasi Sequence Order (QSO)**:
    # QSO_Grant1  QSO_Grant2  QSO_Grant3 ...
    # 0.123287    0.079967    0.04332 ...
 
+Normalised Output
+-----------------
+
+The descriptors in the table below take an opt-in ``normalized=False`` parameter. With ``normalized=True``
+every output is rescaled to [0, 1] using the descriptor's theoretical bounds and every column
+gets a ``_norm`` suffix, so raw and normalised values never share a column name. Default outputs
+are unchanged.
+
+.. code-block:: python
+
+   protpy.gravy(protein_seq, normalized=True)     # GRAVY_norm
+   protpy.all_descriptors(protein_seq, params={"gravy": {"normalized": True},
+                                               "ctd_": {"normalized": True}})
+
+.. list-table::
+   :header-rows: 1
+   :widths: 35 65
+
+   * - Descriptor
+     - Rescaling
+   * - ``gravy``
+     - between the scale's min and max residue value (GRAVY is a mean)
+   * - ``instability_index``
+     - [10·min(DIWV, 0), 10·max(DIWV, 0)]
+   * - ``isoelectric_point``
+     - pI / 14 (the searched pH range)
+   * - ``molecular_weight``
+     - between the all-Gly and all-Trp sequences of the same length, i.e. (mean residue mass − min) / (max − min)
+   * - ``charge_distribution``
+     - positive / (L·f₊), negative / (L·f₋), net mapped from [−L·f₋, L·f₊]; f₊, f₋ are the charges of the most basic (highest pKa) and most acidic (lowest pKa) residue at that pH and pKa set
+   * - ``secondary_structure_propensity``
+     - each column between its table's min and max propensity
+   * - ``aliphatic_index``
+     - / 390 (all-Ile/Leu)
+   * - ``extinction_coefficient``
+     - coefficients / (5500·L) (all-Trp); absorbances / (5500 / (204.228 − 18.015))
+   * - ``boman_index``
+     - between −max and −min of the solubility scale
+   * - ``shannon_entropy``
+     - / log₂20
+   * - ``hydrophobic_moment``
+     - / max abs(H) of the scale (a window moment cannot exceed it)
+   * - ``pseudo_amino_acid_composition``
+     - / 100 (non-negative percentages summing to 100)
+   * - ``moreaubroto_autocorrelation``
+     - between min and max of P(a)·P(b) over all residue pairs (including 0 for lags without pairs)
+   * - ``moran_autocorrelation``
+     - from [−N/(N−d), N/(N−d)] (Cauchy–Schwarz); 0.5 = no autocorrelation
+   * - ``geary_autocorrelation``
+     - / (2(N−1)/(N−d))
+   * - ``ctd_composition``, ``ctd_transition``
+     - already fractions in [0, 1]; unchanged apart from the ``_norm`` suffix
+   * - ``ctd_distribution``, ``ctd_``
+     - distribution / 100; composition and transition unchanged
+   * - ``sequence_order_coupling_number_`` (float), ``sequence_order_coupling_number``, ``sequence_order_coupling_number_all``
+     - τ_d / ((N−d)·max(distance)²)
+   * - ``quasi_sequence_order``, ``quasi_sequence_order_all``
+     - first 20 components / 100 (percentages over 1 + w·Στ ≥ 1); lag components unchanged (always < 1)
+
+``amphiphilic_pseudo_amino_acid_composition`` has no ``normalized`` option: its denominator
+1 + w·Στ can approach zero or become negative, so its outputs have no fixed bound. To scale features
+to the range seen in a training set instead, fit a min-max scaler (e.g. scikit-learn's
+``MinMaxScaler``) on that set.
+
 Encoding All Descriptors at Once
 ---------------------------------
 

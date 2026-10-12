@@ -98,7 +98,8 @@ References
 """
 #list of amino acids
 from ._constants import amino_acids, _validate_sequence, _validate_int, _validate_weight
-from ._helpers import _load_json_table, _read_json, _gapped_pair_counts, _kmer_counts, _to_df, _property_matrix
+from ._helpers import (_load_json_table, _read_json, _gapped_pair_counts, _kmer_counts, _to_df, _property_matrix,
+                       _minmax, _scale_range)
 
 #physicochemical values for all amino acids for hydrophobicity, hydrophilicty and residue mass
 #values taken from http://www.csbio.sjtu.edu.cn/bioinf/PseAAC/ParaValue.htm
@@ -319,7 +320,7 @@ kyte_doolittle_ = {
     "W": -0.9, "Y": -1.3
 }
 
-def gravy(sequence: str, scale: str = "kyte_doolittle") -> pd.DataFrame:
+def gravy(sequence: str, scale: str = "kyte_doolittle", normalized: bool = False) -> pd.DataFrame:
     """
     Calculate the Grand Average of Hydropathy (GRAVY) for a protein sequence.
     GRAVY is the sum of the Kyte-Doolittle hydropathy values of all residues
@@ -340,6 +341,9 @@ def gravy(sequence: str, scale: str = "kyte_doolittle") -> pd.DataFrame:
         protein sequence.
     :scale: str (default="kyte_doolittle")
         hydrophobicity scale to average.
+    :normalized: bool (default=False)
+        rescale to [0, 1] with the scale's minimum and maximum residue values
+        (GRAVY is a mean, so it lies between them); columns get a ``_norm`` suffix.
 
     Returns
     =======
@@ -354,7 +358,8 @@ def gravy(sequence: str, scale: str = "kyte_doolittle") -> pd.DataFrame:
         values = _property_matrix(sequence, scale)
         if values.shape[1] != 1:
             raise ValueError(f"Scale '{scale}' is multi-dimensional; use a single-value scale.")
-        return _to_df([values.mean()], [f"GRAVY_{scale}"])
+        df = _to_df([values.mean()], [f"GRAVY_{scale}"])
+        return _minmax(df, *_scale_range(scale)) if normalized else df
 
     #sum Kyte-Doolittle hydropathy values and divide by sequence length
     gravy_score = round(sum(kyte_doolittle_[aa] for aa in sequence) / len(sequence), 3)
@@ -362,6 +367,8 @@ def gravy(sequence: str, scale: str = "kyte_doolittle") -> pd.DataFrame:
     #transform to DataFrame
     gravy_df = pd.DataFrame([[gravy_score]], columns=["GRAVY"])
 
+    if normalized:
+        return _minmax(gravy_df, min(kyte_doolittle_.values()), max(kyte_doolittle_.values()))
     return gravy_df
 
 ################################## Aromaticity ############################################
@@ -465,7 +472,7 @@ diwv_ = {
     "EP": 20.26,"EA": 1.0,  "EI": 1.0,   "EL": 1.0,   "EG": 1.0,  "EE": 20.26
 }
 
-def instability_index(sequence: str) -> pd.DataFrame:
+def instability_index(sequence: str, normalized: bool = False) -> pd.DataFrame:
     """
     Calculate the Instability Index (II) of a protein sequence. The instability
     index is a measure of in vivo stability, computed as a weighted sum of
@@ -480,6 +487,9 @@ def instability_index(sequence: str) -> pd.DataFrame:
     ==========
     :sequence: str
         protein sequence.
+    :normalized: bool (default=False)
+        rescale to [0, 1] with the bounds 10 x min(DIWV, 0) and 10 x max(DIWV, 0)
+        (II = 10 x sum of L - 1 dipeptide weights / L); column ``InstabilityIndex_norm``.
 
     Returns
     =======
@@ -496,6 +506,9 @@ def instability_index(sequence: str) -> pd.DataFrame:
     #transform to DataFrame
     instability_index_df = pd.DataFrame([[ii]], columns=["InstabilityIndex"])
 
+    if normalized:
+        weights = list(diwv_.values()) + [1.0]
+        return _minmax(instability_index_df, 10 * min(min(weights), 0), 10 * max(max(weights), 0))
     return instability_index_df
 
 ################################# Isoelectric Point ######################################
@@ -513,7 +526,7 @@ def _pka_set(pka_scale: str) -> dict:
         raise ValueError(f"Invalid pka_scale '{pka_scale}'. Valid scales are: {list(sets)}.")
     return sets[pka_scale]
 
-def isoelectric_point(sequence: str, pka_scale: str = "protpy") -> pd.DataFrame:
+def isoelectric_point(sequence: str, pka_scale: str = "protpy", normalized: bool = False) -> pd.DataFrame:
     """
     Calculate the theoretical Isoelectric Point (pI) of a protein sequence.
     pI is the pH at which the net charge of the protein is zero. It is computed
@@ -532,6 +545,9 @@ def isoelectric_point(sequence: str, pka_scale: str = "protpy") -> pd.DataFrame:
         protein sequence.
     :pka_scale: str (default="protpy")
         pKa value set: "protpy", "emboss", "bjellqvist" or "ipc_protein".
+    :normalized: bool (default=False)
+        rescale the pI from the searched pH range 0-14 to [0, 1] (pI / 14);
+        column ``IsoelectricPoint_norm``.
 
     Returns
     =======
@@ -577,6 +593,8 @@ def isoelectric_point(sequence: str, pka_scale: str = "protpy") -> pd.DataFrame:
     #transform to DataFrame
     isoelectric_point_df = pd.DataFrame([[round(ph, 3)]], columns=["IsoelectricPoint"])
 
+    if normalized:
+        return _minmax(isoelectric_point_df, 0.0, 14.0)
     return isoelectric_point_df
 
 ############################### Molecular Weight ##########################################
@@ -589,7 +607,7 @@ residue_molecular_weight_ = {
     "S": 105.093, "T": 119.119, "V": 117.148, "W": 204.228, "Y": 181.191
 }
 
-def molecular_weight(sequence: str) -> pd.DataFrame:
+def molecular_weight(sequence: str, normalized: bool = False) -> pd.DataFrame:
     """
     Calculate the Molecular Weight (MW) of a protein sequence. MW is computed
     as the sum of average residue masses minus one water molecule per peptide
@@ -601,6 +619,11 @@ def molecular_weight(sequence: str) -> pd.DataFrame:
     ==========
     :sequence: str
         protein sequence.
+    :normalized: bool (default=False)
+        rescale to [0, 1] between the lightest (all-Gly) and heaviest (all-Trp)
+        sequences of the same length, which reduces to
+        (mean residue mass - min mass) / (max mass - min mass); column
+        ``MolecularWeight_norm``.
 
     Returns
     =======
@@ -614,11 +637,17 @@ def molecular_weight(sequence: str) -> pd.DataFrame:
     mw = sum(residue_molecular_weight_[aa] for aa in sequence) - (len(sequence) - 1) * 18.015
     molecular_weight_df = pd.DataFrame([[round(mw, 3)]], columns=["MolecularWeight"])
 
+    if normalized:
+        L = len(sequence)
+        lightest = L * min(residue_molecular_weight_.values()) - (L - 1) * 18.015
+        heaviest = L * max(residue_molecular_weight_.values()) - (L - 1) * 18.015
+        return _minmax(molecular_weight_df, lightest, heaviest)
     return molecular_weight_df
 
 ############################## Charge Distribution ########################################
 
-def charge_distribution(sequence: str, ph: float = 7.4, pka_scale: str = "protpy") -> pd.DataFrame:
+def charge_distribution(sequence: str, ph: float = 7.4, pka_scale: str = "protpy",
+    normalized: bool = False) -> pd.DataFrame:
     """
     Calculate Charge Distribution of a protein sequence at a given pH. Positive
     charge is contributed by Lys (K), Arg (R) and His (H); negative charge by
@@ -637,6 +666,11 @@ def charge_distribution(sequence: str, ph: float = 7.4, pka_scale: str = "protpy
     :pka_scale: str (default="protpy")
         pKa value set for K, R, H, D and E: "protpy", "emboss", "bjellqvist" or
         "ipc_protein" (see ``isoelectric_point``). Termini are not included.
+    :normalized: bool (default=False)
+        rescale to [0, 1] at the given pH: PositiveCharge / (L x f+),
+        NegativeCharge / (L x f-) and (NetCharge + L x f-) / (L x (f+ + f-)), where
+        f+ is the charge of the most basic residue (highest pKa) and f- that of the
+        most acidic (lowest pKa); columns get a ``_norm`` suffix.
 
     Returns
     =======
@@ -662,6 +696,11 @@ def charge_distribution(sequence: str, ph: float = 7.4, pka_scale: str = "protpy
         columns=["PositiveCharge", "NegativeCharge", "NetCharge"]
     )
 
+    if normalized:
+        L = len(sequence)
+        f_pos = max(1 / (1 + 10 ** (ph - pka_charged_[aa])) for aa in ("K", "R", "H"))
+        f_neg = max(1 / (1 + 10 ** (pka_charged_[aa] - ph)) for aa in ("D", "E"))
+        return _minmax(charge_distribution_df, [0, 0, -L * f_neg], [L * f_pos, L * f_neg, L * f_pos])
     return charge_distribution_df
 
 ####################### Hydrophobic/Polar/Charged Composition ############################
@@ -725,7 +764,7 @@ coil_propensity_ = {
     "R": 1.24, "S": 1.33, "T": 1.03, "V": 0.50, "W": 0.99, "Y": 1.29
 }
 
-def secondary_structure_propensity(sequence: str) -> pd.DataFrame:
+def secondary_structure_propensity(sequence: str, normalized: bool = False) -> pd.DataFrame:
     """
     Calculate Secondary Structure Propensity of a protein sequence. Each residue
     is assigned Chou-Fasman propensity values for alpha-helix (H), beta-sheet (E)
@@ -736,6 +775,9 @@ def secondary_structure_propensity(sequence: str) -> pd.DataFrame:
     ==========
     :sequence: str
         protein sequence.
+    :normalized: bool (default=False)
+        rescale each column to [0, 1] with the minimum and maximum residue
+        propensity of its table; columns get a ``_norm`` suffix.
 
     Returns
     =======
@@ -753,6 +795,9 @@ def secondary_structure_propensity(sequence: str) -> pd.DataFrame:
 
     ssp_df = pd.DataFrame([[h, e, c]], columns=["Helix", "Sheet", "Coil"])
 
+    if normalized:
+        tables = (helix_propensity_, sheet_propensity_, coil_propensity_)
+        return _minmax(ssp_df, [min(t.values()) for t in tables], [max(t.values()) for t in tables])
     return ssp_df
 
 ################################# k-mer Composition ######################################
@@ -999,7 +1044,7 @@ def amino_acid_pair_composition(sequence: str) -> pd.DataFrame:
 
 ################################## Aliphatic Index ########################################
 
-def aliphatic_index(sequence: str) -> pd.DataFrame:
+def aliphatic_index(sequence: str, normalized: bool = False) -> pd.DataFrame:
     """
     Calculate the Aliphatic Index (AI) of a protein sequence. The aliphatic
     index is a measure of thermostability, defined as the relative volume
@@ -1014,6 +1059,9 @@ def aliphatic_index(sequence: str) -> pd.DataFrame:
     ==========
     :sequence: str
         protein sequence.
+    :normalized: bool (default=False)
+        rescale to [0, 1] by the maximum of 390 (an all-Ile/Leu sequence);
+        column ``AliphaticIndex_norm``.
 
     Returns
     =======
@@ -1035,11 +1083,13 @@ def aliphatic_index(sequence: str) -> pd.DataFrame:
 
     aliphatic_index_df = pd.DataFrame([[ai]], columns=["AliphaticIndex"])
 
+    if normalized:
+        return _minmax(aliphatic_index_df, 0.0, 390.0)
     return aliphatic_index_df
 
 ############################### Extinction Coefficient ####################################
 
-def extinction_coefficient(sequence: str, absorbance: bool = False) -> pd.DataFrame:
+def extinction_coefficient(sequence: str, absorbance: bool = False, normalized: bool = False) -> pd.DataFrame:
     """
     Calculate the molar Extinction Coefficient of a protein sequence at 280 nm.
     The coefficient is derived from the number of Trp (W), Tyr (Y) and
@@ -1059,6 +1109,10 @@ def extinction_coefficient(sequence: str, absorbance: bool = False) -> pd.DataFr
         protein sequence.
     :absorbance: bool (default=False)
         also return ``Abs01_Reduced`` and ``Abs01_Oxidized``.
+    :normalized: bool (default=False)
+        rescale to [0, 1]: coefficients by the all-Trp maximum 5500 x L, and
+        absorbances by the per-residue maximum 5500 / (204.228 - 18.015) (Trp's
+        coefficient over its residue mass); columns get a ``_norm`` suffix.
 
     Returns
     =======
@@ -1088,6 +1142,9 @@ def extinction_coefficient(sequence: str, absorbance: bool = False) -> pd.DataFr
         extinction_coefficient_df["Abs01_Reduced"] = round(ec_reduced / mw, 3)
         extinction_coefficient_df["Abs01_Oxidized"] = round(ec_oxidized / mw, 3)
 
+    if normalized:
+        hi = [5500 * len(sequence)] * 2 + [5500 / (residue_molecular_weight_["W"] - 18.015)] * (2 if absorbance else 0)
+        return _minmax(extinction_coefficient_df, 0.0, hi)
     return extinction_coefficient_df
 
 ################################ Boman Index ##############################################
@@ -1100,7 +1157,7 @@ boman_scale_ = {
     "W":  2.33, "Y": -0.14
 }
 
-def boman_index(sequence: str) -> pd.DataFrame:
+def boman_index(sequence: str, normalized: bool = False) -> pd.DataFrame:
     """
     Calculate the Boman Index (potential protein interaction index) for
     a protein sequence. The index is the sum of the solubility values of
@@ -1116,6 +1173,9 @@ def boman_index(sequence: str) -> pd.DataFrame:
     ==========
     :sequence: str
         protein sequence.
+    :normalized: bool (default=False)
+        rescale to [0, 1] between -max and -min of the solubility scale
+        (BI is a negated mean); column ``BomanIndex_norm``.
 
     Returns
     =======
@@ -1130,6 +1190,8 @@ def boman_index(sequence: str) -> pd.DataFrame:
 
     boman_index_df = pd.DataFrame([[bi]], columns=["BomanIndex"])
 
+    if normalized:
+        return _minmax(boman_index_df, -max(boman_scale_.values()), -min(boman_scale_.values()))
     return boman_index_df
 
 ############################### Aggregation Propensity ####################################
@@ -1192,7 +1254,7 @@ def aggregation_propensity(sequence: str, window: int = 5, hydrophobicity_thresh
 
 ################################## Shannon Entropy ########################################
 
-def shannon_entropy(sequence: str) -> pd.DataFrame:
+def shannon_entropy(sequence: str, normalized: bool = False) -> pd.DataFrame:
     """
     Calculate the Shannon Entropy of a protein sequence. Shannon entropy
     quantifies the diversity of the amino acid composition using the
@@ -1211,6 +1273,9 @@ def shannon_entropy(sequence: str) -> pd.DataFrame:
     ==========
     :sequence: str
         protein sequence.
+    :normalized: bool (default=False)
+        rescale to [0, 1] by the maximum log2(20) bits; column
+        ``ShannonEntropy_norm``.
 
     Returns
     =======
@@ -1235,12 +1300,14 @@ def shannon_entropy(sequence: str) -> pd.DataFrame:
 
     shannon_entropy_df = pd.DataFrame([[round(entropy, 3)]], columns=["ShannonEntropy"])
 
+    if normalized:
+        return _minmax(shannon_entropy_df, 0.0, math.log2(20))
     return shannon_entropy_df
 
 ############################### Hydrophobic Moment ########################################
 
 def hydrophobic_moment(sequence: str, window: int = 11, angle: float | str = 100,
-    scale: str | None = None) -> pd.DataFrame:
+    scale: str | None = None, normalized: bool = False) -> pd.DataFrame:
     """
     Calculate the mean and maximum Hydrophobic Moment of a protein sequence.
     The hydrophobic moment measures the amphiphilicity of a helical segment —
@@ -1271,6 +1338,9 @@ def hydrophobic_moment(sequence: str, window: int = 11, angle: float | str = 100
         residue rotation angle in degrees, or "helix" (100) / "sheet" (160).
     :scale: str | None (default=None)
         hydrophobicity scale; None uses protpy's default table.
+    :normalized: bool (default=False)
+        rescale to [0, 1] by the largest absolute value of the hydrophobicity
+        scale (a window moment cannot exceed it); columns get a ``_norm`` suffix.
 
     Returns
     =======
@@ -1316,11 +1386,14 @@ def hydrophobic_moment(sequence: str, window: int = 11, angle: float | str = 100
         columns=["HydrophobicMoment_Mean", "HydrophobicMoment_Max"]
     )
 
+    if normalized:
+        return _minmax(hydrophobic_moment_df, 0.0, max(abs(v) for v in h_scale.values()))
     return hydrophobic_moment_df
 
 ############################## Pseudo Amino Acid Composition ##############################
 
-def pseudo_amino_acid_composition(sequence: str, lamda: int = 30, weight: float = 0.05, properties: list[str] | None = None) -> pd.DataFrame:
+def pseudo_amino_acid_composition(sequence: str, lamda: int = 30, weight: float = 0.05, properties: list[str] | None = None,
+    normalized: bool = False) -> pd.DataFrame:
     """
     Pseudo amino acid composition (PAAComp) combines the vanilla amino acid composition 
     descriptor with additional local features, such as correlation between residues of 
@@ -1342,6 +1415,9 @@ def pseudo_amino_acid_composition(sequence: str, lamda: int = 30, weight: float 
         weighting factor.
     :properties: list 
         list of dicts of physicochemical/structural property values for amino acids.
+    :normalized: bool (default=False)
+        rescale to [0, 1] by dividing by 100 (components are non-negative
+        percentages summing to 100); columns get a ``_norm`` suffix.
 
     Returns
     =======
@@ -1407,6 +1483,8 @@ def pseudo_amino_acid_composition(sequence: str, lamda: int = 30, weight: float 
     psuedo_amino_acid_composition_df = pd.DataFrame([list(psuedo_aac.values())], 
         columns=list(psuedo_aac.keys()))
 
+    if normalized:
+        return _minmax(psuedo_amino_acid_composition_df, 0.0, 100.0)
     return psuedo_amino_acid_composition_df 
 
 def sequence_order_correlation_factor(sequence: str, k: int = 1, properties: list[dict[str, float]] | None = None) -> float:

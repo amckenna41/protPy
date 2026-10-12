@@ -702,6 +702,42 @@ result = protpy.quasi_sequence_order_all(protein_seq, lag=15, weight=0.05)
 
 ---
 
+## Normalised output (`normalized=True`)
+
+The descriptors below take an opt-in `normalized=False` parameter. With `normalized=True` every output is rescaled to [0, 1] using the descriptor's theoretical bounds, not the bounds of any particular dataset, and every column gets a `_norm` suffix (e.g. `GRAVY_norm`). Raw and normalised outputs therefore never share a column name, and `encode_dataset` refuses to append one to a file holding the other. Default outputs are unchanged.
+
+```python
+protpy.gravy(seq, normalized=True)                 # GRAVY_norm
+protpy.ctd_(seq, normalized=True)                  # CTD_..._norm
+protpy.all_descriptors(seq, params={"gravy": {"normalized": True}, "moran_autocorrelation": {"normalized": True}})
+```
+
+| Descriptor | Rescaling |
+|---|---|
+| `gravy` | between the scale's min and max residue value (GRAVY is a mean) |
+| `instability_index` | [10·min(DIWV, 0), 10·max(DIWV, 0)] |
+| `isoelectric_point` | pI / 14 (the searched pH range) |
+| `molecular_weight` | between the all-Gly and all-Trp sequences of the same length, i.e. (mean residue mass − min) / (max − min) |
+| `charge_distribution` | positive / (L·f₊), negative / (L·f₋), net mapped from [−L·f₋, L·f₊]; f₊, f₋ are the charges of the most basic (highest pKa) and most acidic (lowest pKa) residue at that pH and pKa set |
+| `secondary_structure_propensity` | each column between its table's min and max propensity |
+| `aliphatic_index` | / 390 (all-Ile/Leu) |
+| `extinction_coefficient` | coefficients / (5500·L) (all-Trp); absorbances / (5500 / (204.228 − 18.015)) |
+| `boman_index` | between −max and −min of the solubility scale |
+| `shannon_entropy` | / log₂20 |
+| `hydrophobic_moment` | / max abs(H) of the scale (a window moment cannot exceed it) |
+| `pseudo_amino_acid_composition` | / 100 (non-negative percentages summing to 100) |
+| `moreaubroto_autocorrelation` | between min and max of P(a)·P(b) over all residue pairs (including 0 for lags without pairs) |
+| `moran_autocorrelation` | from [−N/(N−d), N/(N−d)] (Cauchy–Schwarz); 0.5 = no autocorrelation |
+| `geary_autocorrelation` | / (2(N−1)/(N−d)) |
+| `ctd_composition`, `ctd_transition` | already fractions in [0, 1]; unchanged apart from the `_norm` suffix |
+| `ctd_distribution`, `ctd_` | distribution / 100; composition and transition unchanged |
+| `sequence_order_coupling_number_` (float), `sequence_order_coupling_number`, `sequence_order_coupling_number_all` | τ_d / ((N−d)·max(distance)²) |
+| `quasi_sequence_order`, `quasi_sequence_order_all` | first 20 components / 100 (percentages over 1 + w·Στ ≥ 1); lag components unchanged (always < 1) |
+
+`amphiphilic_pseudo_amino_acid_composition` has no `normalized` option: its shared denominator 1 + w·Στ uses correlation factors that can be negative, so its outputs have no fixed bound. Bounds based on theory keep features comparable across datasets; to scale to the range actually seen in a training set, fit a min–max scaler (e.g. scikit-learn's `MinMaxScaler`) on that set instead.
+
+---
+
 ## v1.5.0 Descriptors
 
 Descriptors added in v1.5.0. Each lists its formula, output shape, parameters and primary reference.

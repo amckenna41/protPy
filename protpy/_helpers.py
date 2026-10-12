@@ -151,3 +151,31 @@ def _to_df(values: list, columns: list[str]) -> pd.DataFrame:
     values = [round(float(v), 3) if isinstance(v, (float, np.floating)) else
               int(v) if isinstance(v, (bool, np.bool_, np.integer)) else v for v in values]
     return pd.DataFrame([values], columns=columns)
+
+
+def _minmax(df: pd.DataFrame, lo, hi) -> pd.DataFrame:
+    """
+    Rescale a 1 x N descriptor DataFrame to [0, 1] with the descriptor's theoretical bounds
+    (scalars or per-column arrays) and suffix every column with ``_norm`` so normalised and
+    raw outputs can never share a column. Values are clipped to [0, 1] to absorb the 3 dp
+    rounding of the raw values, and rounded to 6 dp.
+    """
+    lo = np.broadcast_to(np.asarray(lo, dtype=float), (df.shape[1],))
+    hi = np.broadcast_to(np.asarray(hi, dtype=float), (df.shape[1],))
+    span = hi - lo
+    raw = df.iloc[0].to_numpy(dtype=float)
+    scaled = np.divide(raw - lo, span, out=np.zeros_like(raw), where=span > 0)
+    return pd.DataFrame([np.round(_unit_clip(scaled), 6)], columns=[f"{c}_norm" for c in df.columns])
+
+
+def _unit_clip(values: np.ndarray) -> np.ndarray:
+    """Clip to [0, 1]; only ever absorbs the rounding of raw values (tests disable it to check the bounds)."""
+    return np.clip(values, 0.0, 1.0)
+
+
+def _scale_range(scale: str | dict) -> tuple[float, float]:
+    """Minimum and maximum residue value of a single-value scale over the 20 amino acids."""
+    values = _property_matrix("".join(amino_acids), scale)
+    if values.shape[1] != 1:
+        raise ValueError(f"Scale '{scale}' is multi-dimensional; use a single-value scale.")
+    return float(values.min()), float(values.max())

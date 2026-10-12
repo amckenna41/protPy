@@ -25,12 +25,14 @@ References
 
 #list of amino acids
 from ._constants import amino_acids, _validate_sequence, _validate_int
+from ._helpers import _minmax
     
 ############################### MoreauBroto Autocorrelation ###############################
 
 def moreaubroto_autocorrelation(sequence: str, lag: int = 30,
     properties: list[str] = ["CIDH920105", "BHAR880101", "CHAM820101", "CHAM820102",
-    "CHOC760101", "BIGC670101", "CHAM810101", "DAYM780201"], normalize: bool = True) -> pd.DataFrame:
+    "CHOC760101", "BIGC670101", "CHAM810101", "DAYM780201"], normalize: bool = True,
+    normalized: bool = False) -> pd.DataFrame:
     """
     Calculate MoreauBrotoAuto Autocorrelation (MBAuto) descriptor for sequence.
     Autocorrelation descriptors are a class of topological descriptors,
@@ -68,7 +70,16 @@ def moreaubroto_autocorrelation(sequence: str, lag: int = 30,
     :properties: list
         list of AAI index record codes/accession numbers for the physicochemical properties to use in the calculation. Defaults to the 8 standard AAIndex properties listed above.
     :normalize: bool (default=True)
-        rescale/normalize MoreauBroto Autocorrelation values into range of 0-1.
+        standardise each property (zero mean, unit standard deviation over the 20
+        amino acids) before the calculation. This does not bound the output; use
+        ``normalized`` for [0, 1] output.
+    :normalized: bool (default=False)
+        rescale every value to [0, 1] with its theoretical bounds (see below);
+        columns get a ``_norm`` suffix. Independent of ``normalize``, which
+        standardises the property values before the calculation.
+        Bounds: the minimum and maximum product P(a) x P(b) over all amino-acid
+        pairs (extended to include 0, the value of lags with no residue pairs),
+        since each value is a mean of such products.
 
     Returns
     =======
@@ -106,13 +117,22 @@ def moreaubroto_autocorrelation(sequence: str, lag: int = 30,
     moreaubroto_autocorrelation_df = pd.DataFrame([list(moreaubroto_autocorrelation.values())], 
         columns=list(moreaubroto_autocorrelation.keys()))
 
+    if normalized:
+        lo, hi = [], []
+        for key in aai_properties:
+            products = [aai_properties[key][a] * aai_properties[key][b] for a in amino_acids for b in amino_acids]
+            #include 0: lags with no residue pairs are reported as 0
+            lo += [min(min(products), 0.0)] * lag
+            hi += [max(max(products), 0.0)] * lag
+        return _minmax(moreaubroto_autocorrelation_df, lo, hi)
     return moreaubroto_autocorrelation_df
 
 ################################## Moran Autocorrelation ##################################
 
 def moran_autocorrelation(sequence: str, lag: int = 30,
     properties: list[str] = ["CIDH920105", "BHAR880101", "CHAM820101", "CHAM820102",
-    "CHOC760101", "BIGC670101", "CHAM810101", "DAYM780201"], normalize: bool = True) -> pd.DataFrame:
+    "CHOC760101", "BIGC670101", "CHAM810101", "DAYM780201"], normalize: bool = True,
+    normalized: bool = False) -> pd.DataFrame:
     """
     Refer to MBAuto docstring for autocorrelation explanation.
     Moran autocorrelation (MAuto) utilizes property deviations from the
@@ -127,7 +147,15 @@ def moran_autocorrelation(sequence: str, lag: int = 30,
     :properties: list
         list of AAI index record codes/accession numbers for the physicochemical properties to use in the calculation. Defaults to the same 8 standard AAIndex properties as MBAuto.
     :normalize: bool (default=True)
-        rescale/normalize MoreauBroto Autocorrelation values into range of 0-1.
+        standardise each property (zero mean, unit standard deviation over the 20
+        amino acids) before the calculation. This does not bound the output; use
+        ``normalized`` for [0, 1] output.
+    :normalized: bool (default=False)
+        rescale every value to [0, 1] with its theoretical bounds (see below);
+        columns get a ``_norm`` suffix. Independent of ``normalize``, which
+        standardises the property values before the calculation.
+        Bounds: abs(I(d)) <= N / (N - d) by the Cauchy-Schwarz inequality, so I is
+        mapped from [-N/(N-d), N/(N-d)]; 0.5 means no autocorrelation.
 
     Returns
     =======
@@ -174,13 +202,18 @@ def moran_autocorrelation(sequence: str, lag: int = 30,
     moran_autocorrelation_df = pd.DataFrame([list(moran_autocorrelation.values())], 
         columns=list(moran_autocorrelation.keys()))
 
+    if normalized:
+        N = len(sequence)
+        bound = [N / (N - i) if N > i else 1.0 for i in range(1, lag + 1)] * len(aai_properties)
+        return _minmax(moran_autocorrelation_df, [-b for b in bound], bound)
     return moran_autocorrelation_df
 
 ################################## Geary Autocorrelation ##################################
 
 def geary_autocorrelation(sequence: str, lag: int = 30,
     properties: list[str] = ["CIDH920105", "BHAR880101", "CHAM820101", "CHAM820102",
-    "CHOC760101", "BIGC670101", "CHAM810101", "DAYM780201"], normalize: bool = True) -> pd.DataFrame:
+    "CHOC760101", "BIGC670101", "CHAM810101", "DAYM780201"], normalize: bool = True,
+    normalized: bool = False) -> pd.DataFrame:
     """
     Refer to MBAuto docstring for autocorrelation description.
     Geary Autocorrelation (GAuto) utilizes the square-difference of property
@@ -195,7 +228,15 @@ def geary_autocorrelation(sequence: str, lag: int = 30,
     :properties: list
         list of AAI index record codes/accession numbers for the physicochemical properties to use in the calculation. Defaults to the same 8 standard AAIndex properties as MBAuto.
     :normalize: bool (default=True)
-        rescale/normalize MoreauBroto Autocorrelation values into range of 0-1.
+        standardise each property (zero mean, unit standard deviation over the 20
+        amino acids) before the calculation. This does not bound the output; use
+        ``normalized`` for [0, 1] output.
+    :normalized: bool (default=False)
+        rescale every value to [0, 1] with its theoretical bounds (see below);
+        columns get a ``_norm`` suffix. Independent of ``normalize``, which
+        standardises the property values before the calculation.
+        Bounds: 0 <= C(d) <= 2(N - 1) / (N - d), since each squared difference is at
+        most twice the sum of the two squared deviations.
 
     Returns
     =======
@@ -238,6 +279,10 @@ def geary_autocorrelation(sequence: str, lag: int = 30,
     geary_autocorrelation_df = pd.DataFrame([list(geary_autocorrelation.values())], 
         columns=list(geary_autocorrelation.keys()))
 
+    if normalized:
+        N = len(sequence)
+        bound = [2 * (N - 1) / (N - i) if N > i else 1.0 for i in range(1, lag + 1)] * len(aai_properties)
+        return _minmax(geary_autocorrelation_df, 0.0, bound)
     return geary_autocorrelation_df
 
 def _get_properties(properties: list[str] | str, normalize: bool) -> dict[str, dict[str, float]]:

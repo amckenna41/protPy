@@ -129,6 +129,8 @@ The descriptors available in `protpy` include:
 df = protpy.all_descriptors(protein_seq, descriptor_set="extended")
 ```
 
+Most scalar, autocorrelation, CTD and sequence-order descriptors also take `normalized=True`, which rescales their output to [0, 1] with the descriptor's theoretical bounds and adds a `_norm` column suffix (see [`DESCRIPTORS.md`](https://github.com/amckenna41/protPy/blob/main/DESCRIPTORS.md#normalised-output-normalizedtrue)).
+
 More detail of each descriptor is listed in the markdown file: [`DESCRIPTORS.md`](https://github.com/amckenna41/protPy/blob/main/DESCRIPTORS.md)
 
 
