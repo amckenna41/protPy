@@ -3,6 +3,11 @@ from .composition import *
 from .conjoint_triad import *
 from .ctd import *
 from .sequence_order import *
+from .scales import *
+from .physicochemical import *
+from .complexity import *
+from .signal import *
+from .structural import *
 from .utils import get_descriptor_info, list_descriptors, print_descriptor_info
 from .encode import all_descriptors, encode_dataset, read_sequences_from_file
 
@@ -12,7 +17,7 @@ amino_acids = ["A", "C", "D", "E", "F", "G", "H", "I", "K", "L", "M", "N", "P",
 
 #protPy package metadata
 __name__ = 'protpy'
-__version__ = "1.4.2"
+__version__ = "1.5.0"
 __description__ = "Python package for generating various biochemical, physicochemical and structural descriptors/features of protein sequences."
 __author__ = 'AJ McKenna: https://github.com/amckenna41'
 __authorEmail__ = 'amckenna41@qub.ac.uk'
@@ -39,5 +44,15 @@ descriptor_names = ["amino_acid_composition", "dipeptide_composition", "tripepti
     "conjoint_triad", "ctd_composition", "ctd_transition", "ctd_distribution", "ctd_",
     "sequence_order_coupling_number_", "sequence_order_coupling_number",
     "sequence_order_coupling_number_all", "quasi_sequence_order", "quasi_sequence_order_all",
-    "shannon_entropy"
+    "shannon_entropy",
+    #v1.5.0
+    "cksaap", "cksaagp", "dde", "asdc", "distance_pair", "natural_vector", "atomic_composition",
+    "z_scales_5", "vhse", "atchley_factors", "t_scales", "st_scales", "protfp", "fasgai",
+    "blosum_indices", "ms_whim", "auto_cross_covariance", "physicochemical_distance_transformation",
+    "charge_fractions", "ncpr", "kappa", "sequence_charge_decoration", "charge_density",
+    "hydrophobicity_profile", "hydrophobic_ratio", "half_life", "ivywrel_index", "cvp_bias", "flexibility",
+    "wootton_federhen_complexity", "linguistic_complexity", "lempel_ziv_complexity",
+    "fft_descriptors", "dct_descriptors",
+    "aggrescan", "uversky_charge_hydropathy", "fold_index", "disorder_propensity", "transmembrane_features",
+    "signal_peptide_features", "functional_site_counts", "plaac", "antigenicity_surface", "cysteine_features",
     ]

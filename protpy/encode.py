@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 import os
+import csv
 import pandas as pd
 from tqdm import tqdm as _tqdm
 
@@ -23,7 +24,6 @@ from .composition import (
     kmer_composition,
     reduced_alphabet_composition,
     motif_composition,
-    amino_acid_pair_composition,
     aliphatic_index,
     extinction_coefficient,
     boman_index,
@@ -45,6 +45,11 @@ from .sequence_order import (
     quasi_sequence_order_all,
 )
 from ._constants import _validate_sequence
+from . import (composition as _composition, autocorrelation as _autocorrelation, ctd as _ctd,
+               conjoint_triad as _conjoint_triad_module, sequence_order as _sequence_order, scales as _scales,
+               physicochemical as _physicochemical, complexity as _complexity, signal as _signal,
+               structural as _structural)
+from .utils import _DESCRIPTOR_REGISTRY
 
 #descriptors that accept extra keyword arguments beyond sequence
 _PARAMETERISED_DESCRIPTORS: frozenset[str] = frozenset({
@@ -62,20 +67,77 @@ _PARAMETERISED_DESCRIPTORS: frozenset[str] = frozenset({
     "ctd_",
     "sequence_order_coupling_number_all",
     "quasi_sequence_order_all",
-})
+}) | frozenset(
+    #v1.5.0 descriptors outside the classic set that take parameters
+    name for name, meta in _DESCRIPTOR_REGISTRY.items()
+    if not meta.get("in_default_set", True) and set(meta["parameters"]) - {"sequence"}
+)
+
+#descriptor sets accepted by all_descriptors / encode_dataset
+_DESCRIPTOR_SETS = ("classic", "extended", "all")
+
+#modules holding each registry "module" value
+_MODULES = {
+    "composition": _composition, "autocorrelation": _autocorrelation, "ctd": _ctd,
+    "conjoint_triad": _conjoint_triad_module, "sequence_order": _sequence_order, "scales": _scales,
+    "physicochemical": _physicochemical, "complexity": _complexity, "signal": _signal,
+    "structural": _structural,
+}
+
+
+def _set_members(descriptor_set: str) -> list[str]:
+    """
+    Get the descriptors outside the classic set that belong to a descriptor set,
+    in the order of the descriptor registry. Membership is taken from the
+    descriptor_sets field of each registry entry.
+
+    Parameters
+    ==========
+    :descriptor_set: str
+        descriptor set: "classic", "extended" or "all".
+
+    Returns
+    =======
+    :members: list[str]
+        names of the descriptors added by the set; empty for "classic".
+    """
+    if descriptor_set == "classic":
+        return []
+    return [name for name, meta in _DESCRIPTOR_REGISTRY.items()
+            if not meta.get("in_default_set", True) and descriptor_set in meta.get("descriptor_sets", [])]
 
 
 def all_descriptors(
     sequence: str,
     params: dict[str, dict] | None = None,
     show_progress: bool = False,
-    output_file: str | None = "descriptors.csv",
+    output_file: str | None = None,
     save_each_sequence: bool = True,
+    descriptor_set: str = "classic",
+    include: list[str] | None = None,
+    exclude: list[str] | None = None,
     _show_descriptor_list: bool = True,
 ) -> pd.DataFrame:
     """
     Calculate all available protpy descriptors for a protein sequence and
     return them concatenated into a single DataFrame (1 x N_total).
+
+    ``descriptor_set`` chooses which descriptors are computed:
+
+    - ``"classic"`` (default): the v1.4 descriptor set described below, with an
+      unchanged output.
+    - ``"extended"``: classic plus every v1.5 descriptor whose default output
+      has at most 150 columns (factor scales, charge patterning,
+      hydrophobicity/stability, complexity, signal and structural descriptors).
+    - ``"all"``: extended plus the high-dimensional v1.5 descriptors (CKSAAP,
+      DDE, ASDC, distance pair and auto/cross covariance).
+
+    Set membership comes from the descriptor registry (``descriptor_sets``).
+    ``include`` adds further registered descriptors by name and ``exclude``
+    removes descriptors by name (classic ones included, e.g. "ctd_" or
+    "tripeptide_composition"). Some extended descriptors are NaN where their
+    method leaves them undefined (``plaac`` LLR/COREscore for short or
+    non-prion sequences, ``half_life`` E. coli for an N-terminal Pro).
 
     The combined variants of multi-property descriptors are used to avoid
     redundancy: ``ctd_`` is called with ``all_ctd=True`` (covers
@@ -117,6 +179,10 @@ def all_descriptors(
             sequence_order_coupling_number_all → lag
             quasi_sequence_order_all      → lag, weight
 
+        plus any v1.5 descriptor with parameters (see
+        ``protpy.get_descriptor_info(name)["parameters"]``), e.g.
+        ``{"kappa": {"blob_sizes": (5,)}, "aggrescan": {"window": 7}}``.
+
         Example::
 
             df = protpy.all_descriptors(seq, params={
@@ -131,11 +197,13 @@ def all_descriptors(
         When ``True``, display a ``tqdm`` progress bar that names the
         descriptor currently being computed and tracks overall progress.
 
-    :output_file: str | None (default="descriptors.csv")
-        Path to the CSV file where results are written.  Pass ``None`` to
-        disable all file output.  When calling this function in a loop over
+    :output_file: str | None (default=None)
+        Path to the CSV file where results are written.  ``None`` (default)
+        disables all file output.  When calling this function in a loop over
         multiple sequences the rows are accumulated in the file across calls;
-        each call appends one row to any previously saved sequences.
+        each call appends one row to any previously saved sequences.  A
+        ``ValueError`` is raised, and the file left untouched, if an existing
+        file has different columns.
 
     :save_each_sequence: bool (default=True)
         When ``True``, the output CSV is updated once after all descriptors
@@ -145,6 +213,15 @@ def all_descriptors(
         progress is preserved if the process is interrupted.  When ``False``,
         nothing is written to the CSV within this call.  Has no effect when
         ``output_file`` is ``None``.
+
+    :descriptor_set: str (default="classic")
+        "classic", "extended" or "all" (see above).
+
+    :include: list[str] | None (default=None)
+        extra registered descriptor names to compute.
+
+    :exclude: list[str] | None (default=None)
+        descriptor names to skip.
 
     Returns
     =======
@@ -179,6 +256,14 @@ def all_descriptors(
     if not isinstance(params, dict):
         raise TypeError(f"params must be a dict, got {type(params)}.")
 
+    if descriptor_set not in _DESCRIPTOR_SETS:
+        raise ValueError(f"Invalid descriptor_set '{descriptor_set}'. Valid sets are: {list(_DESCRIPTOR_SETS)}.")
+    include, exclude = list(include or []), set(exclude or [])
+    unregistered = [n for n in include + sorted(exclude) if n not in _DESCRIPTOR_REGISTRY]
+    if unregistered:
+        raise ValueError(f"Unknown descriptor name(s) in include/exclude: {unregistered}. "
+                         "See protpy.list_descriptors().")
+
     unknown = set(params) - _PARAMETERISED_DESCRIPTORS
     if unknown:
         raise ValueError(
@@ -193,62 +278,59 @@ def all_descriptors(
     # Only include kmer_composition when the user requests a k value that is unique.
     _kmer_k = _p("kmer_composition").get("k", 2)
 
-    steps: list[tuple[str, object]] = [
+    steps: list[tuple[str, str, object]] = [
         # ── Composition ────────────────────────────────────────────────────────
-        ("[Composition]    Amino acid composition",                 lambda: amino_acid_composition(sequence)),
-        ("[Composition]    Dipeptide composition",                  lambda: dipeptide_composition(sequence)),
-        ("[Composition]    Tripeptide composition",                 lambda: tripeptide_composition(sequence)),
-        ("[Composition]    GRAVY index",                            lambda: gravy(sequence)),
-        ("[Composition]    Aromaticity",                            lambda: aromaticity(sequence)),
-        ("[Composition]    Instability index",                      lambda: instability_index(sequence)),
-        ("[Composition]    Isoelectric point",                      lambda: isoelectric_point(sequence)),
-        ("[Composition]    Molecular weight",                       lambda: molecular_weight(sequence)),
-        ("[Composition]    Charge distribution",                    lambda: charge_distribution(sequence, **_p("charge_distribution"))),
-        ("[Composition]    Hydrophobic / polar / charged comp.",    lambda: hydrophobic_polar_charged_composition(sequence)),
-        ("[Composition]    Secondary structure propensity",         lambda: secondary_structure_propensity(sequence)),
-        *([("[Composition]    K-mer composition",                   lambda: kmer_composition(sequence, **_p("kmer_composition")))]
+        ("[Composition]    Amino acid composition",                    "amino_acid_composition",                     lambda: amino_acid_composition(sequence)),
+        ("[Composition]    Dipeptide composition",                     "dipeptide_composition",                      lambda: dipeptide_composition(sequence)),
+        ("[Composition]    Tripeptide composition",                    "tripeptide_composition",                     lambda: tripeptide_composition(sequence)),
+        ("[Composition]    GRAVY index",                               "gravy",                                      lambda: gravy(sequence)),
+        ("[Composition]    Aromaticity",                               "aromaticity",                                lambda: aromaticity(sequence)),
+        ("[Composition]    Instability index",                         "instability_index",                          lambda: instability_index(sequence)),
+        ("[Composition]    Isoelectric point",                         "isoelectric_point",                          lambda: isoelectric_point(sequence)),
+        ("[Composition]    Molecular weight",                          "molecular_weight",                           lambda: molecular_weight(sequence)),
+        ("[Composition]    Charge distribution",                       "charge_distribution",                        lambda: charge_distribution(sequence, **_p("charge_distribution"))),
+        ("[Composition]    Hydrophobic / polar / charged comp.",       "hydrophobic_polar_charged_composition",      lambda: hydrophobic_polar_charged_composition(sequence)),
+        ("[Composition]    Secondary structure propensity",            "secondary_structure_propensity",             lambda: secondary_structure_propensity(sequence)),
+        *([("[Composition]    K-mer composition",                         "kmer_composition",                           lambda: kmer_composition(sequence, **_p("kmer_composition")))]
           if _kmer_k not in (2, 3) else []),
-        ("[Composition]    Reduced alphabet composition",           lambda: reduced_alphabet_composition(sequence, **_p("reduced_alphabet_composition"))),
-        ("[Composition]    Motif composition",                      lambda: motif_composition(sequence, **_p("motif_composition"))),
-        ("[Composition]    Amino acid pair composition",            lambda: amino_acid_pair_composition(sequence)),
-        ("[Composition]    Aliphatic index",                        lambda: aliphatic_index(sequence)),
-        ("[Composition]    Extinction coefficient",                 lambda: extinction_coefficient(sequence)),
-        ("[Composition]    Boman index",                            lambda: boman_index(sequence)),
-        ("[Composition]    Aggregation propensity",                 lambda: aggregation_propensity(sequence, **_p("aggregation_propensity"))),
-        ("[Composition]    Hydrophobic moment",                     lambda: hydrophobic_moment(sequence, **_p("hydrophobic_moment"))),
-        ("[Composition]    Shannon entropy",                        lambda: shannon_entropy(sequence)),
-        ("[Composition]    Pseudo amino acid composition",          lambda: pseudo_amino_acid_composition(sequence, **_p("pseudo_amino_acid_composition"))),
-        ("[Composition]    Amphiphilic pseudo amino acid comp.",    lambda: amphiphilic_pseudo_amino_acid_composition(sequence, **_p("amphiphilic_pseudo_amino_acid_composition"))),
+        ("[Composition]    Reduced alphabet composition",              "reduced_alphabet_composition",               lambda: reduced_alphabet_composition(sequence, **_p("reduced_alphabet_composition"))),
+        ("[Composition]    Motif composition",                         "motif_composition",                          lambda: motif_composition(sequence, **_p("motif_composition"))),
+        ("[Composition]    Aliphatic index",                           "aliphatic_index",                            lambda: aliphatic_index(sequence)),
+        ("[Composition]    Extinction coefficient",                    "extinction_coefficient",                     lambda: extinction_coefficient(sequence)),
+        ("[Composition]    Boman index",                               "boman_index",                                lambda: boman_index(sequence)),
+        ("[Composition]    Aggregation propensity",                    "aggregation_propensity",                     lambda: aggregation_propensity(sequence, **_p("aggregation_propensity"))),
+        ("[Composition]    Hydrophobic moment",                        "hydrophobic_moment",                         lambda: hydrophobic_moment(sequence, **_p("hydrophobic_moment"))),
+        ("[Composition]    Shannon entropy",                           "shannon_entropy",                            lambda: shannon_entropy(sequence)),
+        ("[Composition]    Pseudo amino acid composition",             "pseudo_amino_acid_composition",              lambda: pseudo_amino_acid_composition(sequence, **_p("pseudo_amino_acid_composition"))),
+        ("[Composition]    Amphiphilic pseudo amino acid comp.",       "amphiphilic_pseudo_amino_acid_composition",  lambda: amphiphilic_pseudo_amino_acid_composition(sequence, **_p("amphiphilic_pseudo_amino_acid_composition"))),
         # ── Autocorrelation ────────────────────────────────────────────────────
-        ("[Autocorrelation] Moreaubroto autocorrelation",          lambda: moreaubroto_autocorrelation(sequence, **_p("moreaubroto_autocorrelation"))),
-        ("[Autocorrelation] Moran autocorrelation",                lambda: moran_autocorrelation(sequence, **_p("moran_autocorrelation"))),
-        ("[Autocorrelation] Geary autocorrelation",                lambda: geary_autocorrelation(sequence, **_p("geary_autocorrelation"))),
+        ("[Autocorrelation] Moreaubroto autocorrelation",              "moreaubroto_autocorrelation",                lambda: moreaubroto_autocorrelation(sequence, **_p("moreaubroto_autocorrelation"))),
+        ("[Autocorrelation] Moran autocorrelation",                    "moran_autocorrelation",                      lambda: moran_autocorrelation(sequence, **_p("moran_autocorrelation"))),
+        ("[Autocorrelation] Geary autocorrelation",                    "geary_autocorrelation",                      lambda: geary_autocorrelation(sequence, **_p("geary_autocorrelation"))),
         # ── Conjoint Triad ─────────────────────────────────────────────────────
-        ("[Conjoint Triad]  Conjoint triad",                       lambda: _conjoint_triad(sequence)),
+        ("[Conjoint Triad]  Conjoint triad",                           "conjoint_triad",                             lambda: _conjoint_triad(sequence)),
         # ── CTD ────────────────────────────────────────────────────────────────
-        ("[CTD]             Composition, transition & distribution",lambda: ctd_(sequence, all_ctd=True, **_p("ctd_"))),
+        ("[CTD]             Composition, transition & distribution",   "ctd_",                                       lambda: ctd_(sequence, **{"all_ctd": True, **_p("ctd_")})),
         # ── Sequence Order ─────────────────────────────────────────────────────
-        ("[Sequence Order]  Sequence order coupling number",        lambda: sequence_order_coupling_number_all(sequence, **_p("sequence_order_coupling_number_all"))),
-        ("[Sequence Order]  Quasi sequence order",                  lambda: quasi_sequence_order_all(sequence, **_p("quasi_sequence_order_all"))),
+        ("[Sequence Order]  Sequence order coupling number",           "sequence_order_coupling_number_all",         lambda: sequence_order_coupling_number_all(sequence, **_p("sequence_order_coupling_number_all"))),
+        ("[Sequence Order]  Quasi sequence order",                     "quasi_sequence_order_all",                   lambda: quasi_sequence_order_all(sequence, **_p("quasi_sequence_order_all"))),
     ]
 
-    descriptor_names = [label.split("]", 1)[1].strip() for label, _ in steps]
+    #v1.5 descriptors from the chosen set and include, then apply exclude
+    extra = _set_members(descriptor_set) + [n for n in include if n not in _set_members(descriptor_set)]
+    classic_names = {name for _, name, _ in steps}
+    for name in extra:
+        if name in classic_names:
+            continue
+        meta = _DESCRIPTOR_REGISTRY[name]
+        func = getattr(_MODULES[meta["module"]], name)
+        steps.append((f"[{meta['category']}] {name}", name,
+                      lambda func=func, name=name: func(sequence, **_p(name))))
+    steps = [step for step in steps if step[1] not in exclude]
+
+    descriptor_names = [label.split("]", 1)[1].strip() for label, _, _ in steps]
     if _show_descriptor_list:
         print("Calculating descriptors: " + ", ".join(descriptor_names))
-
-    # Load any rows already saved from previous sequences in this run so they
-    # are preserved when we rewrite the file after each checkpoint.
-    existing_df: pd.DataFrame | None = None
-    if output_file is not None and os.path.isfile(output_file):
-        try:
-            existing_df = pd.read_csv(output_file)
-        except Exception:
-            existing_df = None
-
-    def _checkpoint(frames_so_far: list[pd.DataFrame]) -> None:
-        partial = pd.concat(frames_so_far, axis=1)
-        out = pd.concat([existing_df, partial], ignore_index=True) if existing_df is not None else partial
-        out.to_csv(output_file, index=False)
 
     frames: list[pd.DataFrame] = []
 
@@ -259,20 +341,21 @@ def all_descriptors(
             dynamic_ncols=True,
             bar_format="{desc} {percentage:3.0f}%|{bar:28}| {n:02d}/{total} [{elapsed}<{remaining}]",
         )
-        for label, fn in steps:
+        for label, _, fn in steps:
             bar.set_description(label)
             frames.append(fn())
             bar.update(1)
         bar.set_description(f"All {len(steps)} descriptors computed")
         bar.close()
     else:
-        for label, fn in steps:
+        for _, _, fn in steps:
             frames.append(fn())
 
     result = pd.concat(frames, axis=1)
 
     if output_file is not None and save_each_sequence:
-        _checkpoint(frames)
+        _prepare_output_file(output_file, list(result.columns))
+        result.to_csv(output_file, mode="a", header=False, index=False)
 
     return result
 
@@ -286,6 +369,9 @@ def encode_dataset(
     save_each_sequence: bool = True,
     strip_gaps: bool = False,
     verbose: bool = True,
+    descriptor_set: str = "classic",
+    include: list[str] | None = None,
+    exclude: list[str] | None = None,
 ) -> pd.DataFrame:
     """
     Compute all available descriptors for every sequence in a dataset and
@@ -318,10 +404,13 @@ def encode_dataset(
 
     :output_file: str | None (default="descriptors.csv")
         Path to the CSV file where results are written.  Each completed row
-        (identifier prepended) is flushed immediately after that sequence
+        (identifier prepended) is appended immediately after that sequence
         finishes, so progress is preserved if the process is interrupted.
-        Rows already present in the file from a previous run are retained.
-        Pass ``None`` to disable all file output.
+        Rows already present in the file from a previous run are retained,
+        except rows whose identifier is encoded again in this run, which are
+        replaced.  A ``ValueError`` is raised, and the file left untouched, if
+        an existing file has different columns.  Pass ``None`` to disable all
+        file output.
 
     :save_each_sequence: bool (default=True)
         When ``True``, the CSV is updated after each sequence completes.
@@ -339,6 +428,15 @@ def encode_dataset(
         When ``True``, print a status line for each sequence as it is encoded
         (``"Encoding sequence N/total: id"``).  Set to ``False`` to suppress
         all stdout output from this function.
+
+    :descriptor_set: str (default="classic")
+        "classic", "extended" or "all"; see ``all_descriptors``.
+
+    :include: list[str] | None (default=None)
+        extra descriptor names; see ``all_descriptors``.
+
+    :exclude: list[str] | None (default=None)
+        descriptor names to skip; see ``all_descriptors``.
 
     Returns
     =======
@@ -394,14 +492,6 @@ def encode_dataset(
             f"sequences must be a list[str] or pd.DataFrame, got {type(sequences)}."
         )
 
-    # Snapshot any previously saved rows so they are preserved on each flush.
-    initial_df: pd.DataFrame | None = None
-    if output_file is not None and os.path.isfile(output_file):
-        try:
-            initial_df = pd.read_csv(output_file)
-        except Exception:
-            pass
-
     completed: list[pd.DataFrame] = []
     total = len(seqs)
 
@@ -422,25 +512,50 @@ def encode_dataset(
             show_progress=show_progress,
             output_file=None,
             save_each_sequence=False,
-            _show_descriptor_list=(idx == 1),
+            descriptor_set=descriptor_set,
+            include=include,
+            exclude=exclude,
+            _show_descriptor_list=(idx == 1 and verbose),
         )
         row_df.insert(0, id_col_name, seq_id)
         completed.append(row_df)
 
         if output_file is not None and save_each_sequence:
-            new_rows = pd.concat(completed, ignore_index=True)
-            # Only prepend the initial snapshot when its columns exactly match the
-            # current run (mismatches arise from stale CSVs with mangled duplicate
-            # column names written by a prior buggy run).
-            if initial_df is not None and list(initial_df.columns) == list(new_rows.columns):
-                out = pd.concat([initial_df, new_rows], ignore_index=True)
-            else:
-                out = new_rows
-            out.to_csv(output_file, index=False)
+            if idx == 1:
+                _prepare_output_file(output_file, list(row_df.columns), replace_ids=ids)
+            row_df.to_csv(output_file, mode="a", header=False, index=False)
 
     if not completed:
         return pd.DataFrame()
     return pd.concat(completed, ignore_index=True)
+
+
+def _prepare_output_file(output_file: str, columns: list, replace_ids: list | None = None) -> None:
+    """
+    Get ``output_file`` ready for rows to be appended. A missing or empty file
+    gets a header row. An existing file must have exactly ``columns`` as its
+    header, otherwise a ValueError is raised and the file is not modified.
+    When ``replace_ids`` is given, existing rows whose first column matches
+    one of them are removed so a re-run does not duplicate them.
+    """
+    if not os.path.isfile(output_file) or os.path.getsize(output_file) == 0:
+        with open(output_file, "w", newline="") as fh:
+            csv.writer(fh).writerow(columns)
+        return
+
+    with open(output_file, newline="") as fh:
+        rows = list(csv.reader(fh))
+    if rows[0] != [str(c) for c in columns]:
+        raise ValueError(
+            f"Existing output file '{output_file}' has different columns from this run; "
+            "refusing to overwrite it. Pass a different output_file or remove the file."
+        )
+    if replace_ids:
+        replace = {str(i) for i in replace_ids}
+        kept = [rows[0]] + [r for r in rows[1:] if r and r[0] not in replace]
+        if len(kept) != len(rows):
+            with open(output_file, "w", newline="") as fh:
+                csv.writer(fh).writerows(kept)
 
 
 def _parse_fasta(filepath: str) -> list[str]:

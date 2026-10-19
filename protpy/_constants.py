@@ -43,3 +43,37 @@ def _validate_sequence(sequence: str) -> str:
                 f"Invalid amino acid found in protein sequence: {aa}."
             )
     return sequence
+
+
+def _validate_int(name: str, value, minimum: int = 0) -> int:
+    """
+    Parse ``value`` as an int and check it is >= ``minimum``.
+
+    Raises
+    ======
+    ValueError
+        if ``value`` cannot be parsed as an int or is below ``minimum``.
+    """
+    if isinstance(value, bool):
+        raise ValueError(f"Invalid {name} value input: {value}.")
+    try:
+        value = int(value)
+    except (ValueError, TypeError):
+        raise ValueError(f"Invalid {name} value input: {value}.")
+    if value < minimum:
+        raise ValueError(f"{name} must be >= {minimum}, got {value}.")
+    return value
+
+
+def _validate_weight(weight) -> float:
+    """
+    Check that ``weight`` is a non-negative number.
+
+    Raises
+    ======
+    ValueError
+        if ``weight`` is not a number or is negative.
+    """
+    if isinstance(weight, bool) or not isinstance(weight, (int, float)) or weight < 0:
+        raise ValueError(f"weight must be a non-negative number, got {weight}.")
+    return weight

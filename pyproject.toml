@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "protpy"
-version = "1.4.2"
+version = "1.5.0"
 description = "Python package for generating various biochemical, physicochemical and structural descriptors/features of protein sequences."
 readme = "README.md"
 license = { text = "MIT" }
@@ -82,4 +82,5 @@ where = ["."]
 "protpy.data" = ["*.json"]
 
 [tool.pytest.ini_options]
-norecursedirs = ["docs/_build"]
+testpaths = ["tests"]
+norecursedirs = ["docs/_build", "build", "dist", "*.egg-info"]

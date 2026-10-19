@@ -1,0 +1,151 @@
+{
+  "ifeature5": {
+    "name": "iFeature 5-group alphabet (GAAC/CKSAAGP)",
+    "values": {
+      "aliphatic": "GAVLMI",
+      "aromatic": "FYW",
+      "positive": "KRH",
+      "negative": "DE",
+      "uncharged": "STCPNQ"
+    },
+    "reference": "iFeature: Chen Z. et al. (2018). iFeature: a Python package and web server for features extraction and selection from protein and peptide sequences. Bioinformatics, 34(14), 2499-2502.",
+    "doi": "10.1093/bioinformatics/bty140",
+    "source_note": "Groups as defined for GAAC in the iFeature paper and its reference implementation; transcribed 2026-10-12."
+  },
+  "cp13": {
+    "name": "cp(13) cluster profile",
+    "values": [
+      "MF",
+      "IL",
+      "V",
+      "A",
+      "C",
+      "WYQHP",
+      "G",
+      "T",
+      "S",
+      "N",
+      "RK",
+      "D",
+      "E"
+    ],
+    "reference": "Liu B. et al. (2014). iDNA-Prot|dis: identifying DNA-binding proteins by incorporating amino acid distance-pairs and reduced alphabet profile into the general pseudo amino acid composition. PLoS ONE, 9(9), e106691.",
+    "doi": "10.1371/journal.pone.0106691",
+    "source_note": "Eq. 10 of the paper (image pone.0106691.e027); transcribed 2026-10-12."
+  },
+  "cp14": {
+    "name": "cp(14) cluster profile",
+    "values": [
+      "IMV",
+      "L",
+      "F",
+      "WY",
+      "G",
+      "P",
+      "C",
+      "A",
+      "S",
+      "T",
+      "N",
+      "HRKQ",
+      "E",
+      "D"
+    ],
+    "reference": "Liu B. et al. (2014). iDNA-Prot|dis: identifying DNA-binding proteins by incorporating amino acid distance-pairs and reduced alphabet profile into the general pseudo amino acid composition. PLoS ONE, 9(9), e106691.",
+    "doi": "10.1371/journal.pone.0106691",
+    "source_note": "Eq. 10 of the paper prints cp(14) = {EIMV; L; F; WY; G; P; C; A; S; T; N; HRKQ; E; D}, listing E twice. The paper fixes n(c)=14 (dimension 14+14x14x3=602), so the stray E in the first cluster is a typo: dropping it is the only reading with 14 clusters that partitions the 20 residues. Transcribed 2026-10-12."
+  },
+  "cp19": {
+    "name": "cp(19) cluster profile",
+    "values": [
+      "P",
+      "G",
+      "E",
+      "K",
+      "R",
+      "Q",
+      "D",
+      "S",
+      "N",
+      "T",
+      "H",
+      "C",
+      "I",
+      "V",
+      "W",
+      "YF",
+      "A",
+      "L",
+      "M"
+    ],
+    "reference": "Liu B. et al. (2014). iDNA-Prot|dis: identifying DNA-binding proteins by incorporating amino acid distance-pairs and reduced alphabet profile into the general pseudo amino acid composition. PLoS ONE, 9(9), e106691.",
+    "doi": "10.1371/journal.pone.0106691",
+    "source_note": "Eq. 10 of the paper (image pone.0106691.e027); transcribed 2026-10-12."
+  },
+  "cp20": {
+    "name": "cp(20) cluster profile (no reduction)",
+    "values": [
+      "A",
+      "C",
+      "D",
+      "E",
+      "F",
+      "G",
+      "H",
+      "I",
+      "K",
+      "L",
+      "M",
+      "N",
+      "P",
+      "Q",
+      "R",
+      "S",
+      "T",
+      "V",
+      "W",
+      "Y"
+    ],
+    "reference": "Liu B. et al. (2014). iDNA-Prot|dis: identifying DNA-binding proteins by incorporating amino acid distance-pairs and reduced alphabet profile into the general pseudo amino acid composition. PLoS ONE, 9(9), e106691.",
+    "doi": "10.1371/journal.pone.0106691",
+    "source_note": "cp(20) is the conventional 20 amino acid profile (Liu 2014, Section 2); 2026-10-12."
+  },
+  "ctd_ifeature_extra": {
+    "name": "Six additional CTD property partitions (iFeature 13-property CTD)",
+    "values": {
+      "hydrophobicity_ARGP820101": {
+        "1": "QSTNGDE",
+        "2": "RAHCKMV",
+        "3": "LYPFIW"
+      },
+      "hydrophobicity_ZIMJ680101": {
+        "1": "QNGSWTDERA",
+        "2": "HMCKV",
+        "3": "LPFYI"
+      },
+      "hydrophobicity_PONP930101": {
+        "1": "KPDESNQT",
+        "2": "GRHA",
+        "3": "YMFWLCVI"
+      },
+      "hydrophobicity_CASG920101": {
+        "1": "KDEQPSRNTG",
+        "2": "AHYMLV",
+        "3": "FIWC"
+      },
+      "hydrophobicity_ENGD860101": {
+        "1": "RDKENQHYP",
+        "2": "SGTAW",
+        "3": "CVLIMF"
+      },
+      "hydrophobicity_FASG890101": {
+        "1": "KERSQD",
+        "2": "NTPG",
+        "3": "AYHWVMFLIC"
+      }
+    },
+    "reference": "iFeature: Chen Z. et al. (2018). iFeature: a Python package and web server for features extraction and selection from protein and peptide sequences. Bioinformatics, 34(14), 2499-2502. Following Dubchak I. et al. (1995). PNAS, 92(19), 8700-8704.",
+    "doi": "10.1093/bioinformatics/bty140",
+    "source_note": "Three-group partitions for the six AAindex hydrophobicity properties used by iFeature's 13-property CTD (Table/Supplementary of iFeature, cross-checked against the iFeature reference implementation; data only, no code copied). Transcribed 2026-10-12."
+  }
+}

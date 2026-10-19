@@ -1,0 +1,135 @@
+{
+  "aggrescan_a3v": {
+    "name": "AGGRESCAN amino-acid aggregation propensity (a3v)",
+    "values": {
+      "A": -0.036,
+      "C": 0.604,
+      "D": -1.836,
+      "E": -1.412,
+      "F": 1.754,
+      "G": -0.535,
+      "H": -1.033,
+      "I": 1.822,
+      "K": -0.931,
+      "L": 1.38,
+      "M": 0.91,
+      "N": -1.302,
+      "P": -0.334,
+      "Q": -1.231,
+      "R": -1.24,
+      "S": -0.294,
+      "T": -0.159,
+      "V": 1.594,
+      "W": 1.037,
+      "Y": 1.159
+    },
+    "reference": "Conchillo-Sol\u00e9 O. et al. (2007). AGGRESCAN: a server for the prediction and evaluation of 'hot spots' of aggregation in polypeptides. BMC Bioinformatics, 8, 65.",
+    "doi": "10.1186/1471-2105-8-65",
+    "source_note": "Additional file 1 of the paper (12859_2006_1437_MOESM1_ESM.pdf), parsed 2026-10-12. Hot-spot threshold -0.02 and hot-spot rules from Additional file 2."
+  },
+  "top_idp": {
+    "name": "TOP-IDP disorder propensity scale",
+    "values": {
+      "A": 0.06,
+      "C": 0.02,
+      "D": 0.192,
+      "E": 0.736,
+      "F": -0.697,
+      "G": 0.166,
+      "H": 0.303,
+      "I": -0.486,
+      "K": 0.586,
+      "L": -0.326,
+      "M": -0.397,
+      "N": 0.007,
+      "P": 0.987,
+      "Q": 0.318,
+      "R": 0.18,
+      "S": 0.341,
+      "T": 0.059,
+      "V": -0.121,
+      "W": -0.884,
+      "Y": -0.51
+    },
+    "reference": "Campen A. et al. (2008). TOP-IDP-scale: a new amino acid scale measuring propensity for intrinsic disorder. Protein Pept Lett, 15(9), 956-963.",
+    "doi": "10.2174/092986608785849164",
+    "source_note": "Table 2 of the paper (PMC2676888), parsed 2026-10-12."
+  },
+  "disorder_residue_classes": {
+    "name": "Order- and disorder-promoting residues",
+    "values": {
+      "disorder_promoting": "ARGQSPEK",
+      "order_promoting": "WCFIYVLN"
+    },
+    "reference": "Dunker A.K. et al. (2001). Intrinsically disordered protein. J Mol Graph Model, 19(1), 26-59.",
+    "doi": "10.1016/S1093-3263(00)00138-8",
+    "source_note": "Residue lists as restated in Campen et al. 2008 (PMC2676888, Introduction), which cites Dunker 2001; 2026-10-12."
+  },
+  "plaac": {
+    "name": "PLAAC prion-like domain model (S. cerevisiae, 28 prion domains)",
+    "values": {
+      "fg": {
+        "A": 0.04865,
+        "C": 0.00219,
+        "D": 0.01638,
+        "E": 0.00783,
+        "F": 0.02537,
+        "G": 0.07603,
+        "H": 0.0181,
+        "I": 0.02018,
+        "K": 0.01641,
+        "L": 0.02639,
+        "M": 0.02975,
+        "N": 0.25885,
+        "P": 0.05126,
+        "Q": 0.15178,
+        "R": 0.025,
+        "S": 0.10988,
+        "T": 0.03841,
+        "V": 0.01972,
+        "W": 0.00157,
+        "Y": 0.05624
+      },
+      "bg": {
+        "A": 0.055,
+        "C": 0.0126,
+        "D": 0.0586,
+        "E": 0.0655,
+        "F": 0.0441,
+        "G": 0.0498,
+        "H": 0.0217,
+        "I": 0.0655,
+        "K": 0.0735,
+        "L": 0.095,
+        "M": 0.0207,
+        "N": 0.0615,
+        "P": 0.0438,
+        "Q": 0.0396,
+        "R": 0.0444,
+        "S": 0.0899,
+        "T": 0.0592,
+        "V": 0.0556,
+        "W": 0.0104,
+        "Y": 0.0337
+      },
+      "transition": [
+        [
+          0.999,
+          0.001
+        ],
+        [
+          0.02,
+          0.98
+        ]
+      ],
+      "initial": [
+        0.9524,
+        0.0476
+      ],
+      "epsilon": 1e-05
+    },
+    "reference": "Lancaster A.K. et al. (2014). PLAAC: a web and command-line application to identify proteins with prion-like amino acid composition. Bioinformatics, 30(17), 2501-2502.",
+    "doi": "10.1093/bioinformatics/btu310",
+    "source_note": "Ported 2026-10-12 from the PLAAC source (github.com/whitehead/plaac, cli/src/plaac.java: prd_freq_scer_28, bg_freq_scer, prionhmm1). MIT License, Copyright (c) 2009-2014 Whitehead Institute for Biomedical Research; (c) 2011 Boston Biomedical Research Institute; (c) 2013 University of Massachusetts Medical School."
+  }
+}
