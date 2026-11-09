@@ -12,6 +12,7 @@ this module is exported from the protpy namespace.
 import copy
 import json
 import os
+import warnings
 from collections import Counter
 from functools import lru_cache
 
@@ -20,6 +21,7 @@ import pandas as pd
 
 from ._constants import amino_acids
 
+# data directory for protpy JSON data files (aa_scales.json, aaindex.json)
 _DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
 
 
@@ -87,7 +89,8 @@ def _scale_values(scale: str | dict) -> dict:
     Returns
     =======
     :values: dict
-        dict of scale values (a float or a list of floats) for each amino acid.
+        dict of scale values (a float or a list of floats) for each amino acid;
+        a copy for protpy tables, so callers cannot change the cached data.
 
     Raises
     ======
@@ -97,11 +100,18 @@ def _scale_values(scale: str | dict) -> dict:
     if isinstance(scale, dict):
         return scale
     tables = _read_json("aa_scales.json")
+    if scale == "eisenberg":
+        _warn_deprecated("scale='eisenberg'", "scale='eisenberg_arb1984' (the same table, AAindex EISD840101)")
+        scale = "eisenberg_arb1984"
     if scale in tables:
-        return tables[scale]["values"]
+        if tables[scale].get("experimental"):
+            warnings.warn(f"Scale '{scale}' is experimental: some of its values could not be checked against "
+                          "the primary paper (see 'source_note' in protpy/data/aa_scales.json).",
+                          UserWarning, stacklevel=3)
+        return copy.deepcopy(tables[scale]["values"])
     from .autocorrelation import _get_properties
     try:
-        return _get_properties(scale, normalize=False)[scale]
+        return _get_properties(scale)[scale]
     except ValueError:
         raise ValueError(f"Unknown scale '{scale}'. Use a protpy scale name {sorted(tables)}, "
                          "an AAindex1 accession code, or a {amino_acid: value} dict.") from None
@@ -307,11 +317,58 @@ def _runs(mask: np.ndarray, min_len: int = 1) -> list[tuple[int, int]]:
     return [(int(s), int(e)) for s, e in zip(edges[::2], edges[1::2]) if e - s >= min_len]
 
 
+def _warn_deprecated(old: str, new: str | None = None) -> None:
+    """
+    Emit a DeprecationWarning for a descriptor that will be removed in protpy 2.0.
+
+    Parameters
+    ==========
+    :old: str
+        name of the deprecated function or option.
+    :new: str | None (default=None)
+        what to use instead, if anything.
+    """
+    msg = f"{old} is deprecated and will be removed in protpy 2.0"
+    warnings.warn(msg + (f"; use {new} instead." if new else "."), DeprecationWarning, stacklevel=3)
+
+
+def _check_lag(name: str, lag, length: int, minimum: int = 1) -> int:
+    """
+    Validate a lag (or lamda/gap) against the sequence length. A lag needs at
+    least one residue pair, so it must be less than the length of the sequence.
+    This is the single lag policy of protpy: an invalid lag raises a ValueError
+    rather than being replaced by a default.
+
+    Parameters
+    ==========
+    :name: str
+        name of the parameter, used in the error message.
+    :lag: int
+        lag value.
+    :length: int
+        length of the sequence.
+    :minimum: int (default=1)
+        smallest allowed lag.
+
+    Returns
+    =======
+    :lag: int
+        validated lag.
+    """
+    from ._constants import _validate_int
+    lag = _validate_int(name, lag, minimum)
+    if lag >= length:
+        raise ValueError(f"{name} ({lag}) must be less than the sequence length ({length}); "
+                         f"pass a smaller {name} for short sequences.")
+    return lag
+
+
 def _to_df(values: list, columns: list[str]) -> pd.DataFrame:
     """
-    Convert a list of descriptor values into a single-row dataframe. Floats are
-    rounded to 3 decimal places and booleans and numpy integers are converted to
-    ints.
+    Convert a list of descriptor values into a single-row dataframe. Values are
+    not rounded (rounding is opt-in through the ``decimals`` argument of
+    all_descriptors and encode_dataset); booleans and numpy integers are converted
+    to ints and numpy floats to Python floats.
 
     Parameters
     ==========
@@ -326,6 +383,6 @@ def _to_df(values: list, columns: list[str]) -> pd.DataFrame:
         pandas dataframe of the descriptor values, of the shape 1 x N, where N is
         the number of values.
     """
-    values = [round(float(v), 3) if isinstance(v, (float, np.floating)) else
+    values = [float(v) if isinstance(v, (float, np.floating)) else
               int(v) if isinstance(v, (bool, np.bool_, np.integer)) else v for v in values]
     return pd.DataFrame([values], columns=columns)

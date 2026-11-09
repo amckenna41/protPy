@@ -96,9 +96,9 @@ class ProtpyEncodeTests(unittest.TestCase):
             'Expected last column to be {}, got {}.'.format(expected_last_col, list(all_desc_seq1.columns)[-1]))
         self.assertTrue(all_desc_seq1.any().isnull().sum() == 0,
             'Expected output to contain no null values.')
-        self.assertEqual(all_desc_seq1["A"].values[0], 6.693,
+        self.assertAlmostEqual(all_desc_seq1["A"].values[0], 6.693, 3,
             'Expected amino acid composition A value of 6.693 for seq1, got {}.'.format(all_desc_seq1["A"].values[0]))
-        self.assertEqual(all_desc_seq1["MBAuto_CIDH920105_1"].values[0], -0.052,
+        self.assertAlmostEqual(all_desc_seq1["MBAuto_CIDH920105_1"].values[0], -0.052, 3,
             'Expected MBAuto_CIDH920105_1 value of -0.052 for seq1, got {}.'.format(all_desc_seq1["MBAuto_CIDH920105_1"].values[0]))
         self.assertAlmostEqual(all_desc_seq1["QSO_Grant50"].values[0], 0.034943, places=5,
             msg='Expected QSO_Grant50 value of ~0.034943 for seq1, got {}.'.format(all_desc_seq1["QSO_Grant50"].values[0]))
@@ -115,9 +115,9 @@ class ProtpyEncodeTests(unittest.TestCase):
             'Expected last column to be {}, got {}.'.format(expected_last_col, list(all_desc_seq2.columns)[-1]))
         self.assertTrue(all_desc_seq2.any().isnull().sum() == 0,
             'Expected output to contain no null values.')
-        self.assertEqual(all_desc_seq2["A"].values[0], 8.057,
+        self.assertAlmostEqual(all_desc_seq2["A"].values[0], 8.057, 3,
             'Expected amino acid composition A value of 8.057 for seq2, got {}.'.format(all_desc_seq2["A"].values[0]))
-        self.assertEqual(all_desc_seq2["MBAuto_CIDH920105_1"].values[0], 0.228,
+        self.assertAlmostEqual(all_desc_seq2["MBAuto_CIDH920105_1"].values[0], 0.228, 3,
             'Expected MBAuto_CIDH920105_1 value of 0.228 for seq2, got {}.'.format(all_desc_seq2["MBAuto_CIDH920105_1"].values[0]))
         self.assertAlmostEqual(all_desc_seq2["QSO_Grant50"].values[0], 0.031915, places=5,
             msg='Expected QSO_Grant50 value of ~0.031915 for seq2, got {}.'.format(all_desc_seq2["QSO_Grant50"].values[0]))
@@ -134,9 +134,9 @@ class ProtpyEncodeTests(unittest.TestCase):
             'Expected last column to be {}, got {}.'.format(expected_last_col, list(all_desc_seq3.columns)[-1]))
         self.assertTrue(all_desc_seq3.any().isnull().sum() == 0,
             'Expected output to contain no null values.')
-        self.assertEqual(all_desc_seq3["A"].values[0], 5.263,
+        self.assertAlmostEqual(all_desc_seq3["A"].values[0], 5.263, 3,
             'Expected amino acid composition A value of 5.263 for seq3, got {}.'.format(all_desc_seq3["A"].values[0]))
-        self.assertEqual(all_desc_seq3["MBAuto_CIDH920105_1"].values[0], 0.212,
+        self.assertAlmostEqual(all_desc_seq3["MBAuto_CIDH920105_1"].values[0], 0.212, 3,
             'Expected MBAuto_CIDH920105_1 value of 0.212 for seq3, got {}.'.format(all_desc_seq3["MBAuto_CIDH920105_1"].values[0]))
         self.assertAlmostEqual(all_desc_seq3["QSO_Grant50"].values[0], 0.028037, places=5,
             msg='Expected QSO_Grant50 value of ~0.028037 for seq3, got {}.'.format(all_desc_seq3["QSO_Grant50"].values[0]))
@@ -153,9 +153,9 @@ class ProtpyEncodeTests(unittest.TestCase):
             'Expected last column to be {}, got {}.'.format(expected_last_col, list(all_desc_seq4.columns)[-1]))
         self.assertTrue(all_desc_seq4.any().isnull().sum() == 0,
             'Expected output to contain no null values.')
-        self.assertEqual(all_desc_seq4["A"].values[0], 8.831,
+        self.assertAlmostEqual(all_desc_seq4["A"].values[0], 8.831, 3,
             'Expected amino acid composition A value of 8.831 for seq4, got {}.'.format(all_desc_seq4["A"].values[0]))
-        self.assertEqual(all_desc_seq4["MBAuto_CIDH920105_1"].values[0], 0.246,
+        self.assertAlmostEqual(all_desc_seq4["MBAuto_CIDH920105_1"].values[0], 0.246, 3,
             'Expected MBAuto_CIDH920105_1 value of 0.246 for seq4, got {}.'.format(all_desc_seq4["MBAuto_CIDH920105_1"].values[0]))
         self.assertAlmostEqual(all_desc_seq4["QSO_Grant50"].values[0], 0.031954, places=5,
             msg='Expected QSO_Grant50 value of ~0.031954 for seq4, got {}.'.format(all_desc_seq4["QSO_Grant50"].values[0]))
@@ -207,7 +207,7 @@ class ProtpyEncodeTests(unittest.TestCase):
             charge_custom["PositiveCharge"].values[0],
             charge_default["PositiveCharge"].values[0],
             'Expected PositiveCharge to differ between ph=5.5 and ph=7.4 (default).')
-        self.assertEqual(charge_custom["PositiveCharge"].values[0], 110.396,
+        self.assertAlmostEqual(charge_custom["PositiveCharge"].values[0], 110.396, 3,
             'Expected PositiveCharge of 110.396 at ph=5.5 for seq1, got {}.'.format(
                 charge_custom["PositiveCharge"].values[0]))
 #3.) reduced lag on autocorrelation and sequence-order descriptors reduces feature count
@@ -264,11 +264,11 @@ class ProtpyEncodeTests(unittest.TestCase):
             protpy.all_descriptors(self.protein_seq1, params={'unknown_descriptor': {'k': 2}})
 #2.) a descriptor that takes no extra parameters raises ValueError
         with self.assertRaises(ValueError):
-            protpy.all_descriptors(self.protein_seq1, params={'amino_acid_composition': {}})
+            protpy.all_descriptors(self.protein_seq1, params={'molecular_weight': {}})
         with self.assertRaises(ValueError):
-            protpy.all_descriptors(self.protein_seq1, params={'conjoint_triad': {}})
+            protpy.all_descriptors(self.protein_seq1, params={'aromaticity': {}})
         with self.assertRaises(ValueError):
-            protpy.all_descriptors(self.protein_seq1, params={'gravy': {}})
+            protpy.all_descriptors(self.protein_seq1, params={'instability_index': {}})
 #3.) params of wrong type raises TypeError
         with self.assertRaises(TypeError):
             protpy.all_descriptors(self.protein_seq1, params="lag=15")

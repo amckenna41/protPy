@@ -6,8 +6,8 @@ import pandas as pd
 import numpy as np
 import os
 import unittest
+from tests._compare import frames_close
 import re
-from decimal import *
 from Bio import SeqIO
 unittest.TestLoader.sortTestMethodsUsing = None
 
@@ -78,70 +78,70 @@ class ProtpySequenceOrderTests(unittest.TestCase):
         lag = 15
         for i in range(lag):
 #1.)        #testing using schneider wrede distance matrix
-            socn1_grantham = protpy.sequence_order_coupling_number_(self.protein_seq1, i+1, self.distance_matrix_schneider_wrede)
+            socn1_grantham = protpy.sequence_order.sequence_order_coupling_number_(self.protein_seq1, i+1, self.distance_matrix_schneider_wrede)
             self.assertIsInstance(socn1_grantham, float, 
                 'Expected descriptor to be of type float, got {}.'.format(type(socn1_grantham)))
-            self.assertEqual(socn1_grantham, socn1_expected_grantham[i], 
+            self.assertAlmostEqual(socn1_grantham, socn1_expected_grantham[i], 3, 
                 "Output from function doesnt match expected:\n{}.".format(socn1_grantham))
 #2.)
-            socn2_grantham = protpy.sequence_order_coupling_number_(self.protein_seq2, i+1, self.distance_matrix_schneider_wrede)
+            socn2_grantham = protpy.sequence_order.sequence_order_coupling_number_(self.protein_seq2, i+1, self.distance_matrix_schneider_wrede)
             self.assertIsInstance(socn2_grantham, float, 
                 'Expected descriptor to be of type float, got {}.'.format(type(socn2_grantham)))
-            self.assertEqual(socn2_grantham, socn2_expected_grantham[i], 
+            self.assertAlmostEqual(socn2_grantham, socn2_expected_grantham[i], 3, 
                 "Output from function doesnt match expected:\n{}.".format(socn2_grantham))
 #3.)
-            socn3_grantham = protpy.sequence_order_coupling_number_(self.protein_seq3, i+1, self.distance_matrix_schneider_wrede)
+            socn3_grantham = protpy.sequence_order.sequence_order_coupling_number_(self.protein_seq3, i+1, self.distance_matrix_schneider_wrede)
             self.assertIsInstance(socn3_grantham, float, 
                 'Expected descriptor to be of type float, got {}.'.format(type(socn3_grantham)))
-            self.assertEqual(socn3_grantham, socn3_expected_grantham[i], 
+            self.assertAlmostEqual(socn3_grantham, socn3_expected_grantham[i], 3, 
                 "Output from function doesnt match expected:\n{}.".format(socn3_grantham))
 #4.)
-            socn4_grantham = protpy.sequence_order_coupling_number_(self.protein_seq4, i+1, self.distance_matrix_schneider_wrede)
+            socn4_grantham = protpy.sequence_order.sequence_order_coupling_number_(self.protein_seq4, i+1, self.distance_matrix_schneider_wrede)
             self.assertIsInstance(socn4_grantham, float, 
                 'Expected descriptor to be of type float, got {}.'.format(type(socn4_grantham)))
-            self.assertEqual(socn4_grantham, socn4_expected_grantham[i], 
+            self.assertAlmostEqual(socn4_grantham, socn4_expected_grantham[i], 3, 
                 "Output from function doesnt match expected:\n{}.".format(socn4_grantham))
 #5.)        #testing using grantham distance matrix
-            socn1_sw = protpy.sequence_order_coupling_number_(self.protein_seq1, i+1, self.distance_matrix_grantham)
+            socn1_sw = protpy.sequence_order.sequence_order_coupling_number_(self.protein_seq1, i+1, self.distance_matrix_grantham)
             self.assertIsInstance(socn1_sw, float, 
                 'Expected descriptor to be of type float, got {}.'.format(type(socn1_sw)))
-            self.assertEqual(socn1_sw, socn1_expected_sw[i], 
+            self.assertAlmostEqual(socn1_sw, socn1_expected_sw[i], 3, 
                 "Output from function doesnt match expected:\n{}.".format(socn1_sw))
 #6.)
-            socn2_sw = protpy.sequence_order_coupling_number_(self.protein_seq2, i+1, self.distance_matrix_grantham)
+            socn2_sw = protpy.sequence_order.sequence_order_coupling_number_(self.protein_seq2, i+1, self.distance_matrix_grantham)
             self.assertIsInstance(socn2_sw, float, 
                 'Expected descriptor to be of type float, got {}.'.format(type(socn2_sw)))
-            self.assertEqual(socn2_sw, socn2_expected_sw[i], 
+            self.assertAlmostEqual(socn2_sw, socn2_expected_sw[i], 3, 
                 "Output from function doesnt match expected:\n{}.".format(socn2_sw))
 #7.)
-            socn3_sw = protpy.sequence_order_coupling_number_(self.protein_seq3, i+1, self.distance_matrix_grantham)
+            socn3_sw = protpy.sequence_order.sequence_order_coupling_number_(self.protein_seq3, i+1, self.distance_matrix_grantham)
             self.assertIsInstance(socn3_sw, float, 
                 'Expected descriptor to be of type float, got {}.'.format(type(socn3_sw)))
-            self.assertEqual(socn3_sw, socn3_expected_sw[i], 
+            self.assertAlmostEqual(socn3_sw, socn3_expected_sw[i], 3, 
                 "Output from function doesnt match expected:\n{}.".format(socn3_sw))
 #8.)
-            socn4_sw = protpy.sequence_order_coupling_number_(self.protein_seq4, i+1, self.distance_matrix_grantham)
+            socn4_sw = protpy.sequence_order.sequence_order_coupling_number_(self.protein_seq4, i+1, self.distance_matrix_grantham)
             self.assertIsInstance(socn4_sw, float, 
                 'Expected descriptor to be of type float, got {}.'.format(type(socn4_sw)))
-            self.assertEqual(socn4_sw, socn4_expected_sw[i], 
+            self.assertAlmostEqual(socn4_sw, socn4_expected_sw[i], 3, 
                 "Output from function doesnt match expected:\n{}.".format(socn4_sw))
 #9.)
             invalid_seq5 = "ABCDEF"
             invalid_seq6 = "OOOOO"
             with self.assertRaises(ValueError):
-                socn_seq5 = protpy.sequence_order_coupling_number_(invalid_seq5, i+1, 
+                socn_seq5 = protpy.sequence_order.sequence_order_coupling_number_(invalid_seq5, i+1, 
                     distance_matrix=self.distance_matrix_schneider_wrede)
             with self.assertRaises(ValueError):
-                socn_seq6 = protpy.sequence_order_coupling_number_(invalid_seq6, i+1, 
+                socn_seq6 = protpy.sequence_order.sequence_order_coupling_number_(invalid_seq6, i+1, 
                     distance_matrix=self.distance_matrix_grantham)
 #10.)
             invalid_seq7 = 1234
             invalid_seq8 = False
             with self.assertRaises(TypeError):
-                socn_seq7 = protpy.sequence_order_coupling_number_(invalid_seq7, i+1, 
+                socn_seq7 = protpy.sequence_order.sequence_order_coupling_number_(invalid_seq7, i+1, 
                     distance_matrix=self.distance_matrix_grantham)
             with self.assertRaises(TypeError):
-                socn_seq8 = protpy.sequence_order_coupling_number_(invalid_seq8, i+1, 
+                socn_seq8 = protpy.sequence_order.sequence_order_coupling_number_(invalid_seq8, i+1, 
                     distance_matrix=self.distance_matrix_grantham)
 
     def test_sequence_order_coupling_number(self):
@@ -158,7 +158,7 @@ class ProtpySequenceOrderTests(unittest.TestCase):
             'Expected output to be a DataFrame, got {}.'.format(type(socn_seq1)))
         self.assertEqual(socn_seq1.shape, (1, lag), 
             'Expected output to be of shape 1 x 5, got {}.'.format(socn_seq1.shape)) 
-        self.assertTrue(socn_seq1.iloc[:, : 5].equals(socn_seq1_expected_values), 
+        self.assertTrue(frames_close(socn_seq1.iloc[:, : 5], socn_seq1_expected_values), 
             "Output did not match expected values, got\n{}.".format(socn_seq1.iloc[:, : 10]))
         for col in list(socn_seq1.columns):
             #check all columns follow pattern of SOCNX or SOCNXY where x & y integers between 0 and 9
@@ -180,7 +180,7 @@ class ProtpySequenceOrderTests(unittest.TestCase):
             'Expected output to be a DataFrame, got {}.'.format(type(socn_seq2)))
         self.assertEqual(socn_seq2.shape, (1, lag), 
             'Expected output to be of shape 1 x 10, got {}.'.format(socn_seq2.shape)) 
-        self.assertTrue(socn_seq2.iloc[:, : 10].equals(socn_seq2_expected_values), 
+        self.assertTrue(frames_close(socn_seq2.iloc[:, : 10], socn_seq2_expected_values), 
             "Output did not match expected values, got\n{}.".format(socn_seq2.iloc[:, : 10]))
         for col in list(socn_seq2.columns):
             #check all columns follow pattern of SOCNX or SOCNXY where x & y integers between 0 and 9
@@ -202,7 +202,7 @@ class ProtpySequenceOrderTests(unittest.TestCase):
             'Expected output to be a DataFrame, got {}.'.format(type(socn_seq3)))
         self.assertEqual(socn_seq3.shape, (1, lag), 
             'Expected output to be of shape 1 x 15, got {}.'.format(socn_seq3.shape)) 
-        self.assertTrue(socn_seq3.iloc[:, : 10].equals(socn_seq3_expected_values), 
+        self.assertTrue(frames_close(socn_seq3.iloc[:, : 10], socn_seq3_expected_values), 
             "Output did not match expected values, got\n{}.".format(socn_seq3.iloc[:, : 10]))
         for col in list(socn_seq3.columns):
             #check all columns follow pattern of SOCNX or SOCNXY where x & y integers between 0 and 9
@@ -213,27 +213,15 @@ class ProtpySequenceOrderTests(unittest.TestCase):
         self.assertTrue(all(col == np.float64 for col in list(socn_seq3.dtypes)), 
             "Descriptor dataframe dtypes expected to be np.float64, got {}.".format(list(socn_seq3.dtypes)))
 #4.)
-        invalid_lag = 500 #greater than len of protein sequence
-        socn_seq4 = protpy.sequence_order_coupling_number(self.protein_seq4, lag=invalid_lag, 
-            distance_matrix=self.distance_matrix_schneider_wrede)
-        #testing first 10 columns 
-        socn_seq4_expected_values = pd.DataFrame(columns=["SOCN_SW1", "SOCN_SW2", "SOCN_SW3", "SOCN_SW4", "SOCN_SW5", "SOCN_SW6", "SOCN_SW7", "SOCN_SW8", "SOCN_SW9", "SOCN_SW10"])
-        socn_seq4_expected_values.loc[0] = [138.258, 142.37, 137.803, 139.443, 148.422, 146.01, 146.63, 149.337, 150.478, 148.856]
-
-        self.assertIsInstance(socn_seq4, pd.DataFrame, 
-            'Expected output to be a DataFrame, got {}.'.format(type(socn_seq4)))
-        self.assertEqual(socn_seq4.shape, (1, 30), 
-            'Expected output to be of shape 1 x 30, got {}.'.format(socn_seq4.shape)) 
-        self.assertTrue(socn_seq4.iloc[:, : 10].equals(socn_seq4_expected_values), 
-            "Output did not match expected values, got\n{}.".format(socn_seq4.iloc[:, : 10]))
-        for col in list(socn_seq4.columns):
-            #check all columns follow pattern of SOCNX or SOCNXY where x & y integers between 0 and 9
-            self.assertTrue((bool(re.match(r'SOCN_SW[0-9]', col)) or bool(re.match(r'SOCN_SW[0-9][0-9]', col))), 
-                "Column name doesn't match expected regex pattern: {}.".format(col))     
-        self.assertTrue(socn_seq4.any().isnull().sum()==0, 
-            'Expected output to contain no null values.')        
-        self.assertTrue(all(col == np.float64 for col in list(socn_seq4.dtypes)), 
-            "Descriptor dataframe dtypes expected to be np.float64, got {}.".format(list(socn_seq4.dtypes)))
+        #a lag that is not less than the sequence length raises (v1.6.0 lag policy; it used to fall back to 30)
+        with self.assertRaises(ValueError):
+            protpy.sequence_order_coupling_number(self.protein_seq4, lag=500,
+                distance_matrix=self.distance_matrix_schneider_wrede)
+        #normalize=True divides tau_d by the number of pairs L - d
+        socn_norm = protpy.sequence_order_coupling_number(self.protein_seq4, lag=5, normalize=True)
+        socn_raw = protpy.sequence_order_coupling_number(self.protein_seq4, lag=5)
+        for d in range(1, 6):
+            self.assertAlmostEqual(socn_norm.iloc[0, d - 1], socn_raw.iloc[0, d - 1] / (len(self.protein_seq4) - d), 9)
 #5.)
         invalid_seq5 = "ABCDEF"
         invalid_seq6 = "OOOOO"
@@ -270,7 +258,7 @@ class ProtpySequenceOrderTests(unittest.TestCase):
             'Expected output to be a DataFrame, got {}.'.format(type(socn_all_seq1)))
         self.assertEqual(socn_all_seq1.shape, (1, lag*2), 
             'Expected output to be of shape {}, got {}.'.format((1, lag*2), socn_all_seq1.shape))
-        self.assertTrue(socn_all_seq1.iloc[:, : 10].equals(socn_all_seq1_expected_values), 
+        self.assertTrue(frames_close(socn_all_seq1.iloc[:, : 10], socn_all_seq1_expected_values), 
             "Output did not match expected values, got\n{}.".format(socn_all_seq1.iloc[:, : 10]))
         for col in list(socn_all_seq1.columns):
             #check all columns follow pattern of SOCNX or SOCNXY where x & y integers between 0 and 9
@@ -292,7 +280,7 @@ class ProtpySequenceOrderTests(unittest.TestCase):
             'Expected output to be a DataFrame, got {}.'.format(type(socn_all_seq2)))
         self.assertEqual(socn_all_seq2.shape, (1, lag*2), 
             'Expected output to be of shape {}, got {}.'.format((1, lag*2), socn_all_seq2.shape))
-        self.assertTrue(socn_all_seq2.iloc[:, : 10].equals(socn_all_seq2_expected_values), 
+        self.assertTrue(frames_close(socn_all_seq2.iloc[:, : 10], socn_all_seq2_expected_values), 
             "Output did not match expected values, got\n{}.".format(socn_all_seq2.iloc[:, : 10]))
         for col in list(socn_all_seq2.columns):
             #check all columns follow pattern of SOCNX or SOCNXY where x & y integers between 0 and 9
@@ -314,7 +302,7 @@ class ProtpySequenceOrderTests(unittest.TestCase):
             'Expected output to be a DataFrame, got {}.'.format(type(socn_all_seq3)))
         self.assertEqual(socn_all_seq3.shape, (1, lag*2), 
             'Expected output to be of shape {}, got {}.'.format((1, lag*2), socn_all_seq3.shape)) 
-        self.assertTrue(socn_all_seq3.iloc[:, : 10].equals(socn_all_seq3_expected_values), 
+        self.assertTrue(frames_close(socn_all_seq3.iloc[:, : 10], socn_all_seq3_expected_values), 
             "Output did not match expected values, got\n{}.".format(socn_all_seq3.iloc[:, : 10]))
         for col in list(socn_all_seq3.columns):
             #check all columns follow pattern of SOCNX or SOCNXY where x & y integers between 0 and 9
@@ -336,7 +324,7 @@ class ProtpySequenceOrderTests(unittest.TestCase):
             'Expected output to be a DataFrame, got {}.'.format(type(socn_all_seq4)))
         self.assertEqual(socn_all_seq4.shape, (1, lag*2), 
             'Expected output to be of shape {}, got {}.'.format((1, lag*2), socn_all_seq4.shape))
-        self.assertTrue(socn_all_seq4.iloc[:, : 10].equals(socn_all_seq4_expected_values), 
+        self.assertTrue(frames_close(socn_all_seq4.iloc[:, : 10], socn_all_seq4_expected_values), 
             "Output did not match expected values, got\n{}.".format(socn_all_seq4.iloc[:, : 10]))
         for col in list(socn_all_seq4.columns):
             #check all columns follow pattern of SOCNX or SOCNXY where x & y integers between 0 and 9
@@ -362,6 +350,14 @@ class ProtpySequenceOrderTests(unittest.TestCase):
         with self.assertRaises(TypeError):
             socn_all_seq7 = protpy.sequence_order_coupling_number_all(invalid_seq7, lag=lag)
 
+    def test_quasi_sequence_order_sums_to_one(self):
+        """QSO composition terms are fractions, so the 20 + lag values sum to 1 (fixed in v1.6.0)."""
+        for seq in (self.protein_seq1, self.protein_seq2, self.protein_seq3, self.protein_seq4):
+            self.assertAlmostEqual(protpy.quasi_sequence_order(seq).sum(axis=1).iloc[0], 1.0, 9)
+            both = protpy.quasi_sequence_order(seq, distance_matrix="both")
+            self.assertEqual(both.shape, (1, 100))
+            self.assertAlmostEqual(both.sum(axis=1).iloc[0], 2.0, 9)
+
     def test_quasi_sequence_order(self):
         """ Testing quasi sequence order descriptor attributes and functionality. """
 #1.)    #testing using distance_matrix_schneider_wrede distance matrix
@@ -370,13 +366,13 @@ class ProtpySequenceOrderTests(unittest.TestCase):
             distance_matrix=self.distance_matrix_schneider_wrede)
         #testing first 10 columns 
         quasi_sequence_order_seq1_expected_values = pd.DataFrame(columns=["QSO_SW1", "QSO_SW2", "QSO_SW3", "QSO_SW4", "QSO_SW5", "QSO_SW6", "QSO_SW7", "QSO_SW8", "QSO_SW9", "QSO_SW10"])
-        quasi_sequence_order_seq1_expected_values.loc[0] = [0.005692, 0.002643, 0.004947, 0.002846, 0.005625, 0.005354, 0.001016, 0.005286, 0.004066, 0.006708]
+        quasi_sequence_order_seq1_expected_values.loc[0] = [5.692e-05, 2.643e-05, 4.947e-05, 2.846e-05, 5.625e-05, 5.354e-05, 1.016e-05, 5.286e-05, 4.066e-05, 6.708e-05]
 
         self.assertIsInstance(quasi_sequence_order_seq1, pd.DataFrame,
             'Expected output to be a DataFrame, got {}.'.format(type(quasi_sequence_order_seq1)))
         self.assertEqual(quasi_sequence_order_seq1.shape, (1, lag+20), 
             'Expected output to be of shape 1 x 50, got {}.'.format(quasi_sequence_order_seq1.shape))
-        self.assertTrue(quasi_sequence_order_seq1.iloc[:, : 10].equals(quasi_sequence_order_seq1_expected_values), 
+        self.assertTrue(frames_close(quasi_sequence_order_seq1.iloc[:, : 10], quasi_sequence_order_seq1_expected_values, atol=1e-6), 
             "Output did not match expected values, got\n{}.".format(quasi_sequence_order_seq1.iloc[:, : 10]))
         for col in list(quasi_sequence_order_seq1.columns):
             #check all columns follow pattern of SOCNX or SOCNXY where x & y integers between 0 and 9
@@ -392,13 +388,13 @@ class ProtpySequenceOrderTests(unittest.TestCase):
             distance_matrix=self.distance_matrix_schneider_wrede)
         #testing first 10 columns 
         quasi_sequence_order_seq2_expected_values = pd.DataFrame(columns=["QSO_SW1", "QSO_SW2", "QSO_SW3", "QSO_SW4", "QSO_SW5", "QSO_SW6", "QSO_SW7", "QSO_SW8", "QSO_SW9", "QSO_SW10"])
-        quasi_sequence_order_seq2_expected_values.loc[0] = [0.027474, 0.0, 0.017776, 0.011314, 0.010506, 0.036364, 0.004041, 0.00889, 0.023434, 0.021009]
+        quasi_sequence_order_seq2_expected_values.loc[0] = [0.00027474, 0.0, 0.00017776, 0.00011314, 0.00010506, 0.00036364, 4.041e-05, 8.89e-05, 0.00023434, 0.00021009]
 
         self.assertIsInstance(quasi_sequence_order_seq2, pd.DataFrame,
             'Expected output to be a DataFrame, got {}.'.format(type(quasi_sequence_order_seq2)))
         self.assertEqual(quasi_sequence_order_seq2.shape, (1, lag+20), 
             'Expected output to be of shape 1 x 40, got {}.'.format(quasi_sequence_order_seq2.shape)) 
-        self.assertTrue(quasi_sequence_order_seq2.iloc[:, : 10].equals(quasi_sequence_order_seq2_expected_values), 
+        self.assertTrue(frames_close(quasi_sequence_order_seq2.iloc[:, : 10], quasi_sequence_order_seq2_expected_values, atol=1e-6), 
             "Output did not match expected values, got\n{}.".format(quasi_sequence_order_seq2.iloc[:, : 10]))
         for col in list(quasi_sequence_order_seq2.columns):
             #check all columns follow pattern of SOCNX or SOCNXY where x & y integers between 0 and 9
@@ -414,13 +410,13 @@ class ProtpySequenceOrderTests(unittest.TestCase):
             distance_matrix=self.distance_matrix_schneider_wrede)
         #testing first 10 columns 
         quasi_sequence_order_seq3_expected_values = pd.DataFrame(columns=["QSO_SW1", "QSO_SW2", "QSO_SW3", "QSO_SW4", "QSO_SW5", "QSO_SW6", "QSO_SW7", "QSO_SW8", "QSO_SW9", "QSO_SW10"])
-        quasi_sequence_order_seq3_expected_values.loc[0] = [0.310006, 0.23249, 0.077516, 0.23249, 0.310006, 0.155032, 0.0, 0.23249, 0.155032, 1.08505]
+        quasi_sequence_order_seq3_expected_values.loc[0] = [0.00310006, 0.0023249, 0.00077516, 0.0023249, 0.00310006, 0.00155032, 0.0, 0.0023249, 0.00155032, 0.0108505]
 
         self.assertIsInstance(quasi_sequence_order_seq3, pd.DataFrame,
             'Expected output to be a DataFrame, got {}.'.format(type(quasi_sequence_order_seq3)))
         self.assertEqual(quasi_sequence_order_seq3.shape, (1, lag+20), 
             'Expected output to be of shape 1 x 30, got {}.'.format(quasi_sequence_order_seq3.shape)) 
-        self.assertTrue(quasi_sequence_order_seq3.iloc[:, : 10].equals(quasi_sequence_order_seq3_expected_values), 
+        self.assertTrue(frames_close(quasi_sequence_order_seq3.iloc[:, : 10], quasi_sequence_order_seq3_expected_values, atol=1e-6), 
             "Output did not match expected values, got\n{}.".format(quasi_sequence_order_seq3.iloc[:, : 10]))
         for col in list(quasi_sequence_order_seq3.columns):
             #check all columns follow pattern of SOCNX or SOCNXY where x & y integers between 0 and 9
@@ -436,13 +432,13 @@ class ProtpySequenceOrderTests(unittest.TestCase):
             distance_matrix=self.distance_matrix_schneider_wrede)
         #testing first 10 columns 
         quasi_sequence_order_seq4_expected_values = pd.DataFrame(columns=["QSO_SW1", "QSO_SW2", "QSO_SW3", "QSO_SW4", "QSO_SW5", "QSO_SW6", "QSO_SW7", "QSO_SW8", "QSO_SW9", "QSO_SW10"])
-        quasi_sequence_order_seq4_expected_values.loc[0] = [0.123287, 0.0, 0.079967, 0.039983, 0.04332, 0.143279, 0.013332, 0.046643, 0.103295, 0.089963]
+        quasi_sequence_order_seq4_expected_values.loc[0] = [0.00123287, 0.0, 0.00079967, 0.00039983, 0.0004332, 0.00143279, 0.00013332, 0.00046643, 0.00103295, 0.00089963]
 
         self.assertIsInstance(quasi_sequence_order_seq4, pd.DataFrame,
             'Expected output to be a DataFrame, got {}.'.format(type(quasi_sequence_order_seq4)))
         self.assertEqual(quasi_sequence_order_seq4.shape, (1, lag+20), 
             'Expected output to be of shape 1 x 25, got {}.'.format(quasi_sequence_order_seq4.shape)) 
-        self.assertTrue(quasi_sequence_order_seq4.iloc[:, : 10].equals(quasi_sequence_order_seq4_expected_values), 
+        self.assertTrue(frames_close(quasi_sequence_order_seq4.iloc[:, : 10], quasi_sequence_order_seq4_expected_values, atol=1e-6), 
             "Output did not match expected values, got\n{}.".format(quasi_sequence_order_seq4.iloc[:, : 10]))
         for col in list(quasi_sequence_order_seq4.columns):
             #check all columns follow pattern of SOCNX or SOCNXY where x & y integers between 0 and 9
@@ -482,13 +478,13 @@ class ProtpySequenceOrderTests(unittest.TestCase):
         qso_all_seq1 = protpy.quasi_sequence_order_all(self.protein_seq1, lag=lag)
         #testing first 10 columns 
         qso_all_seq1_expected_values = pd.DataFrame(columns=["QSO_SW1", "QSO_SW2", "QSO_SW3", "QSO_SW4", "QSO_SW5", "QSO_SW6", "QSO_SW7", "QSO_SW8", "QSO_SW9", "QSO_SW10"])
-        qso_all_seq1_expected_values.loc[0] = [0.005692, 0.002643, 0.004947, 0.002846, 0.005625, 0.005354, 0.001016, 0.005286, 0.004066, 0.006708]
+        qso_all_seq1_expected_values.loc[0] = [5.692e-05, 2.643e-05, 4.947e-05, 2.846e-05, 5.625e-05, 5.354e-05, 1.016e-05, 5.286e-05, 4.066e-05, 6.708e-05]
 
         self.assertIsInstance(qso_all_seq1, pd.DataFrame, 
             'Expected output to be a DataFrame, got {}.'.format(type(qso_all_seq1)))
         self.assertEqual(qso_all_seq1.shape, (1, (lag+20)*2),
-            'Expected output to be of shape 1 x 100, got {}.'.format((1, (lag+20)*2), qso_all_seq1.shape)) 
-        self.assertTrue(qso_all_seq1.iloc[:, : 10].equals(qso_all_seq1_expected_values), 
+            'Expected output to be of shape {}, got {}.'.format((1, (lag+20)*2), qso_all_seq1.shape)) 
+        self.assertTrue(frames_close(qso_all_seq1.iloc[:, : 10], qso_all_seq1_expected_values, atol=1e-6), 
             "Output did not match expected values, got\n{}.".format(qso_all_seq1.iloc[:, : 10]))
         for col in list(qso_all_seq1.columns):
             #check all columns follow pattern of SOCNX or SOCNXY where x & y integers between 0 and 9
@@ -504,13 +500,13 @@ class ProtpySequenceOrderTests(unittest.TestCase):
         qso_all_seq2 = protpy.quasi_sequence_order_all(self.protein_seq2, lag=lag)
         #testing first 10 columns 
         qso_all_seq2_expected_values = pd.DataFrame(columns=["QSO_SW1", "QSO_SW2", "QSO_SW3", "QSO_SW4", "QSO_SW5", "QSO_SW6", "QSO_SW7", "QSO_SW8", "QSO_SW9", "QSO_SW10"])
-        qso_all_seq2_expected_values.loc[0] = [0.03651, 0.0, 0.023622, 0.015035, 0.013961, 0.048323, 0.00537, 0.011813, 0.03114, 0.027918]
+        qso_all_seq2_expected_values.loc[0] = [0.0003651, 0.0, 0.00023622, 0.00015035, 0.00013961, 0.00048323, 5.37e-05, 0.00011813, 0.0003114, 0.00027918]
 
         self.assertIsInstance(qso_all_seq2, pd.DataFrame, 
             'Expected output to be a DataFrame, got {}.'.format(type(qso_all_seq2)))
         self.assertEqual(qso_all_seq2.shape, (1, (lag+20)*2),
             'Expected output to be of shape 1 x 70, got {}.'.format((1, (lag+20)*2), qso_all_seq2.shape)) 
-        self.assertTrue(qso_all_seq2.iloc[:, : 10].equals(qso_all_seq2_expected_values), 
+        self.assertTrue(frames_close(qso_all_seq2.iloc[:, : 10], qso_all_seq2_expected_values, atol=1e-6), 
             "Output did not match expected values, got\n{}.".format(qso_all_seq2.iloc[:, : 10]))
         for col in list(qso_all_seq2.columns):
             #check all columns follow pattern of SOCNX or SOCNXY where x & y integers between 0 and 9
@@ -526,13 +522,13 @@ class ProtpySequenceOrderTests(unittest.TestCase):
         qso_all_seq3 = protpy.quasi_sequence_order_all(self.protein_seq3, lag=lag)
         #testing first 10 columns 
         qso_all_seq3_expected_values = pd.DataFrame(columns=["QSO_SW1", "QSO_SW2", "QSO_SW3", "QSO_SW4", "QSO_SW5", "QSO_SW6", "QSO_SW7", "QSO_SW8", "QSO_SW9", "QSO_SW10"])
-        qso_all_seq3_expected_values.loc[0] = [0.310006, 0.23249, 0.077516, 0.23249, 0.310006, 0.155032, 0.0, 0.23249, 0.155032, 1.08505]
+        qso_all_seq3_expected_values.loc[0] = [0.00310006, 0.0023249, 0.00077516, 0.0023249, 0.00310006, 0.00155032, 0.0, 0.0023249, 0.00155032, 0.0108505]
 
         self.assertIsInstance(qso_all_seq3, pd.DataFrame, 
             'Expected output to be a DataFrame, got {}.'.format(type(qso_all_seq3)))
         self.assertEqual(qso_all_seq3.shape, (1, (lag+20)*2),
             'Expected output to be of shape 1 x 60, got {}.'.format((1, (lag+20)*2), qso_all_seq3.shape)) 
-        self.assertTrue(qso_all_seq3.iloc[:, : 10].equals(qso_all_seq3_expected_values), 
+        self.assertTrue(frames_close(qso_all_seq3.iloc[:, : 10], qso_all_seq3_expected_values, atol=1e-6), 
             "Output did not match expected values, got\n{}.".format(qso_all_seq3.iloc[:, : 10]))
         for col in list(qso_all_seq3.columns):
             #check all columns follow pattern of SOCNX or SOCNXY where x & y integers between 0 and 9
@@ -548,13 +544,13 @@ class ProtpySequenceOrderTests(unittest.TestCase):
         qso_all_seq4 = protpy.quasi_sequence_order_all(self.protein_seq4, lag=lag)
         #testing first 10 columns 
         qso_all_seq4_expected_values = pd.DataFrame(columns=["QSO_SW1", "QSO_SW2", "QSO_SW3", "QSO_SW4", "QSO_SW5", "QSO_SW6", "QSO_SW7", "QSO_SW8", "QSO_SW9", "QSO_SW10"])
-        qso_all_seq4_expected_values.loc[0] = [0.123287, 0.0, 0.079967, 0.039983, 0.04332, 0.143279, 0.013332, 0.046643, 0.103295, 0.089963]
+        qso_all_seq4_expected_values.loc[0] = [0.00123287, 0.0, 0.00079967, 0.00039983, 0.0004332, 0.00143279, 0.00013332, 0.00046643, 0.00103295, 0.00089963]
 
         self.assertIsInstance(qso_all_seq4, pd.DataFrame, 
             'Expected output to be a DataFrame, got {}.'.format(type(qso_all_seq4)))
         self.assertEqual(qso_all_seq4.shape, (1, (lag+20)*2),
             'Expected output to be of shape 1 x 50, got {}.'.format((1, (lag+20)*2), qso_all_seq4.shape)) 
-        self.assertTrue(qso_all_seq4.iloc[:, : 10].equals(qso_all_seq4_expected_values), 
+        self.assertTrue(frames_close(qso_all_seq4.iloc[:, : 10], qso_all_seq4_expected_values, atol=1e-6), 
             "Output did not match expected values, got\n{}.".format(qso_all_seq4.iloc[:, : 10]))
         for col in list(qso_all_seq4.columns):
             #check all columns follow pattern of SOCNX or SOCNXY where x & y integers between 0 and 9

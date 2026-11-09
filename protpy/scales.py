@@ -57,12 +57,14 @@ import numpy as np
 import pandas as pd
 
 from ._constants import _validate_sequence, _validate_int
-from ._helpers import _property_matrix, _read_json, _to_df
+from ._helpers import _property_matrix, _read_json, _to_df, _warn_deprecated
+from .autocorrelation import default_properties_
 
 __all__ = [
-    "aa_scale_descriptors", "z_scales_5", "vhse", "atchley_factors", "t_scales", "st_scales",
-    "protfp", "fasgai", "blosum_indices", "ms_whim", "auto_cross_covariance",
-    "physicochemical_distance_transformation",
+    "aa_scale_descriptors", "auto_cross_covariance",
+    #deprecated, removed in protpy 2.0
+    "z_scales_5", "vhse", "atchley_factors", "t_scales", "st_scales",
+    "protfp", "fasgai", "blosum_indices", "ms_whim", "physicochemical_distance_transformation",
 ]
 
 #factor-scale families: name -> column abbreviation
@@ -78,20 +80,17 @@ factor_scales_ = {
     "ms_whim": "MSWHIM",
 }
 
-#default AAindex properties for PDT (same 8 as the autocorrelation descriptors)
-_default_pdt_properties = ["CIDH920105", "BHAR880101", "CHAM820101", "CHAM820102",
-    "CHOC760101", "BIGC670101", "CHAM810101", "DAYM780201"]
 
 ################################## Factor Scale Descriptors ###############################
 
-def aa_scale_descriptors(sequence: str, scale: str, domains: int = 1) -> pd.DataFrame:
+def aa_scale_descriptors(sequence: str, scale: str, domains: int = 1, mode: str = "mean") -> pd.DataFrame:
     """
     Calculate an amino acid factor-scale descriptor of protein sequence. Factor
     scales describe each amino acid with a small number of values (dimensions)
     derived from many physicochemical properties, typically by principal component
     or factor analysis [1-9]. Each amino acid in the sequence is replaced by its
-    d-dimensional scale vector and the mean of each dimension is taken over the
-    sequence, calculated as:
+    d-dimensional scale vector and, with mode="mean", the mean of each dimension is
+    taken over the sequence, calculated as:
 
     S_j = (1/L) * sum_i z_j(s_i)
 
@@ -99,7 +98,17 @@ def aa_scale_descriptors(sequence: str, scale: str, domains: int = 1) -> pd.Data
     the value of dimension j for the amino acid at position i and L is the length
     of the sequence. With domains > 1 the sequence is split into that many
     near-equal contiguous segments and the means of each segment are concatenated.
-    The individual scales are also available as their own functions, e.g. vhse().
+
+    The sequence mean is an exact linear function of the amino acid composition,
+    so it adds no information to it; the scales were benchmarked as per-residue
+    encodings of binding sites or mutated positions [6]. ``mode="position"``
+    returns that encoding: the d values of every position, concatenated (1 x L*d),
+    which needs aligned sequences of equal length (e.g. a mutant library).
+
+    The z_scales_5, vhse, st_scales and fasgai tables are experimental: some of
+    their transcribed values could not be checked against the primary papers, and
+    using them raises a UserWarning (see protpy/data/aa_scales.json). The ST-scales
+    also ranked last of 13 sets in [6].
 
     Parameters
     ==========
@@ -110,32 +119,39 @@ def aa_scale_descriptors(sequence: str, scale: str, domains: int = 1) -> pd.Data
         "t_scales", "st_scales", "protfp", "fasgai", "blosum_indices" or "ms_whim".
     :domains: int (default=1)
         number of near-equal segments of the sequence to calculate the means over,
-        at most the length of the sequence.
+        at most the length of the sequence (mode="mean" only).
+    :mode: str (default="mean")
+        "mean" (sequence or domain means) or "position" (per-residue values).
 
     Returns
     =======
     :scale_df: pd.DataFrame
-        pandas dataframe of factor-scale values for protein sequence. Dataframe
-        will be of the shape 1 x d * domains, where d is the number of dimensions
-        of the scale, d * domains is the number of features calculated from the
-        descriptor and 1 is the input sequence. Column names are of the form
-        ABBR_j, or ABBR_j_dk when domains > 1, e.g. VHSE_1 or VHSE_1_d2.
+        pandas dataframe of factor-scale values for protein sequence. With
+        mode="mean" the dataframe is of the shape 1 x d * domains, where d is the
+        number of dimensions of the scale, with column names ABBR_j, or ABBR_j_dk
+        when domains > 1, e.g. VHSE_1 or VHSE_1_d2. With mode="position" it is
+        1 x L * d, with column names ABBR_j_pi, e.g. VHSE_1_p1.
     """
     #validate input protein sequence
     sequence = _validate_sequence(sequence)
     if scale not in factor_scales_:
         raise ValueError(f"Invalid scale '{scale}'. Valid scales are: {list(factor_scales_)}.")
+    if mode not in ("mean", "position"):
+        raise ValueError(f"Invalid mode '{mode}'. Valid modes are: ['mean', 'position'].")
     domains = _validate_int("domains", domains, 1)
     if domains > len(sequence):
         raise ValueError(f"domains ({domains}) cannot exceed the sequence length ({len(sequence)}).")
 
     abbr = factor_scales_[scale]
     matrix = _property_matrix(sequence, scale)
+    dims = range(1, matrix.shape[1] + 1)
+    if mode == "position":
+        return _to_df(list(matrix.ravel()), [f"{abbr}_{j}_p{i}" for i in range(1, len(sequence) + 1) for j in dims])
     values, columns = [], []
     for k, segment in enumerate(np.array_split(matrix, domains), start=1):
         values += list(segment.mean(axis=0))
         suffix = f"_d{k}" if domains > 1 else ""
-        columns += [f"{abbr}_{j}{suffix}" for j in range(1, matrix.shape[1] + 1)]
+        columns += [f"{abbr}_{j}{suffix}" for j in dims]
     return _to_df(values, columns)
 
 
@@ -157,6 +173,9 @@ def z_scales_5(sequence: str, domains: int = 1) -> pd.DataFrame:
     domains > 1 the sequence is split into that many near-equal segments and the
     means of each segment are concatenated.
 
+    Deprecated since v1.6.0, removed in 2.0: use
+    ``aa_scale_descriptors(sequence, "z_scales_5")``.
+
     Parameters
     ==========
     :sequence: str
@@ -173,6 +192,7 @@ def z_scales_5(sequence: str, domains: int = 1) -> pd.DataFrame:
         1 is the input sequence. Column names are of the form Z5_j, or
         Z5_j_dk when domains > 1.
     """
+    _warn_deprecated("z_scales_5", 'aa_scale_descriptors(sequence, "z_scales_5")')
     return aa_scale_descriptors(sequence, "z_scales_5", domains)
 
 def vhse(sequence: str, domains: int = 1) -> pd.DataFrame:
@@ -193,6 +213,9 @@ def vhse(sequence: str, domains: int = 1) -> pd.DataFrame:
     domains > 1 the sequence is split into that many near-equal segments and the
     means of each segment are concatenated.
 
+    Deprecated since v1.6.0, removed in 2.0: use
+    ``aa_scale_descriptors(sequence, "vhse")``.
+
     Parameters
     ==========
     :sequence: str
@@ -209,6 +232,7 @@ def vhse(sequence: str, domains: int = 1) -> pd.DataFrame:
         1 is the input sequence. Column names are of the form VHSE_j, or
         VHSE_j_dk when domains > 1.
     """
+    _warn_deprecated("vhse", 'aa_scale_descriptors(sequence, "vhse")')
     return aa_scale_descriptors(sequence, "vhse", domains)
 
 def atchley_factors(sequence: str, domains: int = 1) -> pd.DataFrame:
@@ -229,6 +253,9 @@ def atchley_factors(sequence: str, domains: int = 1) -> pd.DataFrame:
     domains > 1 the sequence is split into that many near-equal segments and the
     means of each segment are concatenated.
 
+    Deprecated since v1.6.0, removed in 2.0: use
+    ``aa_scale_descriptors(sequence, "atchley_factors")``.
+
     Parameters
     ==========
     :sequence: str
@@ -245,6 +272,7 @@ def atchley_factors(sequence: str, domains: int = 1) -> pd.DataFrame:
         1 is the input sequence. Column names are of the form AF_j, or
         AF_j_dk when domains > 1.
     """
+    _warn_deprecated("atchley_factors", 'aa_scale_descriptors(sequence, "atchley_factors")')
     return aa_scale_descriptors(sequence, "atchley_factors", domains)
 
 def t_scales(sequence: str, domains: int = 1) -> pd.DataFrame:
@@ -263,6 +291,9 @@ def t_scales(sequence: str, domains: int = 1) -> pd.DataFrame:
     domains > 1 the sequence is split into that many near-equal segments and the
     means of each segment are concatenated.
 
+    Deprecated since v1.6.0, removed in 2.0: use
+    ``aa_scale_descriptors(sequence, "t_scales")``.
+
     Parameters
     ==========
     :sequence: str
@@ -279,6 +310,7 @@ def t_scales(sequence: str, domains: int = 1) -> pd.DataFrame:
         1 is the input sequence. Column names are of the form T_j, or
         T_j_dk when domains > 1.
     """
+    _warn_deprecated("t_scales", 'aa_scale_descriptors(sequence, "t_scales")')
     return aa_scale_descriptors(sequence, "t_scales", domains)
 
 def st_scales(sequence: str, domains: int = 1) -> pd.DataFrame:
@@ -297,6 +329,10 @@ def st_scales(sequence: str, domains: int = 1) -> pd.DataFrame:
     domains > 1 the sequence is split into that many near-equal segments and the
     means of each segment are concatenated.
 
+    Deprecated since v1.6.0, removed in 2.0: use
+    ``aa_scale_descriptors(sequence, "st_scales")``. The ST-scales ranked last of 13
+    descriptor sets in [6] and their table has an unresolved sign flip.
+
     Parameters
     ==========
     :sequence: str
@@ -313,6 +349,7 @@ def st_scales(sequence: str, domains: int = 1) -> pd.DataFrame:
         1 is the input sequence. Column names are of the form ST_j, or
         ST_j_dk when domains > 1.
     """
+    _warn_deprecated("st_scales", 'aa_scale_descriptors(sequence, "st_scales")')
     return aa_scale_descriptors(sequence, "st_scales", domains)
 
 def protfp(sequence: str, domains: int = 1) -> pd.DataFrame:
@@ -331,6 +368,9 @@ def protfp(sequence: str, domains: int = 1) -> pd.DataFrame:
     domains > 1 the sequence is split into that many near-equal segments and the
     means of each segment are concatenated.
 
+    Deprecated since v1.6.0, removed in 2.0: use
+    ``aa_scale_descriptors(sequence, "protfp")``.
+
     Parameters
     ==========
     :sequence: str
@@ -347,6 +387,7 @@ def protfp(sequence: str, domains: int = 1) -> pd.DataFrame:
         1 is the input sequence. Column names are of the form ProtFP_j, or
         ProtFP_j_dk when domains > 1.
     """
+    _warn_deprecated("protfp", 'aa_scale_descriptors(sequence, "protfp")')
     return aa_scale_descriptors(sequence, "protfp", domains)
 
 def fasgai(sequence: str, domains: int = 1) -> pd.DataFrame:
@@ -367,6 +408,9 @@ def fasgai(sequence: str, domains: int = 1) -> pd.DataFrame:
     domains > 1 the sequence is split into that many near-equal segments and the
     means of each segment are concatenated.
 
+    Deprecated since v1.6.0, removed in 2.0: use
+    ``aa_scale_descriptors(sequence, "fasgai")``.
+
     Parameters
     ==========
     :sequence: str
@@ -383,6 +427,7 @@ def fasgai(sequence: str, domains: int = 1) -> pd.DataFrame:
         1 is the input sequence. Column names are of the form FASGAI_j, or
         FASGAI_j_dk when domains > 1.
     """
+    _warn_deprecated("fasgai", 'aa_scale_descriptors(sequence, "fasgai")')
     return aa_scale_descriptors(sequence, "fasgai", domains)
 
 def blosum_indices(sequence: str, domains: int = 1) -> pd.DataFrame:
@@ -402,6 +447,9 @@ def blosum_indices(sequence: str, domains: int = 1) -> pd.DataFrame:
     domains > 1 the sequence is split into that many near-equal segments and the
     means of each segment are concatenated.
 
+    Deprecated since v1.6.0, removed in 2.0: use
+    ``aa_scale_descriptors(sequence, "blosum_indices")``.
+
     Parameters
     ==========
     :sequence: str
@@ -418,6 +466,7 @@ def blosum_indices(sequence: str, domains: int = 1) -> pd.DataFrame:
         1 is the input sequence. Column names are of the form BLOSUM_j, or
         BLOSUM_j_dk when domains > 1.
     """
+    _warn_deprecated("blosum_indices", 'aa_scale_descriptors(sequence, "blosum_indices")')
     return aa_scale_descriptors(sequence, "blosum_indices", domains)
 
 def ms_whim(sequence: str, domains: int = 1) -> pd.DataFrame:
@@ -437,6 +486,9 @@ def ms_whim(sequence: str, domains: int = 1) -> pd.DataFrame:
     domains > 1 the sequence is split into that many near-equal segments and the
     means of each segment are concatenated.
 
+    Deprecated since v1.6.0, removed in 2.0: use
+    ``aa_scale_descriptors(sequence, "ms_whim")``.
+
     Parameters
     ==========
     :sequence: str
@@ -453,6 +505,7 @@ def ms_whim(sequence: str, domains: int = 1) -> pd.DataFrame:
         1 is the input sequence. Column names are of the form MSWHIM_j, or
         MSWHIM_j_dk when domains > 1.
     """
+    _warn_deprecated("ms_whim", 'aa_scale_descriptors(sequence, "ms_whim")')
     return aa_scale_descriptors(sequence, "ms_whim", domains)
 
 ############################## Auto/Cross Covariance ######################################
@@ -532,6 +585,10 @@ def physicochemical_distance_transformation(sequence: str, lag: int = 3,
 
     PDT_j(l) = sum_{i=1}^{L-l} (P_j(s_i) - P_j(s_i+l))^2 / (L - l)
 
+    Deprecated since v1.6.0, removed in 2.0: PDT_j(l) = 2 * s_j^2 * Geary_j(l)
+    exactly, where s_j^2 is the sample variance of property j over the sequence,
+    so it adds nothing to ``autocorrelation(method="geary")``.
+
     where PDT_j(l) is the descriptor value for property j at lag l, P_j(s_i) is the
     value of property j for the amino acid at position i, standardised over the 20
     amino acids, and L is the length of the sequence. By default the same 8 AAindex
@@ -556,12 +613,13 @@ def physicochemical_distance_transformation(sequence: str, lag: int = 3,
         default the shape will be 1 x 24. Column names are of the form
         PDT_<accession>_l, e.g. PDT_CIDH920105_1.
     """
+    _warn_deprecated("physicochemical_distance_transformation", 'autocorrelation(sequence, method="geary")')
     #validate input protein sequence
     sequence = _validate_sequence(sequence)
     lag = _validate_int("lag", lag, 1)
     if lag >= len(sequence):
         raise ValueError(f"lag ({lag}) must be less than the sequence length ({len(sequence)}).")
-    properties = list(properties) if properties is not None else _default_pdt_properties
+    properties = list(properties) if properties is not None else list(default_properties_)
     if not properties:
         raise ValueError("At least one property must be given.")
 

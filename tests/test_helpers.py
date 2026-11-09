@@ -82,7 +82,8 @@ class ProtpyHelpersTests(unittest.TestCase):
     def test_to_df(self):
         df = h._to_df([1.23456, np.float64(2.0004), np.int64(3), True], ["a", "b", "c", "d"])
         self.assertEqual(df.shape, (1, 4))
-        self.assertEqual(df.iloc[0].tolist(), [1.235, 2.0, 3, 1])
+        #values are not rounded since v1.6.0
+        self.assertEqual(df.iloc[0].tolist(), [1.23456, 2.0004, 3, 1])
 
 
 class ProtpyRegistryTests(unittest.TestCase):

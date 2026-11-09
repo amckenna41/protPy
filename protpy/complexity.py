@@ -5,9 +5,8 @@
 from __future__ import annotations
 
 """
-Sequence complexity descriptors: Wootton-Federhen (SEG-like) complexity,
-linguistic complexity and Lempel-Ziv complexity. ``shannon_entropy`` lives in
-the composition module and is re-exported here.
+Sequence complexity descriptors: Shannon entropy, Wootton-Federhen local
+complexity, Lempel-Ziv complexity and (deprecated) linguistic complexity.
 
 References
 ==========
@@ -35,56 +34,89 @@ import numpy as np
 import pandas as pd
 
 from ._constants import _validate_sequence, _validate_int
-from ._helpers import _to_df
-from .composition import shannon_entropy
+from ._helpers import _to_df, _warn_deprecated
 
 __all__ = [
-    "wootton_federhen_complexity", "linguistic_complexity", "lempel_ziv_complexity", "shannon_entropy",
+    "shannon_entropy", "wootton_federhen_complexity", "lempel_ziv_complexity",
+    #deprecated, removed in protpy 2.0
+    "linguistic_complexity",
 ]
+
+################################## Shannon Entropy ########################################
+
+def shannon_entropy(sequence: str) -> pd.DataFrame:
+    """
+    Calculate the Shannon Entropy of a protein sequence. Shannon entropy
+    quantifies the diversity of the amino acid composition using the
+    information-theoretic formula:
+
+        H = -sum_i ( p_i * log2(p_i) )
+
+    where p_i is the fractional frequency of amino acid i in the sequence.
+    A value near zero indicates a low-complexity or repetitive sequence; the
+    theoretical maximum is log2(20) ≈ 4.322 bits for a perfectly uniform
+    distribution across all 20 canonical amino acids. It is a non-linear
+    function of the composition, and differs from the windowed Wootton-Federhen
+    K2 (which is the same entropy over local windows).
+
+    Parameters
+    ==========
+    :sequence: str
+        protein sequence.
+
+    Returns
+    =======
+    :shannon_entropy_df: pd.DataFrame
+        pandas DataFrame of shape 1 x 1 with column ``ShannonEntropy``.
+    """
+    #validate input protein sequence
+    sequence = _validate_sequence(sequence)
+    n = len(sequence)
+    entropy = 0.0 - sum(c / n * math.log2(c / n) for c in Counter(sequence).values())
+    return _to_df([entropy], ["ShannonEntropy"])
 
 ########################### Wootton-Federhen Complexity ###################################
 
 def wootton_federhen_complexity(sequence: str, window: int = 12, k2_trigger: float = 2.2) -> pd.DataFrame:
     """
     Calculate the Wootton-Federhen Complexity (WF) of protein sequence. The
-    Wootton-Federhen measures describe the local compositional complexity of a
-    protein sequence over a sliding window, and are the basis of the SEG program
-    for finding low-complexity regions [1, 2]. For each window of W residues
-    they are calculated as:
-
-    K1 = (1/W) * log_20(W! / prod_i n_i!)
+    Wootton-Federhen complexity describes the local compositional complexity of a
+    protein sequence over a sliding window [1, 2]. For each window of W residues
+    it is calculated as:
 
     K2 = -sum_i (n_i / W) * log2(n_i / W)
 
-    where K1 is the complexity state, K2 is the Shannon entropy of the window in
-    bits and n_i is the number of residues of amino acid i in the window. The
-    low-complexity fraction is the fraction of residues covered by at least one
-    window with K2 <= k2_trigger. This is the trigger stage of SEG only; SEG's
-    extension and merging of low-complexity segments are not performed. A window
-    longer than the sequence uses the whole sequence.
+    where K2 is the Shannon entropy of the window in bits and n_i is the number of
+    residues of amino acid i in the window. The low-complexity fraction is the
+    fraction of residues covered by at least one window with K2 <= k2_trigger.
+    This is only the trigger step of a low-complexity search: segments are not
+    extended or merged, so the output is a descriptor and not the masked regions
+    a low-complexity masking program reports. A window longer than the sequence
+    uses the whole sequence. (The K1 complexity state was dropped in v1.6.0; its
+    correlation with K2 was >= 0.996.)
 
     Parameters
     ==========
     :sequence: str
         protein sequence.
     :window: int (default=12)
-        length of the sliding window W (the SEG default).
+        length of the sliding window W (Wootton & Federhen's default).
     :k2_trigger: float (default=2.2)
-        K2 value in bits at or below which a window is low complexity (the SEG
-        default).
+        K2 value in bits at or below which a window is low complexity (Wootton &
+        Federhen's default trigger).
 
     Returns
     =======
     :wf_df: pd.DataFrame
         pandas dataframe of Wootton-Federhen complexity for protein sequence.
-        Dataframe will be of the shape 1 x 4, with the columns WF_K1_mean,
-        WF_K2_mean, WF_K2_min and WF_LowComplexity_frac.
+        Dataframe will be of the shape 1 x 3, with the columns WF_K2_mean,
+        WF_K2_min and WF_LowComplexity_frac.
     """
     #validate input protein sequence
     sequence = _validate_sequence(sequence)
     window = min(_validate_int("window", window, 1), len(sequence))
 
-    k1, k2 = [], []
+    k2 = []
     covered = np.zeros(len(sequence), dtype=bool)
     counts = Counter(sequence[:window])
     for start in range(len(sequence) - window + 1):
@@ -93,14 +125,11 @@ def wootton_federhen_complexity(sequence: str, window: int = 12, k2_trigger: flo
             counts[sequence[start - 1]] -= 1
             counts[sequence[start + window - 1]] += 1
         n = [c for c in counts.values() if c]
-        log_states = math.lgamma(window + 1) - sum(math.lgamma(c + 1) for c in n)
-        k1.append(log_states / math.log(20) / window)
         entropy = 0.0 - sum(c / window * math.log2(c / window) for c in n)
         k2.append(entropy)
         if entropy <= k2_trigger:
             covered[start:start + window] = True
-    return _to_df([np.mean(k1), np.mean(k2), min(k2), covered.mean()],
-                  ["WF_K1_mean", "WF_K2_mean", "WF_K2_min", "WF_LowComplexity_frac"])
+    return _to_df([np.mean(k2), min(k2), covered.mean()], ["WF_K2_mean", "WF_K2_min", "WF_LowComplexity_frac"])
 
 ############################### Linguistic Complexity #####################################
 
@@ -118,6 +147,11 @@ def linguistic_complexity(sequence: str, max_k: int | None = None) -> pd.DataFra
     subwords). Repetitive sequences have a low LC and random sequences an LC
     close to 1.
 
+    Deprecated since v1.6.0, removed in 2.0: it costs O(L^2), saturates at
+    0.997-0.999 for real proteins, and the exact formula of [3] could not be
+    checked (some sources use a product of ratios). Use
+    ``lempel_ziv_complexity`` or ``wootton_federhen_complexity``.
+
     Parameters
     ==========
     :sequence: str
@@ -131,6 +165,7 @@ def linguistic_complexity(sequence: str, max_k: int | None = None) -> pd.DataFra
         pandas dataframe of LC for protein sequence. Dataframe will be of the
         shape 1 x 1, with the column LinguisticComplexity.
     """
+    _warn_deprecated("linguistic_complexity", "lempel_ziv_complexity or wootton_federhen_complexity")
     #validate input protein sequence
     sequence = _validate_sequence(sequence)
     L = len(sequence)
@@ -149,9 +184,11 @@ def linguistic_complexity(sequence: str, max_k: int | None = None) -> pd.DataFra
 def _lz76(sequence: str) -> int:
     """
     Calculate the number of components in the Lempel-Ziv (LZ76) parsing of a
-    sequence [4], using the Kaspar-Schuster algorithm. The sequence is read from
-    left to right and each component is the shortest substring that cannot be
-    copied from the preceding part of the sequence.
+    sequence [4]. The sequence is read from left to right and each component is
+    the shortest substring that cannot be copied from the preceding part of the
+    sequence (the copy may overlap the component itself). The longest copy is
+    found with substring search, which gives the same count as the
+    Kaspar-Schuster algorithm about 50 times faster on long sequences.
 
     Parameters
     ==========
@@ -164,27 +201,14 @@ def _lz76(sequence: str) -> int:
         number of components c(n) in the LZ76 parsing.
     """
     n = len(sequence)
-    if n == 1:
-        return 1
-    c, i, k, l, k_max = 1, 0, 1, 1, 1
-    while True:
-        if sequence[i + k - 1] == sequence[l + k - 1]:
+    c, start = 0, 0
+    while start < n:
+        #grow the component while it can still be copied from the text before its last residue
+        k = 1
+        while start + k <= n and sequence[start:start + k] in sequence[:start + k - 1]:
             k += 1
-            if l + k > n:
-                c += 1
-                break
-        else:
-            k_max = max(k, k_max)
-            i += 1
-            if i == l:
-                #no earlier copy: the component ends here
-                c += 1
-                l += k_max
-                if l + 1 > n:
-                    break
-                i, k, k_max = 0, 1, 1
-            else:
-                k = 1
+        c += 1
+        start += k
     return c
 
 
@@ -194,7 +218,8 @@ def lempel_ziv_complexity(sequence: str) -> pd.DataFrame:
     (LZ76) complexity is the number of new patterns, c(n), found when a sequence is
     read from left to right, each pattern being the shortest substring that cannot
     be copied from the preceding part of the sequence [4, 5]. As c(n) grows with the
-    length of the sequence, a normalised value is also calculated as:
+    length of the sequence (r = 0.999 with length on real proteins), only the
+    normalised value is returned:
 
     LZ_Normalized = c(n) * log_20(n) / n
 
@@ -210,10 +235,10 @@ def lempel_ziv_complexity(sequence: str) -> pd.DataFrame:
     =======
     :lz_df: pd.DataFrame
         pandas dataframe of LZ complexity for protein sequence. Dataframe will be
-        of the shape 1 x 2, with the columns LZ_Complexity and LZ_Normalized.
+        of the shape 1 x 1, with the column LZ_Normalized.
     """
     #validate input protein sequence
     sequence = _validate_sequence(sequence)
     n = len(sequence)
     c = _lz76(sequence)
-    return _to_df([c, c * math.log(n, 20) / n if n > 1 else 0.0], ["LZ_Complexity", "LZ_Normalized"])
+    return _to_df([c * math.log(n, 20) / n if n > 1 else 0.0], ["LZ_Normalized"])

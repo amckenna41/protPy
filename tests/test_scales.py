@@ -34,7 +34,7 @@ class ProtpyScalesTests(unittest.TestCase):
             self.assertEqual(list(df.columns), [f"{abbr}_{j}" for j in range(1, d + 1)])
             self.assertTrue(all(dt == np.float64 for dt in df.dtypes))
             #poly-A gives A's row
-            np.testing.assert_allclose(func("AAAAA").values[0], np.round(tables[name]["values"]["A"], 3))
+            np.testing.assert_allclose(func("AAAAA").values[0], tables[name]["values"]["A"])
             #domains
             df3 = func(SEQ[:30], domains=3)
             self.assertEqual(df3.shape, (1, 3 * d))
@@ -66,7 +66,7 @@ class ProtpyScalesTests(unittest.TestCase):
         z = _read_json("aa_scales.json")["z_scales_5"]["values"]
         L, lag, j, k = len(SEQ), 3, 1, 4
         ref = sum(z[SEQ[i]][j] * z[SEQ[i + lag]][k] for i in range(L - lag)) / (L - lag)
-        self.assertAlmostEqual(df[f"ACC_{j + 1}_{k + 1}_lag{lag}"].iloc[0], round(ref, 3))
+        self.assertAlmostEqual(df[f"ACC_{j + 1}_{k + 1}_lag{lag}"].iloc[0], ref)
         #AAindex codes are accepted and standardised
         self.assertEqual(protpy.auto_cross_covariance(SEQ, scale=["KYTJ820101", "HOPT810101"], lag=2).shape, (1, 8))
         with self.assertRaises(ValueError):

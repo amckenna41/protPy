@@ -20,15 +20,17 @@ Unit tests
 * `test_sequence_order.py` - unit tests for sequence order module and functionality.
 * `test_scales.py` - factor scales, auto/cross covariance and PDT (optional cross-check against `peptides`, skipped if not installed).
 * `test_physicochemical.py` - charge patterning (including the published Das & Pappu kappa values), pKa scales, hydrophobicity profile, half-life, flexibility and the GRAVY / hydrophobic moment / extinction coefficient extensions.
-* `test_complexity.py` - Wootton-Federhen, linguistic and Lempel-Ziv complexity.
-* `test_signal.py` - FFT and DCT descriptors.
+* `test_complexity.py` - Shannon entropy, Wootton-Federhen, linguistic (deprecated) and Lempel-Ziv complexity.
+* `test_spectral.py` - `spectral_descriptors` (FFT and DCT) and the deprecated `fft_descriptors` / `dct_descriptors` aliases.
 * `test_structural.py` - AGGRESCAN, Uversky/FoldIndex, disorder propensity, TM and signal-peptide features, functional sites, PLAAC (against PLAAC's reference output), antigenicity and cysteine features.
 * `test_encode.py` - `all_descriptors`, `encode_dataset` and `read_sequences_from_file`.
-* `test_descriptor_sets.py` - `descriptor_set`, `include` and `exclude`, and every v1.5.0 descriptor on 1-8 residue sequences.
+* `test_descriptor_sets.py` - `descriptor_set`, `include`, `exclude` and `decimals`, the 1,402-column classic set, short sequences (NaN-padded lags, same columns), `params`/`include` checks, and every registered descriptor on 1-8 residue sequences.
 * `test_utils.py` - descriptor registry and metadata functions.
 * `test_helpers.py` - internal helpers, data-table provenance, registry parameters matching function signatures, and registry DOIs present in `docs/references.bib`.
-* `test_regressions.py` - regression tests for bugs fixed in the post-1.4.2 audit.
-* `test_backwards_compat.py` - golden snapshot: every v1.4.2 default output must be unchanged. Regenerate only when deliberately re-baselining: `python tests/test_backwards_compat.py --regen`.
+* `test_regressions.py` - regression tests for bugs fixed in the post-1.4.2 audit (updated for the v1.6.0 lag policy) and in the v1.6.0 final review (numeric validation, motif regex errors, LZ76 against Kaspar-Schuster, FASTA identifiers and stop codons, CSV escaping, scale-table copies).
+* `test_backwards_compat.py` - golden snapshot: the default output of every registered descriptor and of the three `all_descriptors` sets must equal the v1.6.0 baseline (re-baselined from v1.4.2 in v1.6.0, whose audit fixes change values on purpose). Regenerate only for a deliberate, documented change: `python tests/test_backwards_compat.py --regen`.
+* `test_reference_values.py` - checks against independent references rather than earlier protpy outputs: ProtParam values against Biopython, composition sums (QSO = 1, PseAAC = 100), the identities found by the v1.6.0 audit (Moreau-Broto = auto covariance, PDT = 2 s² Geary, DPC = k-mer k=2 = CKSAAP gap 0), ordered CTD quartiles and published kappa values.
+* `_compare.py` - tolerance helper for expected values written from earlier, rounded outputs.
 * `test_performance.py` - timing test for `descriptor_set="all"` on a 500-residue sequence; skipped unless `PROTPY_PERF=1` is set.
 
 Test Files
@@ -38,7 +40,7 @@ Test Files
 * `test_data/test_fasta3.fasta` - Envelope small membrane protein (P59637 · VEMP_SARS) [[3]](#references).
 * `test_data/test_fasta4.fasta` - Nucleoprotein (P0DTC9 · NCAP_SARS2) [[4]](#references).
 * `test_data/structural_reference.fasta` - MOT3 (from the MIT-licensed PLAAC repository example), glycophorin A (P02724) [[5]](#references) and amyloid-β 1-42 (P05067 residues 672-713) [[6]](#references), used by `test_structural.py`.
-* `test_data/golden_v1_4_2.json.gz` - golden outputs used by `test_backwards_compat.py`.
+* `test_data/golden_v1_6_0.json.gz` - golden outputs (every registered descriptor and the three `all_descriptors` sets, for the four test FASTA sequences) used by `test_backwards_compat.py`.
 
 References
 ----------

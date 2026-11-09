@@ -61,7 +61,7 @@ protein_seq = seqs[0]
 
 # Compute all descriptors for that sequence
 df = protpy.all_descriptors(protein_seq)
-# Shape: 1 × 10,757
+# Shape: 1 × 1,402 (the classic set)
 
 # Compute descriptors for all four sequences at once
 import os
@@ -70,7 +70,7 @@ fasta_files = [
 ]
 sequences = [protpy.read_sequences_from_file(f)[0] for f in fasta_files]
 result = protpy.encode_dataset(sequences, output_file=None)
-# Shape: 4 × 10,758  (first column: sequence_id = seq1…seq4)
+# Shape: 4 × 1,403  (first column: sequence_id = seq1…seq4)
 ```
 
 ---

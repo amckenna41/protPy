@@ -6,12 +6,14 @@ from __future__ import annotations
 
 import pandas as pd
 import math
-import copy
 from difflib import get_close_matches
 
 #list of amino acids
-from ._constants import amino_acids, _validate_sequence
-from ._helpers import _load_json_table
+from ._constants import _validate_sequence
+from ._helpers import _load_json_table, _to_df
+
+#str_to_num is an internal encoder and is not exported from the protpy namespace
+__all__ = ["ctd", "ctd_", "ctd_composition", "ctd_transition", "ctd_distribution"]
 
 """
 References
@@ -96,8 +98,7 @@ def str_to_num(sequence: str, property: dict[str, str]) -> str:
     #validate input protein sequence
     sequence = _validate_sequence(sequence)
 
-    #create deep copy of sequence
-    sequence_converted = copy.deepcopy(sequence)
+    sequence_converted = sequence
 
     #convert amino acid into corresponding CTD keys
     for key, value in list(property.items()):
@@ -107,6 +108,25 @@ def str_to_num(sequence: str, property: dict[str, str]) -> str:
             sequence_converted = sequence_converted.replace(index, key)
 
     return sequence_converted
+
+def _ctd_property(property: str) -> dict[str, str]:
+    """
+    Get a CTD property by name, accepting close misspellings (difflib cutoff 0.8).
+
+    Parameters
+    ==========
+    :property: str
+        CTD property name, e.g. "hydrophobicity".
+
+    Returns
+    =======
+    :prop: dict
+        the property's name and its three residue classes.
+    """
+    matches = get_close_matches(property, _all_ctd_properties.keys(), cutoff=0.8)
+    if not matches:
+        raise ValueError(f"Invalid property '{property}'. Available properties are: {list(_all_ctd_properties.keys())}.")
+    return _all_ctd_properties[matches[0]]
 
 ##################################### CTD Composition #####################################
 
@@ -134,14 +154,7 @@ def ctd_composition(sequence: str, property: str = "hydrophobicity") -> pd.DataF
     #validate input protein sequence
     sequence = _validate_sequence(sequence)
 
-    #get closest matched CTD property - using cutoff of 0.8
-    property_matches = get_close_matches(property, _all_ctd_properties.keys(), cutoff=0.8)
-
-    #raise error if no matching property found
-    if (property_matches != []):
-        prop = _all_ctd_properties[property_matches[0]]
-    else:
-        raise ValueError(f"Invalid property '{property}'. Available properties are: {list(_all_ctd_properties.keys())}.")
+    prop = _ctd_property(property)
     
     #convert sequence to number
     seq = str_to_num(sequence, prop)
@@ -149,14 +162,10 @@ def ctd_composition(sequence: str, property: str = "hydrophobicity") -> pd.DataF
     ctd_composition_ = {}
     
     #calculate descriptor values, append to ctd_composition_ dict
-    ctd_composition_['CTD_C_01_' + prop["name"]] = round(float(seq.count("1"))/len(sequence), 3) 
-    ctd_composition_['CTD_C_02_' + prop["name"]] = round(float(seq.count("2"))/len(sequence), 3)
-    ctd_composition_['CTD_C_03_' + prop["name"]] = round(float(seq.count("3"))/len(sequence), 3)
+    for key in ("1", "2", "3"):
+        ctd_composition_[f"CTD_C_0{key}_" + prop["name"]] = seq.count(key) / len(sequence)
 
-    #transform values and columns to DataFrame
-    ctd_composition_df = pd.DataFrame([list(ctd_composition_.values())], columns=list(ctd_composition_.keys()))
-
-    return ctd_composition_df
+    return _to_df(list(ctd_composition_.values()), list(ctd_composition_))
 
 ##################################### CTD Transition ######################################
 
@@ -185,14 +194,7 @@ def ctd_transition(sequence: str, property: str = "hydrophobicity") -> pd.DataFr
     #validate input protein sequence
     sequence = _validate_sequence(sequence)
 
-    #get closest matched CTD property  - using cutoff of 0.8
-    property_matches = get_close_matches(property, _all_ctd_properties.keys(), cutoff=0.8)
-
-    #raise error if no matching property found
-    if (property_matches != []):
-        prop = _all_ctd_properties[property_matches[0]]
-    else:
-        raise ValueError(f"Invalid property '{property}'. Available properties are: {list(_all_ctd_properties.keys())}.")
+    prop = _ctd_property(property)
 
     #convert sequence to number
     seq = str_to_num(sequence, prop)
@@ -205,17 +207,10 @@ def ctd_transition(sequence: str, property: str = "hydrophobicity") -> pd.DataFr
         n_pairs = 1
 
     #calculate descriptor values, append to ctd_transition_ dict
-    ctd_transition_["CTD_T_12_" + prop["name"]] = round(
-        float(seq.count("12") + seq.count("21")) / n_pairs, 3)
-    ctd_transition_["CTD_T_13_" + prop["name"]] = round(
-        float(seq.count("13") + seq.count("31")) / n_pairs, 3)
-    ctd_transition_["CTD_T_23_" + prop["name"]] = round(
-        float(seq.count("23") + seq.count("32")) / n_pairs, 3)
+    for a, b in (("1", "2"), ("1", "3"), ("2", "3")):
+        ctd_transition_[f"CTD_T_{a}{b}_" + prop["name"]] = (seq.count(a + b) + seq.count(b + a)) / n_pairs
 
-    #transform values and columns to DataFrame
-    ctd_transition_df = pd.DataFrame([list(ctd_transition_.values())], columns=list(ctd_transition_.keys()))
-
-    return ctd_transition_df
+    return _to_df(list(ctd_transition_.values()), list(ctd_transition_))
 
 #################################### CTD Distribution #####################################
 
@@ -225,6 +220,11 @@ def ctd_distribution(sequence: str, property: str = "hydrophobicity") -> pd.Data
     is the chain length within which the first, 25%, 50%, 75% and 100% of the 
     amino acids of a particular property are located. The shape of the output 
     will be 1 x 15, with 15 features being generated per sequence.
+
+    The position of the q-th quantile residue is the floor(q * n)-th residue of
+    the class, where n is the number of residues in the class, clamped to at least
+    the first residue as in iFeature [4]. (Before v1.6.0 a class with 1-3 residues
+    used the last residue for the 25% quantile.)
 
     Parameters
     ==========
@@ -243,61 +243,30 @@ def ctd_distribution(sequence: str, property: str = "hydrophobicity") -> pd.Data
     #validate input protein sequence
     sequence = _validate_sequence(sequence)
 
-    #get closest matched CTD property - using cutoff of 0.8
-    property_matches = get_close_matches(property, _all_ctd_properties.keys(), cutoff=0.8)
-
-    #raise error if no matching property found
-    if (property_matches != []):
-        prop = _all_ctd_properties[property_matches[0]]
-    else:
-        raise ValueError(f"Invalid property '{property}'. Available properties are: {list(_all_ctd_properties.keys())}.")
+    prop = _ctd_property(property)
 
     #convert sequence to number
     seq = str_to_num(sequence, prop)
     
     ctd_distribution_ = {}
     
-    #iterate through sequence, calculating distribution descriptor values using property
-    for key, value in prop.items():
-       if (key=="name"):
-        continue
-       num = seq.count(key)
-       ink = 1
-       indexk = 0
-       cds = []
-       while ink <= num:
-           indexk = seq.find(key,indexk) + 1
-           cds.append(indexk)
-           ink = ink + 1
-       if cds == []:
-           ctd_distribution_["CTD_D_0" + key + "_001_" + prop["name"]] = 0
-           ctd_distribution_["CTD_D_0" + key + "_025_" + prop["name"]] = 0
-           ctd_distribution_["CTD_D_0" + key + "_050_" + prop["name"]] = 0
-           ctd_distribution_["CTD_D_0" + key + "_075_" + prop["name"]] = 0
-           ctd_distribution_["CTD_D_0" + key + "_100_" + prop["name"]] = 0
-       else:
-           ctd_distribution_["CTD_D_0" + key + "_001_" + prop["name"]] = round(
-            float(cds[0]) / len(seq) * 100, 3
-           )
-           ctd_distribution_["CTD_D_0" + key + "_025_" + prop["name"]] = round(
-            float(cds[int(math.floor(num * 0.25)) - 1]) / len(seq) * 100, 3
-           )
-           ctd_distribution_["CTD_D_0" + key + "_050_" + prop["name"]] = round(
-            float(cds[int(math.floor(num * 0.5)) - 1]) / len(seq) * 100, 3
-           )
-           ctd_distribution_["CTD_D_0" + key + "_075_" + prop["name"]] = round(
-            float(cds[int(math.floor(num * 0.75)) - 1]) / len(seq) * 100, 3
-           )
-           ctd_distribution_["CTD_D_0" + key + "_100_" + prop["name"]] = round(
-            float(cds[-1]) / len(seq) * 100, 3)
+    #iterate through each class, calculating the positions of its first, 25%, 50%, 75% and last residues
+    for key in ("1", "2", "3"):
+        positions = [i + 1 for i, c in enumerate(seq) if c == key]
+        num = len(positions)
+        for label, q in (("001", None), ("025", 0.25), ("050", 0.5), ("075", 0.75), ("100", 1.0)):
+            if not positions:
+                value = 0.0
+            else:
+                #floor(q * n)-th residue of the class, clamped to the first residue (iFeature CTDD)
+                rank = 1 if q is None else max(1, math.floor(num * q))
+                value = positions[rank - 1] / len(seq) * 100
+            ctd_distribution_["CTD_D_0" + key + "_" + label + "_" + prop["name"]] = value
 
-    #transform values and columns to DataFrame
-    ctd_distribution_df = pd.DataFrame([list(ctd_distribution_.values())], columns=list(ctd_distribution_.keys()))
+    return _to_df(list(ctd_distribution_.values()), list(ctd_distribution_))
 
-    return ctd_distribution_df
-
-def ctd_(sequence: str, property: str = "hydrophobicity", all_ctd: bool = True,
-    property_set: str = "default") -> pd.DataFrame:
+def ctd(sequence: str, property: str = "hydrophobicity", all_ctd: bool = True,
+    property_set: str = "default", parts: str = "CTD") -> pd.DataFrame:
     """
     Calculate all Composition, Transition and Distribution (CTD) features of protein sequences.
     Composition is the number of amino acids of a particular property (e.g., hydrophobicity)
@@ -326,6 +295,11 @@ def ctd_(sequence: str, property: str = "hydrophobicity", all_ctd: bool = True,
         property set used when ``all_ctd=True``: "default" (the 7 properties
         above, 1 x 147) or "ifeature13" (adds the six AAindex hydrophobicity
         partitions used by iFeature, 13 properties, 1 x 273) [4].
+    :parts: str (default="CTD")
+        which parts to calculate, any combination of "C" (composition),
+        "T" (transition) and "D" (distribution), e.g. "CT". The single parts are
+        also available as ``ctd_composition``, ``ctd_transition`` and
+        ``ctd_distribution``, and ``ctd_`` is an alias of this function.
 
     Returns
     =======
@@ -338,28 +312,25 @@ def ctd_(sequence: str, property: str = "hydrophobicity", all_ctd: bool = True,
     sequence = _validate_sequence(sequence)
     if property_set not in ctd_property_sets:
         raise ValueError(f"Invalid property_set '{property_set}'. Available sets are: {list(ctd_property_sets)}.")
+    if not parts or set(parts.upper()) - set("CTD"):
+        raise ValueError(f"Invalid parts '{parts}'. Use a combination of 'C', 'T' and 'D', e.g. 'CTD'.")
 
-    #initialise ctd dataframes
-    comp_df = pd.DataFrame()
-    trans_df = pd.DataFrame()
-    distr_df = pd.DataFrame()
+    props = list(ctd_property_sets[property_set]) if all_ctd else [property]
+    funcs = {"C": ctd_composition, "T": ctd_transition, "D": ctd_distribution}
+    #all composition columns, then all transition columns, then all distribution columns
+    frames = [funcs[part](sequence, property=prop) for part in "CTD" if part in parts.upper() for prop in props]
+    return pd.concat(frames, axis=1)
 
-    #if using single property, calculate each of the CTD descriptors individually
-    if not all_ctd:
-        comp_df = ctd_composition(sequence, property=property)
-        trans_df = ctd_transition(sequence, property=property)
-        distr_df = ctd_distribution(sequence, property=property)
-    else:
-        #if using all calculable properties, calculate CTD descriptors for each property
-        for prop in ctd_property_sets[property_set]:
-            comp = ctd_composition(sequence, property=prop)
-            comp_df = pd.concat([comp_df, comp], axis=1)
-            trans = ctd_transition(sequence, property=prop)
-            trans_df = pd.concat([trans_df, trans], axis=1)
-            distr = ctd_distribution(sequence, property=prop)
-            distr_df = pd.concat([distr_df, distr], axis=1)
+def ctd_(sequence: str, property: str = "hydrophobicity", all_ctd: bool = True,
+    property_set: str = "default") -> pd.DataFrame:
+    """
+    Calculate all Composition, Transition and Distribution (CTD) features of
+    protein sequences. Alias of ``ctd(sequence, property, all_ctd, property_set)``;
+    see ``ctd`` for the description and parameters.
 
-    #concatenate all descriptors
-    ctd = pd.concat([comp_df, trans_df, distr_df], axis=1)
-    
-    return ctd
+    Returns
+    =======
+    :ctd_df: pd.DataFrame
+        dataframe of CTD descriptor values, by default of the shape 1 x 147.
+    """
+    return ctd(sequence, property, all_ctd, property_set)

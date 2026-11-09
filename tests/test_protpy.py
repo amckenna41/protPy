@@ -2,9 +2,7 @@
 #################            protPy Module Tests          #################
 ###########################################################################
 
-import os
 import unittest
-from Bio import SeqIO
 unittest.TestLoader.sortTestMethodsUsing = None
 
 import protpy as protpy
@@ -22,8 +20,8 @@ class ProtpyTests(unittest.TestCase):
     """
     def test_protpy_metadata(self):
         """ Testing correct protpy version and metadata. """
-        self.assertEqual(protpy.__version__, "1.5.0",
-            "protpy version is not correct, expected version 1.5.0, got version {}".format(protpy.__version__))
+        self.assertEqual(protpy.__version__, "1.6.0",
+            "protpy version is not correct, expected version 1.6.0, got version {}".format(protpy.__version__))
         self.assertEqual(protpy.__name__, "protpy", 
             "protpy software name is not correct, expected protpy, got {}.".format(protpy.__name__))
         self.assertEqual(protpy.__author__, "AJ McKenna: https://github.com/amckenna41", 
@@ -46,90 +44,48 @@ class ProtpyTests(unittest.TestCase):
             "protpy keywords is not correct, got\n{}.".format(protpy.__keywords__))
 
     def test_valid_descriptors(self):
-        """ Testing correct list of available descriptors is included in package attribute. """
-        from protpy.utils import _DESCRIPTOR_REGISTRY
-        #every exported descriptor is registered (and vice versa) and callable
-        self.assertEqual(sorted(protpy.descriptor_names), sorted(_DESCRIPTOR_REGISTRY),
-            "descriptor_names and the descriptor registry should list the same descriptors.")
-        self.assertEqual(len(set(protpy.descriptor_names)), len(protpy.descriptor_names))
-        for name in protpy.descriptor_names:
-            self.assertTrue(callable(getattr(protpy, name)), name)
-        self.assertIsInstance(protpy.descriptor_names, list, 
-            "all_descriptors should be of type list, got {}.".format(type(protpy.descriptor_names)))
-        # composition descriptors
-        self.assertIn('amino_acid_composition', protpy.descriptor_names, 
-            "amino_acid_composition should be in available descriptors list.")
-        self.assertIn('dipeptide_composition', protpy.descriptor_names, 
-            "dipeptide_composition should be in available descriptors list.")
-        self.assertIn('tripeptide_composition', protpy.descriptor_names,
-            "tripeptide_composition should be in available descriptors list.")
-        self.assertIn('gravy', protpy.descriptor_names,
-            "gravy should be in available descriptors list.")
-        self.assertIn('aromaticity', protpy.descriptor_names,
-            "aromaticity should be in available descriptors list.")
-        self.assertIn('instability_index', protpy.descriptor_names,
-            "instability_index should be in available descriptors list.")
-        self.assertIn('isoelectric_point', protpy.descriptor_names,
-            "isoelectric_point should be in available descriptors list.")
-        self.assertIn('molecular_weight', protpy.descriptor_names,
-            "molecular_weight should be in available descriptors list.")
-        self.assertIn('charge_distribution', protpy.descriptor_names,
-            "charge_distribution should be in available descriptors list.")
-        self.assertIn('hydrophobic_polar_charged_composition', protpy.descriptor_names,
-            "hydrophobic_polar_charged_composition should be in available descriptors list.")
-        self.assertIn('secondary_structure_propensity', protpy.descriptor_names,
-            "secondary_structure_propensity should be in available descriptors list.")
-        self.assertIn('kmer_composition', protpy.descriptor_names,
-            "kmer_composition should be in available descriptors list.")
-        self.assertIn('reduced_alphabet_composition', protpy.descriptor_names,
-            "reduced_alphabet_composition should be in available descriptors list.")
-        self.assertIn('motif_composition', protpy.descriptor_names,
-            "motif_composition should be in available descriptors list.")
-        self.assertIn('amino_acid_pair_composition', protpy.descriptor_names,
-            "amino_acid_pair_composition should be in available descriptors list.")
-        self.assertIn('aliphatic_index', protpy.descriptor_names,
-            "aliphatic_index should be in available descriptors list.")
-        self.assertIn('extinction_coefficient', protpy.descriptor_names,
-            "extinction_coefficient should be in available descriptors list.")
-        self.assertIn('boman_index', protpy.descriptor_names,
-            "boman_index should be in available descriptors list.")
-        self.assertIn('aggregation_propensity', protpy.descriptor_names,
-            "aggregation_propensity should be in available descriptors list.")
-        self.assertIn('hydrophobic_moment', protpy.descriptor_names,
-            "hydrophobic_moment should be in available descriptors list.")
-        self.assertIn('pseudo_amino_acid_composition', protpy.descriptor_names,
-            "pseudo_amino_acid_composition should be in available descriptors list.")
-        self.assertIn('amphiphilic_pseudo_amino_acid_composition', protpy.descriptor_names, 
-            "amphiphilic_pseudo_amino_acid_composition should be in available descriptors list.")
-        # autocorrelation descriptors
-        self.assertIn('moreaubroto_autocorrelation', protpy.descriptor_names,
-            "moreaubroto_autocorrelation should be in available descriptors list.")
-        self.assertIn('moran_autocorrelation', protpy.descriptor_names, 
-            "moran_autocorrelation should be in available descriptors list.")
-        self.assertIn('geary_autocorrelation', protpy.descriptor_names,
-            "geary_autocorrelation should be in available descriptors list.")
-        # conjoint triad descriptor
-        self.assertIn('conjoint_triad', protpy.descriptor_names,
-            "conjoint_triad should be in available descriptors list.")
-        # CTD descriptors
-        self.assertIn('ctd_composition', protpy.descriptor_names,
-            "ctd_composition should be in available descriptors list.")
-        self.assertIn('ctd_transition', protpy.descriptor_names,
-            "ctd_transition should be in available descriptors list.")
-        self.assertIn('ctd_distribution', protpy.descriptor_names,
-            "ctd_distribution should be in available descriptors list.")
-        self.assertIn('ctd_', protpy.descriptor_names,
-            "ctd_ should be in available descriptors list.")
-        # sequence order descriptors
-        self.assertIn('sequence_order_coupling_number_', protpy.descriptor_names,
-            "sequence_order_coupling_number_ should be in available descriptors list.")
-        self.assertIn('sequence_order_coupling_number', protpy.descriptor_names,
-            "sequence_order_coupling_number should be in available descriptors list.")
-        self.assertIn('sequence_order_coupling_number_all', protpy.descriptor_names,
-            "sequence_order_coupling_number_all should be in available descriptors list.")
-        self.assertIn('quasi_sequence_order', protpy.descriptor_names,
-            "quasi_sequence_order should be in available descriptors list.")
-        self.assertIn('quasi_sequence_order_all', protpy.descriptor_names,
-            "quasi_sequence_order_all should be in available descriptors list.")
-        self.assertIn('shannon_entropy', protpy.descriptor_names,
-            "shannon_entropy should be in available descriptors list.")
+        """ Testing the registered descriptor names and the deprecated v1.6.0 functions. """
+        registered = ["amino_acid_composition", "dipeptide_composition", "tripeptide_composition",
+            "gravy", "aromaticity", "instability_index", "isoelectric_point", "molecular_weight",
+            "charge_distribution", "kmer_composition", "motif_composition", "aliphatic_index",
+            "extinction_coefficient", "boman_index", "hydrophobic_moment", "shannon_entropy",
+            "autocorrelation", "moreaubroto_autocorrelation", "moran_autocorrelation", "geary_autocorrelation",
+            "pseudo_amino_acid_composition", "amphiphilic_pseudo_amino_acid_composition", "conjoint_triad",
+            "ctd", "ctd_", "ctd_composition", "ctd_transition", "ctd_distribution",
+            "sequence_order_coupling_number", "quasi_sequence_order"]
+        for name in registered:
+            self.assertIn(name, protpy.descriptor_names, f"{name} should be a registered descriptor.")
+        #deprecated in v1.6.0: still callable (with a DeprecationWarning) but no longer registered
+        deprecated = ["hydrophobic_polar_charged_composition", "secondary_structure_propensity",
+            "reduced_alphabet_composition", "amino_acid_pair_composition", "aggregation_propensity",
+            "sequence_order_coupling_number_all", "quasi_sequence_order_all", "ncpr", "charge_density",
+            "hydrophobic_ratio", "half_life", "ivywrel_index", "cvp_bias", "flexibility", "linguistic_complexity",
+            "fft_descriptors", "dct_descriptors", "uversky_charge_hydropathy", "fold_index", "disorder_propensity",
+            "transmembrane_features", "signal_peptide_features", "functional_site_counts", "antigenicity_surface",
+            "cysteine_features", "z_scales_5", "vhse", "atchley_factors", "t_scales", "st_scales", "protfp",
+            "fasgai", "blosum_indices", "ms_whim", "physicochemical_distance_transformation"]
+        seq = "MKTAYIAKQRQISFVKSHFSRQLEERLGLIEVQAPILSRVGDAKLVVSTEQW"
+        for name in deprecated:
+            with self.subTest(name=name):
+                self.assertNotIn(name, protpy.descriptor_names)
+                with self.assertWarns(DeprecationWarning):
+                    getattr(protpy, name)(seq)
+        #helpers no longer used by protpy are deprecated (and not exported)
+        from protpy import composition, sequence_order
+        for func, args in ((composition.sequence_order_correlation_factor, (seq, 1, [composition.hydrophobicity_])),
+                           (composition.amphiphilic_sequence_order_correlation_factor, (seq, 1)),
+                           (sequence_order.sequence_order_coupling_number_, (seq, 1))):
+            with self.assertWarns(DeprecationWarning):
+                func(*args)
+        #internal helpers are no longer exported from the protpy namespace
+        for name in ("sequence_order_coupling_number_", "str_to_num", "normalize_property",
+                     "sequence_order_correlation_factor", "amphiphilic_sequence_order_correlation_factor"):
+            self.assertFalse(hasattr(protpy, name), name)
+        #permanent literature aliases give the same output as their family function
+        self.assertTrue(protpy.tripeptide_composition(seq).equals(protpy.kmer_composition(seq, k=3)))
+        self.assertTrue(protpy.dde(seq).equals(protpy.dipeptide_composition(seq, normalize="dde")))
+        self.assertTrue(protpy.cksaagp(seq).equals(protpy.cksaap(seq, alphabet="ifeature5")))
+        self.assertTrue(protpy.geary_autocorrelation(seq).equals(protpy.autocorrelation(seq, method="geary")))
+        self.assertTrue(protpy.ctd_(seq).equals(protpy.ctd(seq)))
+        self.assertTrue(protpy.ctd_composition(seq).equals(protpy.ctd(seq, all_ctd=False, parts="C")))
+        self.assertAlmostEqual(protpy.boman_index(seq).iloc[0, 0], -protpy.gravy(seq, scale="RADA880101").iloc[0, 0])

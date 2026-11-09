@@ -5,8 +5,8 @@
 from __future__ import annotations
 
 """
-Charge and charge-patterning descriptors (FCR, NCPR, kappa, SCD, charge
-density).
+Charge and charge-patterning descriptors (charge fractions and NCPR, kappa,
+SCD), the hydrophobicity profile engine and thermostability indices.
 
 Charges follow the Das & Pappu convention: K, R = +1; D, E = -1; H = 0.
 
@@ -50,18 +50,27 @@ References
 [13] Vihinen, M., Torkkila, E., & Riikonen, P. (1994). Accuracy of protein
     flexibility predictions. Proteins, 19(2), 141-149.
     https://doi.org/10.1002/prot.340190207
+[14] von Heijne, G. (1986). The distribution of positively charged residues in
+    bacterial inner membrane proteins correlates with the trans-membrane
+    topology. EMBO J, 5(11), 3021-3027.
+    https://doi.org/10.1002/j.1460-2075.1986.tb04601.x
 """
+
+from functools import lru_cache
 
 import numpy as np
 import pandas as pd
 
 from ._constants import _validate_sequence, _validate_int
-from ._helpers import _charge_vector, _to_df, _property_matrix, _sliding_windows, _profile_stats, _load_json_table
-from .composition import charge_distribution, molecular_weight
+from ._helpers import (_charge_vector, _to_df, _property_matrix, _sliding_windows, _profile_stats,
+                       _load_json_table, _runs, _warn_deprecated)
+from .composition import charge_distribution
 
 __all__ = [
-    "charge_fractions", "ncpr", "kappa", "sequence_charge_decoration", "charge_density",
-    "hydrophobicity_profile", "hydrophobic_ratio", "half_life", "ivywrel_index", "cvp_bias", "flexibility",
+    "charge_fractions", "kappa", "sequence_charge_decoration", "hydrophobicity_profile",
+    "thermostability_indices",
+    #deprecated, removed in protpy 2.0
+    "ncpr", "charge_density", "hydrophobic_ratio", "half_life", "ivywrel_index", "cvp_bias", "flexibility",
 ]
 
 ################################## Charge Fractions #######################################
@@ -78,11 +87,15 @@ def charge_fractions(sequence: str) -> pd.DataFrame:
 
     FPlus = n+ / L, FMinus = n- / L
 
+    NCPR = (n+ - n-) / L
+
     Sigma = NCPR^2 / FCR
 
     where n+ is the number of positive residues (K, R), n- the number of negative
-    residues (D, E), L is the length of the sequence and NCPR = (n+ - n-) / L. His
-    is treated as neutral and sigma is 0 when there are no charged residues.
+    residues (D, E), L is the length of the sequence and NCPR is the net charge per
+    residue [1]. His is treated as neutral and sigma is 0 when there are no charged
+    residues. (Only two of the values are independent; they are all given because
+    each is a standard localCIDER parameter.)
 
     Parameters
     ==========
@@ -93,9 +106,9 @@ def charge_fractions(sequence: str) -> pd.DataFrame:
     =======
     :charge_fractions_df: pd.DataFrame
         pandas dataframe of charge fractions for protein sequence. Dataframe will
-        be of the shape 1 x 4, where 4 is the number of features calculated from
+        be of the shape 1 x 5, where 5 is the number of features calculated from
         the descriptor and 1 is the input sequence. Column names are Charge_FCR,
-        Charge_FPlus, Charge_FMinus and Charge_Sigma.
+        Charge_FPlus, Charge_FMinus, Charge_NCPR and Charge_Sigma.
     """
     #validate input protein sequence
     sequence = _validate_sequence(sequence)
@@ -105,7 +118,8 @@ def charge_fractions(sequence: str) -> pd.DataFrame:
     fcr, ncpr_ = f_plus + f_minus, f_plus - f_minus
     sigma = ncpr_ ** 2 / fcr if fcr else 0.0
     #prefixed so "FCR" cannot clash with the tripeptide-composition column of the same name
-    return _to_df([fcr, f_plus, f_minus, sigma], ["Charge_FCR", "Charge_FPlus", "Charge_FMinus", "Charge_Sigma"])
+    return _to_df([fcr, f_plus, f_minus, ncpr_, sigma],
+                  ["Charge_FCR", "Charge_FPlus", "Charge_FMinus", "Charge_NCPR", "Charge_Sigma"])
 
 #################################### NCPR #################################################
 
@@ -119,6 +133,9 @@ def ncpr(sequence: str) -> pd.DataFrame:
     where n+ is the number of positive residues (K, R), n- the number of negative
     residues (D, E) and L is the length of the sequence.
 
+    Deprecated since v1.6.0, removed in 2.0: NCPR is the Charge_NCPR column of
+    ``charge_fractions``.
+
     Parameters
     ==========
     :sequence: str
@@ -130,6 +147,7 @@ def ncpr(sequence: str) -> pd.DataFrame:
         pandas dataframe of NCPR for protein sequence. Dataframe will be of the
         shape 1 x 1, with the column NCPR.
     """
+    _warn_deprecated("ncpr", "charge_fractions (column Charge_NCPR)")
     #validate input protein sequence
     sequence = _validate_sequence(sequence)
     return _to_df([_charge_vector(sequence).mean()], ["NCPR"])
@@ -198,7 +216,8 @@ def _delta(pos: np.ndarray, neg: np.ndarray, g: int, sigma: float) -> np.ndarray
     return np.mean((_blob_sigma(pos, neg, g) - sigma) ** 2, axis=-1)
 
 
-def _delta_max(n_pos: int, n_neg: int, length: int, g: int, sigma: float) -> float:
+@lru_cache(maxsize=4096)
+def _delta_max(n_pos: int, n_neg: int, length: int, g: int) -> float:
     """
     Calculate the maximum delta of a sequence composition, used to normalise kappa
     [2]. The maximum is taken over the most segregated arrangements of the
@@ -206,8 +225,15 @@ def _delta_max(n_pos: int, n_neg: int, length: int, g: int, sigma: float) -> flo
     with the neutral residues split across the three gaps around them. Blobs lying
     entirely in a neutral flank contribute the same value whatever the length of
     the flank, so for each gap between the blocks only flank lengths up to g - 1
-    need to be tried. This evaluates every distinct arrangement in O(n0 * g)
-    candidates, where n0 is the number of neutral residues.
+    need to be tried, giving O(n0 * g) candidate arrangements, where n0 is the
+    number of neutral residues.
+
+    Each arrangement is scored in O(g) rather than O(L): only blobs that straddle
+    one of the four block boundaries have a composition other than all-neutral
+    (charge asymmetry 0) or all-charged (charge asymmetry 1), so delta is the sum
+    over the at most 4(g - 1) straddling blobs plus the counts of pure blobs times
+    their constant values. The result is memoised, as it depends only on the
+    composition and the blob size.
 
     Parameters
     ==========
@@ -219,14 +245,13 @@ def _delta_max(n_pos: int, n_neg: int, length: int, g: int, sigma: float) -> flo
         length of the sequence.
     :g: int
         blob size.
-    :sigma: float
-        charge asymmetry of the whole sequence.
 
     Returns
     =======
     :best: float
         maximum delta over the segregated arrangements.
     """
+    sigma = (n_pos - n_neg) ** 2 / (length * (n_pos + n_neg))
     n0 = length - n_pos - n_neg
     candidates = set()
     for b in range(n0 + 1):
@@ -234,16 +259,27 @@ def _delta_max(n_pos: int, n_neg: int, length: int, g: int, sigma: float) -> flo
         for k in range(min(g, rest + 1)):
             candidates.add((k, b))
             candidates.add((rest - k, b))
-    candidates = np.array(sorted(candidates))
-    idx = np.arange(length)
-    best = 0.0
-    #chunk the (candidate x residue) arrays to bound memory on long sequences
-    for chunk in np.array_split(candidates, max(1, len(candidates) // 1000)):
-        a, b = chunk[:, :1], chunk[:, 1:]
-        pos = ((idx >= a) & (idx < a + n_pos)).astype(float)
-        neg = ((idx >= a + n_pos + b) & (idx < a + n_pos + b + n_neg)).astype(float)
-        best = max(best, float(_delta(pos, neg, g, sigma).max()))
-    return best
+    a, b = np.array(sorted(candidates)).T
+    c = n0 - a - b
+    n_blobs = length - g + 1
+    #blob starts that straddle a block boundary
+    boundaries = np.stack([a, a + n_pos, a + n_pos + b, a + n_pos + b + n_neg], axis=1)
+    starts = (boundaries[:, :, None] + np.arange(1 - g, 0)).reshape(len(a), -1)
+    starts = np.sort(np.where((starts >= 0) & (starts < n_blobs), starts, -1), axis=1)
+    mixed = starts >= 0
+    mixed[:, 1:] &= starts[:, 1:] != starts[:, :-1]
+    ends = starts + g
+    n_p = np.clip(np.minimum(ends, (a + n_pos)[:, None]) - np.maximum(starts, a[:, None]), 0, None)
+    lo = (a + n_pos + b)[:, None]
+    n_m = np.clip(np.minimum(ends, lo + n_neg) - np.maximum(starts, lo), 0, None)
+    total = n_p + n_m
+    blob_sigma = np.divide((n_p - n_m) ** 2, total * g, out=np.zeros(total.shape), where=total > 0)
+    mixed_sum = np.where(mixed, (blob_sigma - sigma) ** 2, 0.0).sum(axis=1)
+    #blobs lying inside a single block
+    pure_neutral = sum(np.maximum(0, r - g + 1) for r in (a, b, c))
+    pure_charged = max(0, n_pos - g + 1) + max(0, n_neg - g + 1)
+    delta = (mixed_sum + pure_neutral * sigma ** 2 + pure_charged * (1 - sigma) ** 2) / n_blobs
+    return float(delta.max())
 
 
 def kappa(sequence: str, blob_sizes: tuple[int, ...] = (5, 6)) -> pd.DataFrame:
@@ -263,11 +299,12 @@ def kappa(sequence: str, blob_sizes: tuple[int, ...] = (5, 6)) -> pd.DataFrame:
     where sigma_b is the charge asymmetry of a blob, f+ and f- are its fractions of
     positive (K, R) and negative (D, E) residues, sigma = NCPR^2 / FCR is the charge
     asymmetry of the whole sequence and delta_max,g is the largest delta over the
-    most segregated arrangements of the same composition. The final kappa is the
-    mean of kappa_g over the blob sizes (5 and 6 by default). Kappa ranges from 0
-    (well mixed) to 1 (fully segregated). It is reported as 0 when the sequence has
-    no charged residues or only one type of charge, and blobs longer than the
-    sequence are reduced to its length.
+    most segregated arrangements of the same composition. Kappa is the mean of
+    kappa_g over the blob sizes (5 and 6 by default) and ranges from 0 (well
+    mixed) to 1 (fully segregated). Sequences with only one type of charge are
+    scored the same way (as in localCIDER); kappa is NaN for a sequence with no
+    charged residues, where it is undefined. Blobs longer than the sequence are
+    reduced to its length.
 
     Parameters
     ==========
@@ -279,10 +316,10 @@ def kappa(sequence: str, blob_sizes: tuple[int, ...] = (5, 6)) -> pd.DataFrame:
     Returns
     =======
     :kappa_df: pd.DataFrame
-        pandas dataframe of kappa values for protein sequence. Dataframe will be of
-        the shape 1 x (1 + number of blob sizes), where the first column (Kappa) is
-        the mean and the remaining columns (Kappa_g) are the values for each blob
-        size. By default the shape will be 1 x 3.
+        pandas dataframe of kappa for protein sequence. Dataframe will be of the
+        shape 1 x 1, with the column Kappa. (Before v1.6.0 the values for each blob
+        size were also returned; they correlate at r >= 0.986 with Kappa. Call
+        kappa(sequence, blob_sizes=(g,)) for a single blob size.)
     """
     #validate input protein sequence
     sequence = _validate_sequence(sequence)
@@ -293,16 +330,15 @@ def kappa(sequence: str, blob_sizes: tuple[int, ...] = (5, 6)) -> pd.DataFrame:
     q = _charge_vector(sequence)
     pos, neg = (q > 0).astype(float), (q < 0).astype(float)
     n_pos, n_neg, L = int(pos.sum()), int(neg.sum()), len(sequence)
+    if n_pos + n_neg == 0:
+        return _to_df([np.nan], ["Kappa"])
     values = []
     for g in blob_sizes:
-        if n_pos == 0 or n_neg == 0:
-            values.append(0.0)
-            continue
         g = min(g, L)
         sigma = (n_pos - n_neg) ** 2 / (L * (n_pos + n_neg))
-        d_max = _delta_max(n_pos, n_neg, L, g, sigma)
+        d_max = _delta_max(n_pos, n_neg, L, g)
         values.append(min(float(_delta(pos, neg, g, sigma)) / d_max, 1.0) if d_max else 0.0)
-    return _to_df([float(np.mean(values))] + values, ["Kappa"] + [f"Kappa_{g}" for g in blob_sizes])
+    return _to_df([float(np.mean(values))], ["Kappa"])
 
 ########################### Sequence Charge Decoration ####################################
 
@@ -354,6 +390,10 @@ def charge_density(sequence: str, ph: float = 7.4) -> pd.DataFrame:
     where NetCharge(pH) is calculated using the charge_distribution function and MW
     using the molecular_weight function.
 
+    Deprecated since v1.6.0, removed in 2.0: use
+    ``charge_distribution(sequence, ph, normalize="mass")`` (column
+    NetCharge_perDa); charge density correlates at r = 0.996 with NCPR.
+
     Parameters
     ==========
     :sequence: str
@@ -365,43 +405,53 @@ def charge_density(sequence: str, ph: float = 7.4) -> pd.DataFrame:
     =======
     :charge_density_df: pd.DataFrame
         pandas dataframe of charge density (charges per Da) for protein sequence.
-        Dataframe will be of the shape 1 x 1, with the column ChargeDensity. The
-        value is rounded to 6 decimal places because it is typically of order 1e-4.
+        Dataframe will be of the shape 1 x 1, with the column ChargeDensity.
     """
-    #validate input protein sequence
-    sequence = _validate_sequence(sequence)
-
-    net = charge_distribution(sequence, ph=ph)["NetCharge"].iloc[0]
-    mw = molecular_weight(sequence)["MolecularWeight"].iloc[0]
-    return pd.DataFrame([[round(net / mw, 6)]], columns=["ChargeDensity"])
+    _warn_deprecated("charge_density", 'charge_distribution(sequence, ph, normalize="mass")')
+    net = charge_distribution(sequence, ph=ph, normalize="mass")["NetCharge_perDa"].iloc[0]
+    return _to_df([net], ["ChargeDensity"])
 
 ############################### Hydrophobicity Profile ####################################
 
 def hydrophobicity_profile(sequence: str, scale: str = "kyte_doolittle", window: int = 9, edge: float = 1.0,
-    threshold: float | None = None) -> pd.DataFrame:
+    threshold: float | None = None, segments: bool = False) -> pd.DataFrame:
     """
     Calculate the Hydrophobicity Profile (HP) of protein sequence. Each amino acid
-    in the sequence is replaced by its value on a hydrophobicity scale and the
-    values are averaged over a sliding window, giving a profile along the sequence
-    [5, 6]. The profile is summarised by its mean, maximum, minimum and standard
-    deviation, and optionally the fraction of windows above a threshold, e.g. 1.6
-    for transmembrane segments with the Kyte-Doolittle scale [5]. The window value
-    is calculated as:
+    in the sequence is replaced by its value on a hydrophobicity scale (or any
+    other single-value scale) and the values are averaged over a sliding window,
+    giving a profile along the sequence [5, 6]. The profile is summarised by its
+    mean, maximum, minimum and standard deviation, and optionally the fraction of
+    windows above a threshold, e.g. 1.6 for transmembrane segments with the
+    Kyte-Doolittle scale [5]. The window value is calculated as:
 
     HP(i) = sum_j w_j * H(s_i+j) / sum_j w_j
 
-    where H is the hydrophobicity scale and w_j are the window weights. With
-    edge=1.0 all weights are 1 (a plain mean); with edge < 1 the weights fall
-    linearly from 1 at the centre of the window to edge at its ends, as in ExPASy
-    ProtScale. Windows longer than the sequence use the whole sequence.
+    where H is the scale and w_j are the window weights. With edge=1.0 all
+    weights are 1 (a plain mean); with edge < 1 the weights fall linearly from 1 at
+    the centre of the window to edge at its ends, as in ExPASy ProtScale. Windows
+    longer than the sequence use the whole sequence.
+
+    With ``segments=True`` the windows above ``threshold`` are merged into
+    segments (the residues covered by at least one such window), and the number of
+    segments, the fraction of residues inside a segment and the positive-inside
+    bias (K + R in the 15 residues before the first segment minus K + R in the 15
+    residues after it, 0 without a segment) [14] are added. With the Kyte-Doolittle
+    scale, window=19 and threshold=1.6 these are hydropathy-based transmembrane
+    segments; this is a heuristic, not a topology predictor (signal peptides are
+    also counted, and multi-pass proteins are often under-counted).
+
+    The scale can be any protpy scale (e.g. "vihinen_flexibility" with window=9
+    and edge=0.25 gives the Vihinen flexibility profile [13], "parker" or "janin"
+    with window=7 the Parker and Janin profiles) or an AAindex1 accession number.
 
     Parameters
     ==========
     :sequence: str
         protein sequence.
     :scale: str (default="kyte_doolittle")
-        single-value hydrophobicity scale: "kyte_doolittle", "hopp_woods",
-        "eisenberg", "wimley_white", "engelman", "domcut" or any AAindex
+        single-value scale: "kyte_doolittle", "hopp_woods", "eisenberg_jmb1984",
+        "eisenberg_arb1984", "wimley_white", "engelman", "domcut",
+        "vihinen_flexibility", "parker", "janin", "top_idp", "eiip" or any AAindex
         accession number.
     :window: int (default=9)
         length of the sliding window.
@@ -409,25 +459,43 @@ def hydrophobicity_profile(sequence: str, scale: str = "kyte_doolittle", window:
         relative weight of the ends of the window, between 0 and 1.
     :threshold: float | None (default=None)
         if set, also calculate the fraction of windows with a value above it.
+    :segments: bool (default=False)
+        also calculate the segment features; needs a threshold.
 
     Returns
     =======
     :profile_df: pd.DataFrame
         pandas dataframe of hydrophobicity profile statistics for protein sequence.
-        Dataframe will be of the shape 1 x 4 (1 x 5 with a threshold), with the
-        columns HP_<scale>_w<window>_mean, _max, _min, _std and _frac_above.
+        Dataframe will be of the shape 1 x 4 (1 x 5 with a threshold, 1 x 8 with
+        segments), with the columns HP_<scale>_w<window>_mean, _max, _min, _std,
+        _frac_above, _n_segments, _frac_in_segments and _positive_inside_bias.
     """
     #validate input protein sequence
     sequence = _validate_sequence(sequence)
     window = _validate_int("window", window, 1)
     if not 0 <= edge <= 1:
         raise ValueError(f"edge must be between 0 and 1, got {edge}.")
+    if segments and threshold is None:
+        raise ValueError("segments=True needs a threshold, e.g. threshold=1.6 for Kyte-Doolittle with window=19.")
 
     values = _property_matrix(sequence, scale)
     if values.shape[1] != 1:
         raise ValueError(f"Scale '{scale}' is multi-dimensional; use a single-value scale.")
     profile = _sliding_windows(values[:, 0], window, edge)
-    stats = _profile_stats(profile, f"HP_{scale}_w{window}", threshold=threshold)
+    prefix = f"HP_{scale}_w{window}"
+    stats = _profile_stats(profile, prefix, threshold=threshold)
+    if segments:
+        width = min(window, len(sequence))
+        covered = np.zeros(len(sequence), dtype=bool)
+        for start in np.flatnonzero(profile > threshold):
+            covered[start:start + width] = True
+        runs = _runs(covered)
+        bias = 0
+        if runs:
+            s, e = runs[0]
+            bias = sum(aa in "KR" for aa in sequence[max(0, s - 15):s]) - sum(aa in "KR" for aa in sequence[e:e + 15])
+        stats.update({f"{prefix}_n_segments": len(runs), f"{prefix}_frac_in_segments": float(covered.mean()),
+                      f"{prefix}_positive_inside_bias": bias})
     return _to_df(list(stats.values()), list(stats))
 
 ################################ Hydrophobic Ratio ########################################
@@ -446,6 +514,10 @@ def hydrophobic_ratio(sequence: str) -> pd.DataFrame:
     where N(LIVFMACW) is the number of L, I, V, F, M, A, C and W residues and L
     is the length of the sequence.
 
+    Deprecated since v1.6.0, removed in 2.0: it is a fixed linear map of the amino
+    acid composition (and close to the hydrophobic group of
+    ``kmer_composition(k=1, alphabet=3)``).
+
     Parameters
     ==========
     :sequence: str
@@ -457,6 +529,7 @@ def hydrophobic_ratio(sequence: str) -> pd.DataFrame:
         pandas dataframe of hydrophobic ratio for protein sequence. Dataframe will
         be of the shape 1 x 1, with the column HydrophobicRatio.
     """
+    _warn_deprecated("hydrophobic_ratio", "kmer_composition(sequence, k=1, alphabet=3)")
     #validate input protein sequence
     sequence = _validate_sequence(sequence)
     return _to_df([sum(aa in _apd_hydrophobic for aa in sequence) / len(sequence) * 100], ["HydrophobicRatio"])
@@ -475,6 +548,10 @@ def half_life(sequence: str) -> pd.DataFrame:
     N-terminal proline is unknown in ProtParam and returned as NaN. The estimate is
     not applicable to N-terminally modified proteins.
 
+    Deprecated since v1.6.0, removed in 2.0: it depends only on the first residue
+    (which is Met in most proteins, so it is nearly constant) and the three
+    columns are perfectly correlated.
+
     Parameters
     ==========
     :sequence: str
@@ -487,6 +564,7 @@ def half_life(sequence: str) -> pd.DataFrame:
         be of the shape 1 x 3, with the columns HalfLife_Mammal_h, HalfLife_Yeast_h
         and HalfLife_Ecoli_h.
     """
+    _warn_deprecated("half_life")
     #validate input protein sequence
     sequence = _validate_sequence(sequence)
 
@@ -494,19 +572,50 @@ def half_life(sequence: str) -> pd.DataFrame:
     values = [np.nan if row[k] is None else row[k] for k in ("mammal", "yeast", "ecoli")]
     return _to_df(values, ["HalfLife_Mammal_h", "HalfLife_Yeast_h", "HalfLife_Ecoli_h"])
 
-################################## IVYWREL Index ##########################################
+############################## Thermostability Indices ####################################
 
-def ivywrel_index(sequence: str) -> pd.DataFrame:
+def thermostability_indices(sequence: str) -> pd.DataFrame:
     """
-    Calculate the IVYWREL Index of protein sequence. The IVYWREL index is the
-    fraction of I, V, Y, W, R, E and L residues in a protein sequence, which
-    correlates with the optimal growth temperature of the organism [11]. It is
-    calculated as:
+    Calculate the Thermostability Indices of protein sequence: the IVYWREL index
+    and the charged versus polar (CvP) bias, composition-based indicators of
+    protein thermostability [11, 12]. They are calculated as:
 
     IVYWREL = N(IVYWREL) / L
 
-    where N(IVYWREL) is the number of I, V, Y, W, R, E and L residues and L is the
-    length of the sequence.
+    CvP = %(D + E + K + R) - %(N + Q + S + T)
+
+    where N(IVYWREL) is the number of I, V, Y, W, R, E and L residues, %(X) is the
+    percentage of residues of type X and L is the length of the sequence. IVYWREL
+    was derived as a proteome-wide predictor of optimal growth temperature and
+    does not reliably rank orthologous proteins; CvP bias was validated on
+    hyperthermophile proteomes. Both are fixed linear maps of the amino acid
+    composition.
+
+    Parameters
+    ==========
+    :sequence: str
+        protein sequence.
+
+    Returns
+    =======
+    :thermostability_df: pd.DataFrame
+        pandas dataframe of the thermostability indices for protein sequence.
+        Dataframe will be of the shape 1 x 2, with the columns IVYWREL and CvP_Bias.
+    """
+    #validate input protein sequence
+    sequence = _validate_sequence(sequence)
+    L = len(sequence)
+    charged = sum(aa in "DEKR" for aa in sequence)
+    polar = sum(aa in "NQST" for aa in sequence)
+    return _to_df([sum(aa in "IVYWREL" for aa in sequence) / L, (charged - polar) / L * 100], ["IVYWREL", "CvP_Bias"])
+
+def ivywrel_index(sequence: str) -> pd.DataFrame:
+    """
+    Calculate the IVYWREL Index of protein sequence, the fraction of I, V, Y, W, R,
+    E and L residues [11].
+
+    Deprecated since v1.6.0, removed in 2.0: use ``thermostability_indices``
+    (column IVYWREL).
 
     Parameters
     ==========
@@ -516,24 +625,18 @@ def ivywrel_index(sequence: str) -> pd.DataFrame:
     Returns
     =======
     :ivywrel_df: pd.DataFrame
-        pandas dataframe of IVYWREL index for protein sequence. Dataframe will be
-        of the shape 1 x 1, with the column IVYWREL.
+        pandas dataframe of shape 1 x 1, with the column IVYWREL.
     """
-    #validate input protein sequence
-    sequence = _validate_sequence(sequence)
-    return _to_df([sum(aa in "IVYWREL" for aa in sequence) / len(sequence)], ["IVYWREL"])
-
-#################################### CvP Bias #############################################
+    _warn_deprecated("ivywrel_index", "thermostability_indices (column IVYWREL)")
+    return thermostability_indices(sequence)[["IVYWREL"]]
 
 def cvp_bias(sequence: str) -> pd.DataFrame:
     """
-    Calculate the Charged versus Polar Bias (CvP) of protein sequence. The CvP bias
-    is the difference between the percentages of charged and polar residues in a
-    protein sequence, an indicator of hyperthermostability [12], calculated as:
+    Calculate the Charged versus Polar Bias (CvP) of protein sequence,
+    %(D + E + K + R) - %(N + Q + S + T) [12].
 
-    CvP = %(D + E + K + R) - %(N + Q + S + T)
-
-    where %(X) is the percentage of residues of type X in the sequence.
+    Deprecated since v1.6.0, removed in 2.0: use ``thermostability_indices``
+    (column CvP_Bias).
 
     Parameters
     ==========
@@ -543,14 +646,10 @@ def cvp_bias(sequence: str) -> pd.DataFrame:
     Returns
     =======
     :cvp_df: pd.DataFrame
-        pandas dataframe of CvP bias for protein sequence. Dataframe will be of the
-        shape 1 x 1, with the column CvP_Bias.
+        pandas dataframe of shape 1 x 1, with the column CvP_Bias.
     """
-    #validate input protein sequence
-    sequence = _validate_sequence(sequence)
-    charged = sum(aa in "DEKR" for aa in sequence)
-    polar = sum(aa in "NQST" for aa in sequence)
-    return _to_df([(charged - polar) / len(sequence) * 100], ["CvP_Bias"])
+    _warn_deprecated("cvp_bias", "thermostability_indices (column CvP_Bias)")
+    return thermostability_indices(sequence)[["CvP_Bias"]]
 
 ################################### Flexibility ###########################################
 
@@ -559,13 +658,13 @@ def flexibility(sequence: str, window: int = 9) -> pd.DataFrame:
     Calculate the Flexibility (Flex) profile of protein sequence. Each amino acid
     in the sequence is replaced by its normalised flexibility parameter (B-value)
     and the values are averaged over a sliding window of 9 residues whose end
-    weights fall linearly to 0.25 (weights 0.25, 0.4375, 0.625, 0.8125, 1, ...,
-    0.25), as in Vihinen et al. [13]. The profile is summarised by its mean,
-    maximum, minimum and standard deviation. The average B-values of Vihinen et
-    al. are used; their parameter sets for residues with 0, 1 or 2 rigid
-    neighbours are not. Compared with Biopython's ProteinAnalysis.flexibility,
-    which uses the same values and weights, each window is centred on its middle
-    residue and the last window is included.
+    weights fall linearly to 0.25, as in Vihinen et al. [13], using the average
+    B-values (AAindex VINM940101, as in Biopython). The profile is summarised by
+    its mean, maximum, minimum and standard deviation.
+
+    Deprecated since v1.6.0, removed in 2.0: use
+    ``hydrophobicity_profile(sequence, scale="vihinen_flexibility", window=9, edge=0.25)``,
+    which gives the same values.
 
     Parameters
     ==========
@@ -577,14 +676,10 @@ def flexibility(sequence: str, window: int = 9) -> pd.DataFrame:
     Returns
     =======
     :flexibility_df: pd.DataFrame
-        pandas dataframe of flexibility profile statistics for protein sequence.
-        Dataframe will be of the shape 1 x 4, with the columns Flex_mean, Flex_max,
+        pandas dataframe of shape 1 x 4, with the columns Flex_mean, Flex_max,
         Flex_min and Flex_std.
     """
-    #validate input protein sequence
-    sequence = _validate_sequence(sequence)
-    window = _validate_int("window", window, 1)
-
-    profile = _sliding_windows(_property_matrix(sequence, "vihinen_flexibility")[:, 0], window, edge=0.25)
-    stats = _profile_stats(profile, "Flex")
-    return _to_df(list(stats.values()), list(stats))
+    _warn_deprecated("flexibility", 'hydrophobicity_profile(sequence, scale="vihinen_flexibility", window=9, edge=0.25)')
+    df = hydrophobicity_profile(sequence, scale="vihinen_flexibility", window=window, edge=0.25)
+    df.columns = ["Flex_mean", "Flex_max", "Flex_min", "Flex_std"]
+    return df

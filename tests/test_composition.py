@@ -6,8 +6,11 @@ import pandas as pd
 import numpy as np
 import os
 import unittest
+from tests._compare import frames_close
 import re
 from Bio import SeqIO
+from Bio.SeqUtils.ProtParam import ProteinAnalysis
+from Bio.SeqUtils.IsoelectricPoint import positive_pKs, negative_pKs
 unittest.TestLoader.sortTestMethodsUsing = None
 
 import protpy as protpy
@@ -93,7 +96,7 @@ class ProtpyCompositionTests(unittest.TestCase):
             'Incorrect column values found in output:\n{}.'.format(list(amino_acid_composition_seq1.columns)))
         self.assertTrue(amino_acid_composition_seq1.any().isnull().sum()==0,
             'Expected output to contain no null values.')        
-        self.assertTrue(amino_acid_composition_seq1.equals(amino_acid_composition_seq1_expected_values), 
+        self.assertTrue(frames_close(amino_acid_composition_seq1, amino_acid_composition_seq1_expected_values), 
             "Output did not match expected values, got\n{}.".format(amino_acid_composition_seq1))
         self.assertTrue(all(col == np.float64 for col in list(amino_acid_composition_seq1.dtypes)),
                 "Expected output values to be of datatype np.float64, got {}.".format(list(amino_acid_composition_seq1.dtypes)))
@@ -112,7 +115,7 @@ class ProtpyCompositionTests(unittest.TestCase):
             'Incorrect column values found in output:\n{}'.format(list(amino_acid_composition_seq2.columns)))
         self.assertTrue(amino_acid_composition_seq2.any().isnull().sum()==0,
             'Expected output to contain no null values.')        
-        self.assertTrue(amino_acid_composition_seq2.equals(amino_acid_composition_seq2_expected_values), 
+        self.assertTrue(frames_close(amino_acid_composition_seq2, amino_acid_composition_seq2_expected_values), 
             "Output did not match expected values, got\n{}.".format(amino_acid_composition_seq2))
         self.assertTrue(all(col == np.float64 for col in list(amino_acid_composition_seq2.dtypes)),
                 "Expected output values to be of datatype np.float64, got {}.".format(list(amino_acid_composition_seq2.dtypes)))
@@ -131,7 +134,7 @@ class ProtpyCompositionTests(unittest.TestCase):
             'Incorrect column values found in output:\n{}'.format(list(amino_acid_composition_seq3.columns)))
         self.assertTrue(amino_acid_composition_seq3.any().isnull().sum()==0,
             'Expected output to contain no null values.')        
-        self.assertTrue(amino_acid_composition_seq3.equals(amino_acid_composition_seq3_expected_values), 
+        self.assertTrue(frames_close(amino_acid_composition_seq3, amino_acid_composition_seq3_expected_values), 
             "Output did not match expected values, got\n{}.".format(amino_acid_composition_seq3))
         self.assertTrue(all(col == np.float64 for col in list(amino_acid_composition_seq3.dtypes)),
                 "Expected output values to be of datatype np.float64, got {}.".format(list(amino_acid_composition_seq3.dtypes)))
@@ -150,7 +153,7 @@ class ProtpyCompositionTests(unittest.TestCase):
             'Incorrect column values found in output:\n{}'.format(list(amino_acid_composition_seq4.columns)))
         self.assertTrue(amino_acid_composition_seq4.any().isnull().sum()==0,
             'Expected output to contain no null values.')        
-        self.assertTrue(amino_acid_composition_seq4.equals(amino_acid_composition_seq4_expected_values), 
+        self.assertTrue(frames_close(amino_acid_composition_seq4, amino_acid_composition_seq4_expected_values), 
             "Output did not match expected values, got\n{}.".format(amino_acid_composition_seq4))
         self.assertTrue(all(col == np.float64 for col in list(amino_acid_composition_seq4.dtypes)),
                 "Expected output values to be of datatype np.float64, got {}.".format(list(amino_acid_composition_seq4.dtypes)))
@@ -182,7 +185,7 @@ class ProtpyCompositionTests(unittest.TestCase):
             'Incorrect column values found in output:\n{}.'.format(list(gravy_seq1.columns)))
         self.assertTrue(gravy_seq1.any().isnull().sum() == 0,
             'Expected output to contain no null values.')
-        self.assertEqual(gravy_seq1["GRAVY"].values[0], -0.045,
+        self.assertAlmostEqual(gravy_seq1["GRAVY"].values[0], -0.045, 3,
             'Expected GRAVY value of -0.045 for seq1, got {}.'.format(gravy_seq1["GRAVY"].values[0]))
 #2.)
         gravy_seq2 = protpy.gravy(self.protein_seq2)
@@ -191,7 +194,7 @@ class ProtpyCompositionTests(unittest.TestCase):
             'Expected output to be of type DataFrame, got {}.'.format(type(gravy_seq2)))
         self.assertEqual(gravy_seq2.shape, (1, 1),
             'Expected output to be of shape {}, got {}.'.format((1, 1), gravy_seq2.shape))
-        self.assertEqual(gravy_seq2["GRAVY"].values[0], -1.027,
+        self.assertAlmostEqual(gravy_seq2["GRAVY"].values[0], -1.027, 3,
             'Expected GRAVY value of -1.027 for seq2, got {}.'.format(gravy_seq2["GRAVY"].values[0]))
 #3.)
         gravy_seq3 = protpy.gravy(self.protein_seq3)
@@ -200,7 +203,7 @@ class ProtpyCompositionTests(unittest.TestCase):
             'Expected output to be of type DataFrame, got {}.'.format(type(gravy_seq3)))
         self.assertEqual(gravy_seq3.shape, (1, 1),
             'Expected output to be of shape {}, got {}.'.format((1, 1), gravy_seq3.shape))
-        self.assertEqual(gravy_seq3["GRAVY"].values[0], 1.141,
+        self.assertAlmostEqual(gravy_seq3["GRAVY"].values[0], 1.141, 3,
             'Expected GRAVY value of 1.141 for seq3, got {}.'.format(gravy_seq3["GRAVY"].values[0]))
 #4.)
         gravy_seq4 = protpy.gravy(self.protein_seq4)
@@ -209,7 +212,7 @@ class ProtpyCompositionTests(unittest.TestCase):
             'Expected output to be of type DataFrame, got {}.'.format(type(gravy_seq4)))
         self.assertEqual(gravy_seq4.shape, (1, 1),
             'Expected output to be of shape {}, got {}.'.format((1, 1), gravy_seq4.shape))
-        self.assertEqual(gravy_seq4["GRAVY"].values[0], -0.971,
+        self.assertAlmostEqual(gravy_seq4["GRAVY"].values[0], -0.971, 3,
             'Expected GRAVY value of -0.971 for seq4, got {}.'.format(gravy_seq4["GRAVY"].values[0]))
 #5.)
         invalid_seq5 = "ABCDEF"
@@ -238,7 +241,7 @@ class ProtpyCompositionTests(unittest.TestCase):
             'Expected output to be of type DataFrame, got {}.'.format(type(dipeptide_comp_seq1)))
         self.assertEqual(dipeptide_comp_seq1.shape, (1, 400),
             'Expected output to be of shape {}, got {}.'.format((1, 400), dipeptide_comp_seq1.shape)) 
-        self.assertTrue(dipeptide_comp_seq1.iloc[:, : 10].equals(dipeptide_comp_seq1_expected_values), 
+        self.assertTrue(frames_close(dipeptide_comp_seq1.iloc[:, : 10], dipeptide_comp_seq1_expected_values), 
             "Output did not match expected values, got\n{}.".format(dipeptide_comp_seq1.iloc[:, : 10]))
         for col in list(dipeptide_comp_seq1.columns):
             #check all columns follow pattern of XY where x & y are amino acids 
@@ -262,7 +265,7 @@ class ProtpyCompositionTests(unittest.TestCase):
             'Expected output to be of type DataFrame, got {}.'.format(type(dipeptide_comp_seq2)))
         self.assertEqual(dipeptide_comp_seq2.shape, (1, 400),
             'Expected output to be of shape {}, got {}.'.format((1, 400), dipeptide_comp_seq2.shape)) 
-        self.assertTrue(dipeptide_comp_seq2.iloc[:, : 10].equals(dipeptide_comp_seq2_expected_values), 
+        self.assertTrue(frames_close(dipeptide_comp_seq2.iloc[:, : 10], dipeptide_comp_seq2_expected_values), 
             "Output did not match expected values, got\n{}.".format(dipeptide_comp_seq2.iloc[:, : 10]))
         for col in list(dipeptide_comp_seq2.columns):
             #check all columns follow pattern of XY where x & y are amino acids 
@@ -286,7 +289,7 @@ class ProtpyCompositionTests(unittest.TestCase):
             'Expected output to be of type DataFrame, got {}.'.format(type(dipeptide_comp_seq3)))
         self.assertEqual(dipeptide_comp_seq3.shape, (1, 400),
             'Expected output to be of shape {}, got {}.'.format((1, 400), dipeptide_comp_seq3.shape)) 
-        self.assertTrue(dipeptide_comp_seq3.iloc[:, : 10].equals(dipeptide_comp_seq3_expected_values), 
+        self.assertTrue(frames_close(dipeptide_comp_seq3.iloc[:, : 10], dipeptide_comp_seq3_expected_values), 
             "Output did not match expected values, got\n{}.".format(dipeptide_comp_seq3.iloc[:, : 10]))
         for col in list(dipeptide_comp_seq3.columns):
             #check all columns follow pattern of XY where x & y are amino acids 
@@ -310,7 +313,7 @@ class ProtpyCompositionTests(unittest.TestCase):
             'Expected output to be of type DataFrame, got {}.'.format(type(dipeptide_comp_seq4)))
         self.assertEqual(dipeptide_comp_seq4.shape, (1, 400),
             'Expected output to be of shape {}, got {}.'.format((1, 400), dipeptide_comp_seq4.shape)) 
-        self.assertTrue(dipeptide_comp_seq4.iloc[:, : 10].equals(dipeptide_comp_seq4_expected_values), 
+        self.assertTrue(frames_close(dipeptide_comp_seq4.iloc[:, : 10], dipeptide_comp_seq4_expected_values), 
             "Output did not match expected values, got\n{}.".format(dipeptide_comp_seq4.iloc[:, : 10]))
         for col in list(dipeptide_comp_seq4.columns):
             #check all columns follow pattern of XY where x & y are amino acids 
@@ -352,7 +355,7 @@ class ProtpyCompositionTests(unittest.TestCase):
             'Expected output to be of type DataFrame, got {}.'.format(type(tripeptide_comp_seq1)))
         self.assertEqual(tripeptide_comp_seq1.shape, (1, 8000),
             'Expected output to be of shape {}, got {}.'.format((1, 8000), tripeptide_comp_seq1.shape)) 
-        self.assertTrue(tripeptide_comp_seq1.iloc[:, : 10].equals(tripeptide_comp_seq1_expected_values), 
+        self.assertTrue(frames_close(tripeptide_comp_seq1.iloc[:, : 10], tripeptide_comp_seq1_expected_values), 
             "Output did not match expected values, got\n{}.".format(tripeptide_comp_seq1.iloc[:, : 10]))
         for col in list(tripeptide_comp_seq1.columns):
             #check all columns follow pattern of XY where x & y are amino acids 
@@ -378,7 +381,7 @@ class ProtpyCompositionTests(unittest.TestCase):
             'Expected output to be of type DataFrame, got {}.'.format(type(tripeptide_comp_seq2)))
         self.assertEqual(tripeptide_comp_seq2.shape, (1, 8000),
             'Expected output to be of shape {}, got {}.'.format((1, 8000), tripeptide_comp_seq2.shape)) 
-        self.assertTrue(tripeptide_comp_seq2.iloc[:, : 10].equals(tripeptide_comp_seq2_expected_values), 
+        self.assertTrue(frames_close(tripeptide_comp_seq2.iloc[:, : 10], tripeptide_comp_seq2_expected_values), 
             "Output did not match expected values, got\n{}.".format(tripeptide_comp_seq2.iloc[:, : 10]))
         for col in list(tripeptide_comp_seq2.columns):
             #check all columns follow pattern of XY where x & y are amino acids 
@@ -404,7 +407,7 @@ class ProtpyCompositionTests(unittest.TestCase):
             'Expected output to be of type DataFrame, got {}.'.format(type(tripeptide_comp_seq3)))
         self.assertEqual(tripeptide_comp_seq3.shape, (1, 8000),
             'Expected output to be of shape {}, got {}.'.format((1, 8000), tripeptide_comp_seq3.shape)) 
-        self.assertTrue(tripeptide_comp_seq3.iloc[:, : 10].equals(tripeptide_comp_seq3_expected_values), 
+        self.assertTrue(frames_close(tripeptide_comp_seq3.iloc[:, : 10], tripeptide_comp_seq3_expected_values), 
             "Output did not match expected values, got\n{}.".format(tripeptide_comp_seq3.iloc[:, : 10]))
         for col in list(tripeptide_comp_seq3.columns):
             #check all columns follow pattern of XY where x & y are amino acids 
@@ -430,7 +433,7 @@ class ProtpyCompositionTests(unittest.TestCase):
             'Expected output to be of type DataFrame, got {}.'.format(type(tripeptide_comp_seq4)))
         self.assertEqual(tripeptide_comp_seq4.shape, (1, 8000),
             'Expected output to be of shape {}, got {}.'.format((1, 8000), tripeptide_comp_seq4.shape)) 
-        self.assertTrue(tripeptide_comp_seq4.iloc[:, : 10].equals(tripeptide_comp_seq4_expected_values), 
+        self.assertTrue(frames_close(tripeptide_comp_seq4.iloc[:, : 10], tripeptide_comp_seq4_expected_values), 
             "Output did not match expected values, got\n{}.".format(tripeptide_comp_seq4.iloc[:, : 10]))
         for col in list(tripeptide_comp_seq4.columns):
             #check all columns follow pattern of XY where x & y are amino acids 
@@ -462,11 +465,13 @@ class ProtpyCompositionTests(unittest.TestCase):
             tripeptide_composition_seq8 = protpy.tripeptide_composition(invalid_seq8)
 
     def test_short_sequence_pseudo_amino_acid_composition(self):
-        """Short sequences should not crash when lamda exceeds the usable distance."""
-        result = protpy.pseudo_amino_acid_composition("A")
-        self.assertIsInstance(result, pd.DataFrame)
-        self.assertEqual(result.shape, (1, 50))
+        """A lamda that is not less than the sequence length raises (v1.6.0 lag policy)."""
+        with self.assertRaises(ValueError):
+            protpy.pseudo_amino_acid_composition("A")
+        result = protpy.pseudo_amino_acid_composition("ACDEFG", lamda=5)
+        self.assertEqual(result.shape, (1, 25))
         self.assertFalse(result.isnull().any().any())
+        self.assertAlmostEqual(result.sum(axis=1).iloc[0], 100.0, 9)
 
     def test_zero_variance_property_normalization(self):
         """Properties with zero variance should normalize safely to zeros."""
@@ -488,7 +493,7 @@ class ProtpyCompositionTests(unittest.TestCase):
             'Expected output to be of type DataFrame, got {}.'.format(type(pseudo_amino_acid_composition_seq1)))
         self.assertEqual(pseudo_amino_acid_composition_seq1.shape, (1, 20+lamda), 
             'Expected output to be of shape {}, got {}.'.format((1, 20+lamda), pseudo_amino_acid_composition_seq1.shape)) 
-        self.assertTrue(pseudo_amino_acid_composition_seq1.iloc[:, : 10].equals(pseudo_amino_acid_composition_seq1_expected_values), 
+        self.assertTrue(frames_close(pseudo_amino_acid_composition_seq1.iloc[:, : 10], pseudo_amino_acid_composition_seq1_expected_values), 
             "Output did not match expected values, got\n{}.".format(pseudo_amino_acid_composition_seq1.iloc[:, : 10]))
         for col in list(pseudo_amino_acid_composition_seq1.columns):
             #check all columns follow correct naming convention
@@ -508,7 +513,7 @@ class ProtpyCompositionTests(unittest.TestCase):
             'Expected output to be of type DataFrame, got {}.'.format(type(pseudo_amino_acid_composition_seq2)))
         self.assertEqual(pseudo_amino_acid_composition_seq2.shape, (1, 20+lamda), 
             'Expected output to be of shape {}, got {}.'.format((1, 20+lamda), pseudo_amino_acid_composition_seq2.shape)) 
-        self.assertTrue(pseudo_amino_acid_composition_seq2.iloc[:, : 10].equals(pseudo_amino_acid_composition_seq2_expected_values), 
+        self.assertTrue(frames_close(pseudo_amino_acid_composition_seq2.iloc[:, : 10], pseudo_amino_acid_composition_seq2_expected_values), 
             "Output did not match expected values, got\n{}.".format(pseudo_amino_acid_composition_seq2.iloc[:, : 10]))
         for col in list(pseudo_amino_acid_composition_seq2.columns):
             #check all columns follow correct naming convention
@@ -528,7 +533,7 @@ class ProtpyCompositionTests(unittest.TestCase):
             'Expected output to be of type DataFrame, got {}.'.format(type(pseudo_amino_acid_composition_seq3)))
         self.assertEqual(pseudo_amino_acid_composition_seq3.shape, (1, 20+lamda), 
             'Expected output to be of shape {}, got {}.'.format((1, 20+lamda), pseudo_amino_acid_composition_seq3.shape)) 
-        self.assertTrue(pseudo_amino_acid_composition_seq3.iloc[:, : 10].equals(pseudo_amino_acid_composition_seq3_expected_values), 
+        self.assertTrue(frames_close(pseudo_amino_acid_composition_seq3.iloc[:, : 10], pseudo_amino_acid_composition_seq3_expected_values), 
             "Output did not match expected values, got\n{}.".format(pseudo_amino_acid_composition_seq3.iloc[:, : 10]))
         for col in list(pseudo_amino_acid_composition_seq3.columns):
             #check all columns follow correct naming convention
@@ -548,7 +553,7 @@ class ProtpyCompositionTests(unittest.TestCase):
             'Expected output to be of type DataFrame, got {}.'.format(type(pseudo_amino_acid_composition_seq4)))
         self.assertEqual(pseudo_amino_acid_composition_seq4.shape, (1, 20+lamda), 
             'Expected output to be of shape {}, got {}.'.format((1, 20+lamda), pseudo_amino_acid_composition_seq4.shape)) 
-        self.assertTrue(pseudo_amino_acid_composition_seq4.iloc[:, : 10].equals(pseudo_amino_acid_composition_seq4_expected_values), 
+        self.assertTrue(frames_close(pseudo_amino_acid_composition_seq4.iloc[:, : 10], pseudo_amino_acid_composition_seq4_expected_values), 
             "Output did not match expected values, got\n{}.".format(pseudo_amino_acid_composition_seq4.iloc[:, : 10]))
         for col in list(pseudo_amino_acid_composition_seq4.columns):
             #check all columns follow correct naming convention
@@ -588,7 +593,7 @@ class ProtpyCompositionTests(unittest.TestCase):
             'Expected output to be of type DataFrame, got {}.'.format(type(amp_pseudo_amino_acid_composition_seq1)))
         self.assertEqual(amp_pseudo_amino_acid_composition_seq1.shape, (1, 20+(2*lamda)),
             'Expected output to be of shape {}, got {}.'.format((1, 20+(2*lamda)), amp_pseudo_amino_acid_composition_seq1.shape)) 
-        self.assertTrue(amp_pseudo_amino_acid_composition_seq1.iloc[:, : 10].equals(amp_pseudo_amino_acid_composition_seq1_expected_values), 
+        self.assertTrue(frames_close(amp_pseudo_amino_acid_composition_seq1.iloc[:, : 10], amp_pseudo_amino_acid_composition_seq1_expected_values), 
             "Output did not match expected values, got\n{}.".format(amp_pseudo_amino_acid_composition_seq1.iloc[:, : 10]))
         for col in list(amp_pseudo_amino_acid_composition_seq1.columns):
             #check all columns follow correct naming convention
@@ -608,7 +613,7 @@ class ProtpyCompositionTests(unittest.TestCase):
             'Expected output to be of type DataFrame, got {}.'.format(type(amp_pseudo_amino_acid_composition_seq2)))
         self.assertEqual(amp_pseudo_amino_acid_composition_seq2.shape, (1, 20+(2*lamda)),
             'Expected output to be of shape {}, got {}.'.format((1, 20+(2*lamda)), amp_pseudo_amino_acid_composition_seq2.shape)) 
-        self.assertTrue(amp_pseudo_amino_acid_composition_seq2.iloc[:, : 10].equals(amp_pseudo_amino_acid_composition_seq2_expected_values), 
+        self.assertTrue(frames_close(amp_pseudo_amino_acid_composition_seq2.iloc[:, : 10], amp_pseudo_amino_acid_composition_seq2_expected_values), 
             "Output did not match expected values, got\n{}.".format(amp_pseudo_amino_acid_composition_seq2.iloc[:, : 10]))
         for col in list(amp_pseudo_amino_acid_composition_seq2.columns):
             #check all columns follow correct naming convention
@@ -628,7 +633,7 @@ class ProtpyCompositionTests(unittest.TestCase):
             'Expected output to be of type DataFrame, got {}.'.format(type(amp_pseudo_amino_acid_composition_seq3)))
         self.assertEqual(amp_pseudo_amino_acid_composition_seq3.shape, (1, 20+(2*lamda)),
             'Expected output to be of shape {}, got {}.'.format((1, 20+(2*lamda)), amp_pseudo_amino_acid_composition_seq3.shape)) 
-        self.assertTrue(amp_pseudo_amino_acid_composition_seq3.iloc[:, : 10].equals(amp_pseudo_amino_acid_composition_seq3_expected_values), 
+        self.assertTrue(frames_close(amp_pseudo_amino_acid_composition_seq3.iloc[:, : 10], amp_pseudo_amino_acid_composition_seq3_expected_values), 
             "Output did not match expected values, got\n{}.".format(amp_pseudo_amino_acid_composition_seq3.iloc[:, : 10]))
         for col in list(amp_pseudo_amino_acid_composition_seq3.columns):
             #check all columns follow correct naming convention
@@ -648,7 +653,7 @@ class ProtpyCompositionTests(unittest.TestCase):
             'Expected output to be of type DataFrame, got {}.'.format(type(amp_pseudo_amino_acid_composition_seq4)))
         self.assertEqual(amp_pseudo_amino_acid_composition_seq4.shape, (1, 20+(2*lamda)),
             'Expected output to be of shape {}, got {}.'.format((1, 20+(2*lamda)), amp_pseudo_amino_acid_composition_seq4.shape)) 
-        self.assertTrue(amp_pseudo_amino_acid_composition_seq4.iloc[:, : 10].equals(amp_pseudo_amino_acid_composition_seq4_expected_values), 
+        self.assertTrue(frames_close(amp_pseudo_amino_acid_composition_seq4.iloc[:, : 10], amp_pseudo_amino_acid_composition_seq4_expected_values), 
             "Output did not match expected values, got\n{}.".format(amp_pseudo_amino_acid_composition_seq4.iloc[:, : 10]))
         for col in list(amp_pseudo_amino_acid_composition_seq4.columns):
             #check all columns follow correct naming convention
@@ -686,19 +691,19 @@ class ProtpyCompositionTests(unittest.TestCase):
             'Incorrect columns: {}.'.format(list(aromaticity_seq1.columns)))
         self.assertTrue(aromaticity_seq1.any().isnull().sum() == 0,
             'Expected no null values.')
-        self.assertEqual(aromaticity_seq1["Aromaticity"].values[0], 0.118,
+        self.assertAlmostEqual(aromaticity_seq1["Aromaticity"].values[0], 0.118, 3,
             'Expected 0.118 for seq1, got {}.'.format(aromaticity_seq1["Aromaticity"].values[0]))
 #2.)
         aromaticity_seq2 = protpy.aromaticity(self.protein_seq2)
-        self.assertEqual(aromaticity_seq2["Aromaticity"].values[0], 0.069,
+        self.assertAlmostEqual(aromaticity_seq2["Aromaticity"].values[0], 0.069, 3,
             'Expected 0.069 for seq2, got {}.'.format(aromaticity_seq2["Aromaticity"].values[0]))
 #3.)
         aromaticity_seq3 = protpy.aromaticity(self.protein_seq3)
-        self.assertEqual(aromaticity_seq3["Aromaticity"].values[0], 0.105,
+        self.assertAlmostEqual(aromaticity_seq3["Aromaticity"].values[0], 0.105, 3,
             'Expected 0.105 for seq3, got {}.'.format(aromaticity_seq3["Aromaticity"].values[0]))
 #4.)
         aromaticity_seq4 = protpy.aromaticity(self.protein_seq4)
-        self.assertEqual(aromaticity_seq4["Aromaticity"].values[0], 0.069,
+        self.assertAlmostEqual(aromaticity_seq4["Aromaticity"].values[0], 0.069, 3,
             'Expected 0.069 for seq4, got {}.'.format(aromaticity_seq4["Aromaticity"].values[0]))
 #5.)
         with self.assertRaises(ValueError):
@@ -724,20 +729,20 @@ class ProtpyCompositionTests(unittest.TestCase):
             'Incorrect columns: {}.'.format(list(ii_seq1.columns)))
         self.assertTrue(ii_seq1.any().isnull().sum() == 0,
             'Expected no null values.')
-        self.assertEqual(ii_seq1["InstabilityIndex"].values[0], 31.836,
-            'Expected 31.836 for seq1, got {}.'.format(ii_seq1["InstabilityIndex"].values[0]))
+        self.assertAlmostEqual(ii_seq1["InstabilityIndex"].values[0], ProteinAnalysis(self.protein_seq1).instability_index(), 3,
+            'Expected the Biopython value for seq1.')
 #2.)
         ii_seq2 = protpy.instability_index(self.protein_seq2)
-        self.assertEqual(ii_seq2["InstabilityIndex"].values[0], 57.591,
-            'Expected 57.591 for seq2, got {}.'.format(ii_seq2["InstabilityIndex"].values[0]))
+        self.assertAlmostEqual(ii_seq2["InstabilityIndex"].values[0], ProteinAnalysis(self.protein_seq2).instability_index(), 3,
+            'Expected the Biopython value for seq2.')
 #3.)
         ii_seq3 = protpy.instability_index(self.protein_seq3)
-        self.assertEqual(ii_seq3["InstabilityIndex"].values[0], 24.357,
-            'Expected 24.357 for seq3, got {}.'.format(ii_seq3["InstabilityIndex"].values[0]))
+        self.assertAlmostEqual(ii_seq3["InstabilityIndex"].values[0], ProteinAnalysis(self.protein_seq3).instability_index(), 3,
+            'Expected the Biopython value for seq3.')
 #4.)
         ii_seq4 = protpy.instability_index(self.protein_seq4)
-        self.assertEqual(ii_seq4["InstabilityIndex"].values[0], 57.345,
-            'Expected 57.345 for seq4, got {}.'.format(ii_seq4["InstabilityIndex"].values[0]))
+        self.assertAlmostEqual(ii_seq4["InstabilityIndex"].values[0], ProteinAnalysis(self.protein_seq4).instability_index(), 3,
+            'Expected the Biopython value for seq4.')
 #5.)
         with self.assertRaises(ValueError):
             protpy.instability_index("ABCDEF")
@@ -762,20 +767,20 @@ class ProtpyCompositionTests(unittest.TestCase):
             'Incorrect columns: {}.'.format(list(pi_seq1.columns)))
         self.assertTrue(pi_seq1.any().isnull().sum() == 0,
             'Expected no null values.')
-        self.assertEqual(pi_seq1["IsoelectricPoint"].values[0], 5.412,
-            'Expected 5.412 for seq1, got {}.'.format(pi_seq1["IsoelectricPoint"].values[0]))
+        self.assertAlmostEqual(pi_seq1["IsoelectricPoint"].values[0], ProteinAnalysis(self.protein_seq1).isoelectric_point(), 3,
+            'Expected the Biopython value for seq1.')
 #2.)
         pi_seq2 = protpy.isoelectric_point(self.protein_seq2)
-        self.assertEqual(pi_seq2["IsoelectricPoint"].values[0], 10.515,
-            'Expected 10.515 for seq2, got {}.'.format(pi_seq2["IsoelectricPoint"].values[0]))
+        self.assertAlmostEqual(pi_seq2["IsoelectricPoint"].values[0], ProteinAnalysis(self.protein_seq2).isoelectric_point(), 3,
+            'Expected the Biopython value for seq2.')
 #3.)
         pi_seq3 = protpy.isoelectric_point(self.protein_seq3)
-        self.assertEqual(pi_seq3["IsoelectricPoint"].values[0], 6.134,
-            'Expected 6.134 for seq3, got {}.'.format(pi_seq3["IsoelectricPoint"].values[0]))
+        self.assertAlmostEqual(pi_seq3["IsoelectricPoint"].values[0], ProteinAnalysis(self.protein_seq3).isoelectric_point(), 3,
+            'Expected the Biopython value for seq3.')
 #4.)
         pi_seq4 = protpy.isoelectric_point(self.protein_seq4)
-        self.assertEqual(pi_seq4["IsoelectricPoint"].values[0], 10.473,
-            'Expected 10.473 for seq4, got {}.'.format(pi_seq4["IsoelectricPoint"].values[0]))
+        self.assertAlmostEqual(pi_seq4["IsoelectricPoint"].values[0], ProteinAnalysis(self.protein_seq4).isoelectric_point(), 3,
+            'Expected the Biopython value for seq4.')
 #5.)
         with self.assertRaises(ValueError):
             protpy.isoelectric_point("ABCDEF")
@@ -800,19 +805,19 @@ class ProtpyCompositionTests(unittest.TestCase):
             'Incorrect columns: {}.'.format(list(mw_seq1.columns)))
         self.assertTrue(mw_seq1.any().isnull().sum() == 0,
             'Expected no null values.')
-        self.assertEqual(mw_seq1["MolecularWeight"].values[0], 139125.12,
+        self.assertAlmostEqual(mw_seq1["MolecularWeight"].values[0], 139125.12, 3,
             'Expected 139125.12 for seq1, got {}.'.format(mw_seq1["MolecularWeight"].values[0]))
 #2.)
         mw_seq2 = protpy.molecular_weight(self.protein_seq2)
-        self.assertEqual(mw_seq2["MolecularWeight"].values[0], 46025.03,
+        self.assertAlmostEqual(mw_seq2["MolecularWeight"].values[0], 46025.03, 3,
             'Expected 46025.03 for seq2, got {}.'.format(mw_seq2["MolecularWeight"].values[0]))
 #3.)
         mw_seq3 = protpy.molecular_weight(self.protein_seq3)
-        self.assertEqual(mw_seq3["MolecularWeight"].values[0], 8361.0,
+        self.assertAlmostEqual(mw_seq3["MolecularWeight"].values[0], 8361.0, 3,
             'Expected 8361.0 for seq3, got {}.'.format(mw_seq3["MolecularWeight"].values[0]))
 #4.)
         mw_seq4 = protpy.molecular_weight(self.protein_seq4)
-        self.assertEqual(mw_seq4["MolecularWeight"].values[0], 45625.699,
+        self.assertAlmostEqual(mw_seq4["MolecularWeight"].values[0], 45625.699, 3,
             'Expected 45625.699 for seq4, got {}.'.format(mw_seq4["MolecularWeight"].values[0]))
 #5.)
         with self.assertRaises(ValueError):
@@ -838,25 +843,24 @@ class ProtpyCompositionTests(unittest.TestCase):
             'Incorrect columns: {}.'.format(list(chg_seq1.columns)))
         self.assertTrue(chg_seq1.any().isnull().sum() == 0,
             'Expected no null values.')
-        self.assertEqual(chg_seq1["PositiveCharge"].values[0], 99.526,
-            'Expected PositiveCharge 99.526 for seq1, got {}.'.format(chg_seq1["PositiveCharge"].values[0]))
-        self.assertEqual(chg_seq1["NegativeCharge"].values[0], 114.956,
-            'Expected NegativeCharge 114.956 for seq1, got {}.'.format(chg_seq1["NegativeCharge"].values[0]))
-        self.assertEqual(chg_seq1["NetCharge"].values[0], -15.43,
-            'Expected NetCharge -15.43 for seq1, got {}.'.format(chg_seq1["NetCharge"].values[0]))
-#2.)
-        chg_seq2 = protpy.charge_distribution(self.protein_seq2)
-        self.assertEqual(chg_seq2["PositiveCharge"].values[0], 60.168)
-        self.assertEqual(chg_seq2["NegativeCharge"].values[0], 35.986)
-        self.assertEqual(chg_seq2["NetCharge"].values[0], 24.182)
-#3.)
-        chg_seq3 = protpy.charge_distribution(self.protein_seq3)
-        self.assertEqual(chg_seq3["PositiveCharge"].values[0], 3.998)
-        self.assertEqual(chg_seq3["NegativeCharge"].values[0], 3.998)
-        self.assertEqual(chg_seq3["NetCharge"].values[0], 0.0)
-#4.)
-        chg_seq4 = protpy.charge_distribution(self.protein_seq4)
-        self.assertEqual(chg_seq4["NetCharge"].values[0], 24.142)
+        #Henderson-Hasselbalch with the Bjellqvist side-chain pKa values used by Biopython
+        for seq in (self.protein_seq1, self.protein_seq2, self.protein_seq3, self.protein_seq4):
+            pos = sum(seq.count(aa) / (1 + 10 ** (7.4 - positive_pKs[aa])) for aa in "KRH")
+            neg = sum(seq.count(aa) / (1 + 10 ** (negative_pKs[aa] - 7.4)) for aa in "DE")
+            chg = protpy.charge_distribution(seq)
+            self.assertAlmostEqual(chg["PositiveCharge"].values[0], pos, 6)
+            self.assertAlmostEqual(chg["NegativeCharge"].values[0], neg, 6)
+            self.assertAlmostEqual(chg["NetCharge"].values[0], pos - neg, 6)
+            #per-residue and per-Da normalisation
+            self.assertAlmostEqual(protpy.charge_distribution(seq, normalize="length")["NetCharge_perResidue"].values[0],
+                                   (pos - neg) / len(seq), 9)
+            mw = protpy.molecular_weight(seq)["MolecularWeight"].values[0]
+            self.assertAlmostEqual(protpy.charge_distribution(seq, normalize="mass")["NetCharge_perDa"].values[0],
+                                   (pos - neg) / mw, 12)
+        #the v1.0-v1.5 pKa set is still available
+        self.assertAlmostEqual(protpy.charge_distribution(self.protein_seq1, pka_scale="protpy")["NetCharge"].values[0], -15.43, 2)
+        with self.assertRaises(ValueError):
+            protpy.charge_distribution(self.protein_seq1, normalize="x")
 #5.)
         with self.assertRaises(ValueError):
             protpy.charge_distribution("ABCDEF")
@@ -881,24 +885,28 @@ class ProtpyCompositionTests(unittest.TestCase):
             'Incorrect columns: {}.'.format(list(hpc_seq1.columns)))
         self.assertTrue(hpc_seq1.any().isnull().sum() == 0,
             'Expected no null values.')
-        self.assertEqual(hpc_seq1["Hydrophobic"].values[0], 44.542)
-        self.assertEqual(hpc_seq1["Polar"].values[0], 32.669)
-        self.assertEqual(hpc_seq1["Charged"].values[0], 18.247)
+        self.assertAlmostEqual(hpc_seq1["Hydrophobic"].values[0], 44.542, 3)
+        self.assertAlmostEqual(hpc_seq1["Polar"].values[0], 32.669, 3)
+        #since v1.6.0 P is in the charged class, so the three values sum to 100
+        self.assertAlmostEqual(hpc_seq1["Charged"].values[0], 100 - 44.542 - 32.669, 2)
 #2.)
         hpc_seq2 = protpy.hydrophobic_polar_charged_composition(self.protein_seq2)
-        self.assertEqual(hpc_seq2["Hydrophobic"].values[0], 27.962)
-        self.assertEqual(hpc_seq2["Polar"].values[0], 40.758)
-        self.assertEqual(hpc_seq2["Charged"].values[0], 23.934)
+        self.assertAlmostEqual(hpc_seq2["Hydrophobic"].values[0], 27.962, 3)
+        self.assertAlmostEqual(hpc_seq2["Polar"].values[0], 40.758, 3)
+        #since v1.6.0 P is in the charged class, so the three values sum to 100
+        self.assertAlmostEqual(hpc_seq2["Charged"].values[0], 100 - 27.962 - 40.758, 2)
 #3.)
         hpc_seq3 = protpy.hydrophobic_polar_charged_composition(self.protein_seq3)
-        self.assertEqual(hpc_seq3["Hydrophobic"].values[0], 61.842)
-        self.assertEqual(hpc_seq3["Polar"].values[0], 25.0)
-        self.assertEqual(hpc_seq3["Charged"].values[0], 10.526)
+        self.assertAlmostEqual(hpc_seq3["Hydrophobic"].values[0], 61.842, 3)
+        self.assertAlmostEqual(hpc_seq3["Polar"].values[0], 25.0, 3)
+        #since v1.6.0 P is in the charged class, so the three values sum to 100
+        self.assertAlmostEqual(hpc_seq3["Charged"].values[0], 100 - 61.842 - 25.0, 2)
 #4.)
         hpc_seq4 = protpy.hydrophobic_polar_charged_composition(self.protein_seq4)
-        self.assertEqual(hpc_seq4["Hydrophobic"].values[0], 29.117)
-        self.assertEqual(hpc_seq4["Polar"].values[0], 40.334)
-        self.assertEqual(hpc_seq4["Charged"].values[0], 23.866)
+        self.assertAlmostEqual(hpc_seq4["Hydrophobic"].values[0], 29.117, 3)
+        self.assertAlmostEqual(hpc_seq4["Polar"].values[0], 40.334, 3)
+        #since v1.6.0 P is in the charged class, so the three values sum to 100
+        self.assertAlmostEqual(hpc_seq4["Charged"].values[0], 100 - 29.117 - 40.334, 2)
 #5.)
         with self.assertRaises(ValueError):
             protpy.hydrophobic_polar_charged_composition("ABCDEF")
@@ -923,24 +931,24 @@ class ProtpyCompositionTests(unittest.TestCase):
             'Incorrect columns: {}.'.format(list(ssp_seq1.columns)))
         self.assertTrue(ssp_seq1.any().isnull().sum() == 0,
             'Expected no null values.')
-        self.assertEqual(ssp_seq1["Helix"].values[0], 0.983)
-        self.assertEqual(ssp_seq1["Sheet"].values[0], 1.05)
-        self.assertEqual(ssp_seq1["Coil"].values[0], 1.043)
+        self.assertAlmostEqual(ssp_seq1["Helix"].values[0], 0.983, 3)
+        self.assertAlmostEqual(ssp_seq1["Sheet"].values[0], 1.05, 3)
+        self.assertAlmostEqual(ssp_seq1["Coil"].values[0], 1.043, 3)
 #2.)
         ssp_seq2 = protpy.secondary_structure_propensity(self.protein_seq2)
-        self.assertEqual(ssp_seq2["Helix"].values[0], 0.954)
-        self.assertEqual(ssp_seq2["Sheet"].values[0], 0.952)
-        self.assertEqual(ssp_seq2["Coil"].values[0], 1.151)
+        self.assertAlmostEqual(ssp_seq2["Helix"].values[0], 0.954, 3)
+        self.assertAlmostEqual(ssp_seq2["Sheet"].values[0], 0.952, 3)
+        self.assertAlmostEqual(ssp_seq2["Coil"].values[0], 1.151, 3)
 #3.)
         ssp_seq3 = protpy.secondary_structure_propensity(self.protein_seq3)
-        self.assertEqual(ssp_seq3["Helix"].values[0], 1.036)
-        self.assertEqual(ssp_seq3["Sheet"].values[0], 1.141)
-        self.assertEqual(ssp_seq3["Coil"].values[0], 0.912)
+        self.assertAlmostEqual(ssp_seq3["Helix"].values[0], 1.036, 3)
+        self.assertAlmostEqual(ssp_seq3["Sheet"].values[0], 1.141, 3)
+        self.assertAlmostEqual(ssp_seq3["Coil"].values[0], 0.912, 3)
 #4.)
         ssp_seq4 = protpy.secondary_structure_propensity(self.protein_seq4)
-        self.assertEqual(ssp_seq4["Helix"].values[0], 0.962)
-        self.assertEqual(ssp_seq4["Sheet"].values[0], 0.959)
-        self.assertEqual(ssp_seq4["Coil"].values[0], 1.138)
+        self.assertAlmostEqual(ssp_seq4["Helix"].values[0], 0.962, 3)
+        self.assertAlmostEqual(ssp_seq4["Sheet"].values[0], 0.959, 3)
+        self.assertAlmostEqual(ssp_seq4["Coil"].values[0], 1.138, 3)
 #5.)
         with self.assertRaises(ValueError):
             protpy.secondary_structure_propensity("ABCDEF")
@@ -963,20 +971,20 @@ class ProtpyCompositionTests(unittest.TestCase):
             'Expected output shape {}, got {}.'.format((1, 400), kmer_seq1.shape))
         self.assertTrue(kmer_seq1.any().isnull().sum() == 0,
             'Expected no null values.')
-        self.assertEqual(kmer_seq1["AA"].values[0], 0.797)
-        self.assertEqual(kmer_seq1["AC"].values[0], 0.159)
+        self.assertAlmostEqual(kmer_seq1["AA"].values[0], 0.797, 3)
+        self.assertAlmostEqual(kmer_seq1["AC"].values[0], 0.159, 3)
 #2.)
         kmer_seq2 = protpy.kmer_composition(self.protein_seq2, k=2)
         self.assertEqual(kmer_seq2.shape, (1, 400))
-        self.assertEqual(kmer_seq2["AA"].values[0], 0.713)
+        self.assertAlmostEqual(kmer_seq2["AA"].values[0], 0.713, 3)
 #3.)
         kmer_seq3 = protpy.kmer_composition(self.protein_seq3, k=2)
         self.assertEqual(kmer_seq3.shape, (1, 400))
-        self.assertEqual(kmer_seq3["AA"].values[0], 0.0)
+        self.assertAlmostEqual(kmer_seq3["AA"].values[0], 0.0, 3)
 #4.)
         kmer_seq4 = protpy.kmer_composition(self.protein_seq4, k=2)
         self.assertEqual(kmer_seq4.shape, (1, 400))
-        self.assertEqual(kmer_seq4["AA"].values[0], 0.957)
+        self.assertAlmostEqual(kmer_seq4["AA"].values[0], 0.957, 3)
 #5.) k=1 should give same shape as amino_acid_composition (1 x 20)
         kmer_k1 = protpy.kmer_composition(self.protein_seq1, k=1)
         self.assertEqual(kmer_k1.shape, (1, 20))
@@ -1002,20 +1010,20 @@ class ProtpyCompositionTests(unittest.TestCase):
             'Expected output shape {}, got {}.'.format((1, 6), ra_seq1.shape))
         self.assertTrue(ra_seq1.any().isnull().sum() == 0,
             'Expected no null values.')
-        self.assertEqual(ra_seq1["ReducedAlphabet_1"].values[0], 25.339)
-        self.assertEqual(ra_seq1["ReducedAlphabet_2"].values[0], 34.741)
+        self.assertAlmostEqual(ra_seq1["ReducedAlphabet_1"].values[0], 25.339, 3)
+        self.assertAlmostEqual(ra_seq1["ReducedAlphabet_2"].values[0], 34.741, 3)
 #2.)
         ra_seq2 = protpy.reduced_alphabet_composition(self.protein_seq2)
         self.assertEqual(ra_seq2.shape, (1, 6))
-        self.assertEqual(ra_seq2["ReducedAlphabet_1"].values[0], 24.171)
+        self.assertAlmostEqual(ra_seq2["ReducedAlphabet_1"].values[0], 24.171, 3)
 #3.)
         ra_seq3 = protpy.reduced_alphabet_composition(self.protein_seq3)
         self.assertEqual(ra_seq3.shape, (1, 6))
-        self.assertEqual(ra_seq3["ReducedAlphabet_1"].values[0], 25.0)
+        self.assertAlmostEqual(ra_seq3["ReducedAlphabet_1"].values[0], 25.0, 3)
 #4.)
         ra_seq4 = protpy.reduced_alphabet_composition(self.protein_seq4)
         self.assertEqual(ra_seq4.shape, (1, 6))
-        self.assertEqual(ra_seq4["ReducedAlphabet_1"].values[0], 25.298)
+        self.assertAlmostEqual(ra_seq4["ReducedAlphabet_1"].values[0], 25.298, 3)
 #5.) alphabet_size=2 should yield 2 columns
         ra_2 = protpy.reduced_alphabet_composition(self.protein_seq1, alphabet_size=2)
         self.assertEqual(ra_2.shape, (1, 2))
@@ -1085,19 +1093,19 @@ class ProtpyCompositionTests(unittest.TestCase):
         #check first column label contains physicochemical class annotation
         self.assertIn("_", pair_seq1.columns[0],
             'Expected underscore separator in column names, got {}.'.format(pair_seq1.columns[0]))
-        self.assertEqual(pair_seq1["AA_Hydrophobic-Hydrophobic"].values[0], 0.797)
+        self.assertAlmostEqual(pair_seq1["AA_Hydrophobic-Hydrophobic"].values[0], 0.797, 3)
 #2.)
         pair_seq2 = protpy.amino_acid_pair_composition(self.protein_seq2)
         self.assertEqual(pair_seq2.shape, (1, 400))
-        self.assertEqual(pair_seq2["AA_Hydrophobic-Hydrophobic"].values[0], 0.713)
+        self.assertAlmostEqual(pair_seq2["AA_Hydrophobic-Hydrophobic"].values[0], 0.713, 3)
 #3.)
         pair_seq3 = protpy.amino_acid_pair_composition(self.protein_seq3)
         self.assertEqual(pair_seq3.shape, (1, 400))
-        self.assertEqual(pair_seq3["AA_Hydrophobic-Hydrophobic"].values[0], 0.0)
+        self.assertAlmostEqual(pair_seq3["AA_Hydrophobic-Hydrophobic"].values[0], 0.0, 3)
 #4.)
         pair_seq4 = protpy.amino_acid_pair_composition(self.protein_seq4)
         self.assertEqual(pair_seq4.shape, (1, 400))
-        self.assertEqual(pair_seq4["AA_Hydrophobic-Hydrophobic"].values[0], 0.957)
+        self.assertAlmostEqual(pair_seq4["AA_Hydrophobic-Hydrophobic"].values[0], 0.957, 3)
 #5.)
         with self.assertRaises(ValueError):
             protpy.amino_acid_pair_composition("ABCDEF")
@@ -1120,13 +1128,13 @@ class ProtpyCompositionTests(unittest.TestCase):
         self.assertEqual(list(ai_seq1.columns), ["AliphaticIndex"],
             'Incorrect columns: {}.'.format(list(ai_seq1.columns)))
         self.assertTrue(ai_seq1.any().isnull().sum() == 0, 'Expected no null values.')
-        self.assertEqual(ai_seq1["AliphaticIndex"].values[0], 82.725)
+        self.assertAlmostEqual(ai_seq1["AliphaticIndex"].values[0], 82.725, 3)
 #2.)
-        self.assertEqual(protpy.aliphatic_index(self.protein_seq2)["AliphaticIndex"].values[0], 49.81)
+        self.assertAlmostEqual(protpy.aliphatic_index(self.protein_seq2)["AliphaticIndex"].values[0], 49.81, 3)
 #3.)
-        self.assertEqual(protpy.aliphatic_index(self.protein_seq3)["AliphaticIndex"].values[0], 145.921)
+        self.assertAlmostEqual(protpy.aliphatic_index(self.protein_seq3)["AliphaticIndex"].values[0], 145.921, 3)
 #4.)
-        self.assertEqual(protpy.aliphatic_index(self.protein_seq4)["AliphaticIndex"].values[0], 52.53)
+        self.assertAlmostEqual(protpy.aliphatic_index(self.protein_seq4)["AliphaticIndex"].values[0], 52.53, 3)
 #5.)
         with self.assertRaises(ValueError): protpy.aliphatic_index("ABCDEF")
         with self.assertRaises(ValueError): protpy.aliphatic_index("OOOOO")
@@ -1177,13 +1185,13 @@ class ProtpyCompositionTests(unittest.TestCase):
         self.assertEqual(list(bi_seq1.columns), ["BomanIndex"],
             'Incorrect columns: {}.'.format(list(bi_seq1.columns)))
         self.assertTrue(bi_seq1.any().isnull().sum() == 0, 'Expected no null values.')
-        self.assertEqual(bi_seq1["BomanIndex"].values[0], 1.198)
+        self.assertAlmostEqual(bi_seq1["BomanIndex"].values[0], 1.198, 3)
 #2.)
-        self.assertEqual(protpy.boman_index(self.protein_seq2)["BomanIndex"].values[0], 2.598)
+        self.assertAlmostEqual(protpy.boman_index(self.protein_seq2)["BomanIndex"].values[0], 2.598, 3)
 #3.)
-        self.assertEqual(protpy.boman_index(self.protein_seq3)["BomanIndex"].values[0], -0.354)
+        self.assertAlmostEqual(protpy.boman_index(self.protein_seq3)["BomanIndex"].values[0], -0.354, 3)
 #4.)
-        self.assertEqual(protpy.boman_index(self.protein_seq4)["BomanIndex"].values[0], 2.519)
+        self.assertAlmostEqual(protpy.boman_index(self.protein_seq4)["BomanIndex"].values[0], 2.519, 3)
 #5.)
         with self.assertRaises(ValueError): protpy.boman_index("ABCDEF")
         with self.assertRaises(ValueError): protpy.boman_index("OOOOO")
@@ -1195,6 +1203,8 @@ class ProtpyCompositionTests(unittest.TestCase):
         """ Testing Aggregation Propensity protein descriptor attributes and functionality. """
 #1.)
         ap_seq1 = protpy.aggregation_propensity(self.protein_seq1)
+        #one hydrophobic tract is one region, not one per overlapping window (fixed in v1.6.0)
+        self.assertEqual(protpy.aggregation_propensity("DDDDIIIIIIIIIIIDDDD")["AggregProneRegions"].values[0], 1)
         self.assertIsInstance(ap_seq1, pd.DataFrame,
             'Expected output to be of type DataFrame, got {}.'.format(type(ap_seq1)))
         self.assertEqual(ap_seq1.shape, (1, 2),
@@ -1202,20 +1212,20 @@ class ProtpyCompositionTests(unittest.TestCase):
         self.assertEqual(list(ap_seq1.columns), ["AggregProneRegions", "AggregProneFraction"],
             'Incorrect columns: {}.'.format(list(ap_seq1.columns)))
         self.assertTrue(ap_seq1.any().isnull().sum() == 0, 'Expected no null values.')
-        self.assertEqual(ap_seq1["AggregProneRegions"].values[0], 58)
-        self.assertEqual(ap_seq1["AggregProneFraction"].values[0], 11.793)
+        self.assertEqual(ap_seq1["AggregProneRegions"].values[0], 22)
+        self.assertAlmostEqual(ap_seq1["AggregProneFraction"].values[0], 11.793, 3)
 #2.)
         ap_seq2 = protpy.aggregation_propensity(self.protein_seq2)
-        self.assertEqual(ap_seq2["AggregProneRegions"].values[0], 10)
-        self.assertEqual(ap_seq2["AggregProneFraction"].values[0], 7.109)
+        self.assertEqual(ap_seq2["AggregProneRegions"].values[0], 5)
+        self.assertAlmostEqual(ap_seq2["AggregProneFraction"].values[0], 7.109, 3)
 #3.)
         ap_seq3 = protpy.aggregation_propensity(self.protein_seq3)
-        self.assertEqual(ap_seq3["AggregProneRegions"].values[0], 20)
-        self.assertEqual(ap_seq3["AggregProneFraction"].values[0], 42.105)
+        self.assertEqual(ap_seq3["AggregProneRegions"].values[0], 3)
+        self.assertAlmostEqual(ap_seq3["AggregProneFraction"].values[0], 42.105, 3)
 #4.)
         ap_seq4 = protpy.aggregation_propensity(self.protein_seq4)
-        self.assertEqual(ap_seq4["AggregProneRegions"].values[0], 12)
-        self.assertEqual(ap_seq4["AggregProneFraction"].values[0], 7.637)
+        self.assertEqual(ap_seq4["AggregProneRegions"].values[0], 5)
+        self.assertAlmostEqual(ap_seq4["AggregProneFraction"].values[0], 7.637, 3)
 #5.)
         with self.assertRaises(ValueError): protpy.aggregation_propensity("ABCDEF")
         with self.assertRaises(ValueError): protpy.aggregation_propensity("OOOOO")
@@ -1234,20 +1244,20 @@ class ProtpyCompositionTests(unittest.TestCase):
         self.assertEqual(list(hm_seq1.columns), ["HydrophobicMoment_Mean", "HydrophobicMoment_Max"],
             'Incorrect columns: {}.'.format(list(hm_seq1.columns)))
         self.assertTrue(hm_seq1.any().isnull().sum() == 0, 'Expected no null values.')
-        self.assertEqual(hm_seq1["HydrophobicMoment_Mean"].values[0], 0.272)
-        self.assertEqual(hm_seq1["HydrophobicMoment_Max"].values[0], 0.813)
+        self.assertAlmostEqual(hm_seq1["HydrophobicMoment_Mean"].values[0], 0.272, 3)
+        self.assertAlmostEqual(hm_seq1["HydrophobicMoment_Max"].values[0], 0.813, 3)
 #2.)
         hm_seq2 = protpy.hydrophobic_moment(self.protein_seq2)
-        self.assertEqual(hm_seq2["HydrophobicMoment_Mean"].values[0], 0.296)
-        self.assertEqual(hm_seq2["HydrophobicMoment_Max"].values[0], 0.760)
+        self.assertAlmostEqual(hm_seq2["HydrophobicMoment_Mean"].values[0], 0.296, 3)
+        self.assertAlmostEqual(hm_seq2["HydrophobicMoment_Max"].values[0], 0.760, 3)
 #3.)
         hm_seq3 = protpy.hydrophobic_moment(self.protein_seq3)
-        self.assertEqual(hm_seq3["HydrophobicMoment_Mean"].values[0], 0.228)
-        self.assertEqual(hm_seq3["HydrophobicMoment_Max"].values[0], 0.491)
+        self.assertAlmostEqual(hm_seq3["HydrophobicMoment_Mean"].values[0], 0.228, 3)
+        self.assertAlmostEqual(hm_seq3["HydrophobicMoment_Max"].values[0], 0.491, 3)
 #4.)
         hm_seq4 = protpy.hydrophobic_moment(self.protein_seq4)
-        self.assertEqual(hm_seq4["HydrophobicMoment_Mean"].values[0], 0.294)
-        self.assertEqual(hm_seq4["HydrophobicMoment_Max"].values[0], 0.786)
+        self.assertAlmostEqual(hm_seq4["HydrophobicMoment_Mean"].values[0], 0.294, 3)
+        self.assertAlmostEqual(hm_seq4["HydrophobicMoment_Max"].values[0], 0.786, 3)
 #5.) custom window and angle
         hm_custom = protpy.hydrophobic_moment(self.protein_seq1, window=7, angle=160)
         self.assertEqual(hm_custom.shape, (1, 2))
@@ -1270,27 +1280,27 @@ class ProtpyCompositionTests(unittest.TestCase):
         self.assertEqual(list(se_seq1.columns), ["ShannonEntropy"],
             'Incorrect columns: {}.'.format(list(se_seq1.columns)))
         self.assertTrue(se_seq1.any().isnull().sum() == 0, 'Expected no null values.')
-        self.assertEqual(se_seq1["ShannonEntropy"].values[0], 4.163,
+        self.assertAlmostEqual(se_seq1["ShannonEntropy"].values[0], 4.163, 3,
             'Expected ShannonEntropy of 4.163 for seq1, got {}.'.format(se_seq1["ShannonEntropy"].values[0]))
 #2.)
         se_seq2 = protpy.shannon_entropy(self.protein_seq2)
         self.assertIsInstance(se_seq2, pd.DataFrame)
         self.assertEqual(se_seq2.shape, (1, 1))
-        self.assertEqual(se_seq2["ShannonEntropy"].values[0], 4.024,
+        self.assertAlmostEqual(se_seq2["ShannonEntropy"].values[0], 4.024, 3,
             'Expected ShannonEntropy of 4.024 for seq2, got {}.'.format(se_seq2["ShannonEntropy"].values[0]))
 #3.)
         se_seq3 = protpy.shannon_entropy(self.protein_seq3)
         self.assertEqual(se_seq3.shape, (1, 1))
-        self.assertEqual(se_seq3["ShannonEntropy"].values[0], 3.672,
+        self.assertAlmostEqual(se_seq3["ShannonEntropy"].values[0], 3.672, 3,
             'Expected ShannonEntropy of 3.672 for seq3, got {}.'.format(se_seq3["ShannonEntropy"].values[0]))
 #4.)
         se_seq4 = protpy.shannon_entropy(self.protein_seq4)
         self.assertEqual(se_seq4.shape, (1, 1))
-        self.assertEqual(se_seq4["ShannonEntropy"].values[0], 4.01,
+        self.assertAlmostEqual(se_seq4["ShannonEntropy"].values[0], 4.01, 3,
             'Expected ShannonEntropy of 4.01 for seq4, got {}.'.format(se_seq4["ShannonEntropy"].values[0]))
 #5.) low-complexity (single amino acid) sequence should have entropy 0
         se_low = protpy.shannon_entropy("AAAAAAAAAA")
-        self.assertEqual(se_low["ShannonEntropy"].values[0], 0.0,
+        self.assertAlmostEqual(se_low["ShannonEntropy"].values[0], 0.0, 3,
             'Expected ShannonEntropy of 0.0 for homopolymer sequence.')
 #6.)
         with self.assertRaises(ValueError): protpy.shannon_entropy("ABCDEF")
