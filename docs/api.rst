@@ -1,7 +1,9 @@
 API Reference
 =============
 
-All public functions are importable directly from the ``protpy`` namespace after installation.
+All public functions are importable directly from the ``protpy`` namespace after installation. Each module
+documents the functions in its ``__all__``; functions deprecated in v1.6.0 say so in their docstrings and
+are removed in 2.0.
 
 .. contents:: Modules
    :local:
@@ -12,36 +14,6 @@ Composition
 
 .. automodule:: protpy.composition
    :members:
-      amino_acid_composition,
-      dipeptide_composition,
-      tripeptide_composition,
-      pseudo_amino_acid_composition,
-      amphiphilic_pseudo_amino_acid_composition,
-      gravy,
-      aromaticity,
-      instability_index,
-      isoelectric_point,
-      molecular_weight,
-      charge_distribution,
-      hydrophobic_polar_charged_composition,
-      secondary_structure_propensity,
-      kmer_composition,
-      reduced_alphabet_composition,
-      motif_composition,
-      amino_acid_pair_composition,
-      aliphatic_index,
-      extinction_coefficient,
-      boman_index,
-      aggregation_propensity,
-      hydrophobic_moment,
-      shannon_entropy,
-      cksaap,
-      cksaagp,
-      dde,
-      asdc,
-      distance_pair,
-      natural_vector,
-      atomic_composition
    :undoc-members:
    :show-inheritance:
 
@@ -50,9 +22,6 @@ Autocorrelation
 
 .. automodule:: protpy.autocorrelation
    :members:
-      moreaubroto_autocorrelation,
-      moran_autocorrelation,
-      geary_autocorrelation
    :undoc-members:
    :show-inheritance:
 
@@ -60,7 +29,7 @@ Conjoint Triad
 --------------
 
 .. automodule:: protpy.conjoint_triad
-   :members: conjoint_triad
+   :members:
    :undoc-members:
    :show-inheritance:
 
@@ -69,10 +38,6 @@ CTD
 
 .. automodule:: protpy.ctd
    :members:
-      ctd,
-      ctd_composition,
-      ctd_transition,
-      ctd_distribution
    :undoc-members:
    :show-inheritance:
 
@@ -81,11 +46,6 @@ Sequence Order
 
 .. automodule:: protpy.sequence_order
    :members:
-      sequence_order_coupling_number_,
-      sequence_order_coupling_number,
-      sequence_order_coupling_number_all,
-      quasi_sequence_order,
-      quasi_sequence_order_all
    :undoc-members:
    :show-inheritance:
 
@@ -109,14 +69,14 @@ Complexity
 ----------
 
 .. automodule:: protpy.complexity
-   :members: wootton_federhen_complexity, linguistic_complexity, lempel_ziv_complexity
+   :members:
    :undoc-members:
    :show-inheritance:
 
-Signal
-------
+Spectral
+--------
 
-.. automodule:: protpy.signal
+.. automodule:: protpy.spectral
    :members:
    :undoc-members:
    :show-inheritance:
@@ -133,7 +93,7 @@ Encode
 ------
 
 .. automodule:: protpy.encode
-   :members: all_descriptors, encode_dataset
+   :members:
    :undoc-members:
    :show-inheritance:
 

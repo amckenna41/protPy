@@ -27,34 +27,6 @@
     "doi": "10.1186/1471-2105-8-65",
     "source_note": "Additional file 1 of the paper (12859_2006_1437_MOESM1_ESM.pdf), parsed 2026-10-12. Hot-spot threshold -0.02 and hot-spot rules from Additional file 2."
   },
-  "top_idp": {
-    "name": "TOP-IDP disorder propensity scale",
-    "values": {
-      "A": 0.06,
-      "C": 0.02,
-      "D": 0.192,
-      "E": 0.736,
-      "F": -0.697,
-      "G": 0.166,
-      "H": 0.303,
-      "I": -0.486,
-      "K": 0.586,
-      "L": -0.326,
-      "M": -0.397,
-      "N": 0.007,
-      "P": 0.987,
-      "Q": 0.318,
-      "R": 0.18,
-      "S": 0.341,
-      "T": 0.059,
-      "V": -0.121,
-      "W": -0.884,
-      "Y": -0.51
-    },
-    "reference": "Campen A. et al. (2008). TOP-IDP-scale: a new amino acid scale measuring propensity for intrinsic disorder. Protein Pept Lett, 15(9), 956-963.",
-    "doi": "10.2174/092986608785849164",
-    "source_note": "Table 2 of the paper (PMC2676888), parsed 2026-10-12."
-  },
   "disorder_residue_classes": {
     "name": "Order- and disorder-promoting residues",
     "values": {

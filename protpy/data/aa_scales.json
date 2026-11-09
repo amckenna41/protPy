@@ -55,7 +55,7 @@
     "doi": "10.1073/pnas.78.6.3824",
     "source_note": "AAindex1 record HOPT810101 (Kawashima et al. 2008), which reproduces the published table; copied 2026-10-12."
   },
-  "eisenberg": {
+  "eisenberg_arb1984": {
     "name": "Consensus normalized hydrophobicity scale (Eisenberg, 1984)",
     "values": {
       "A": 0.25,
@@ -82,6 +82,34 @@
     "reference": "Eisenberg, D. 'Three-dimensional structure of membrane and surface proteins' Ann. Rev. Biochem. 53, 595-623 (1984) Original references: Eisenberg, D., Weiss, R.M., Terwilliger, T.C. and Wilcox, W. Faraday Symp. Chem. Soc. 17, 109-120 (1982) Eisenberg, D., Weiss, R.M. and Terwilliger, T.C. The hydrophobic moment detects periodicity in protein hydrophobicity Proc. Natl. Acad. Sci. USA 81, 140-144 (1984)",
     "doi": "10.1146/annurev.bi.53.070184.003115",
     "source_note": "AAindex1 record EISD840101 (Kawashima et al. 2008), which reproduces the published table; copied 2026-10-12."
+  },
+  "eisenberg_jmb1984": {
+    "name": "Normalized consensus hydrophobicity scale (Eisenberg, Schwarz, Komarony & Wall, 1984)",
+    "values": {
+      "A": 0.62,
+      "C": 0.29,
+      "D": -0.9,
+      "E": -0.74,
+      "F": 1.19,
+      "G": 0.48,
+      "H": -0.4,
+      "I": 1.38,
+      "K": -1.5,
+      "L": 1.06,
+      "M": 0.64,
+      "N": -0.78,
+      "P": 0.12,
+      "Q": -0.85,
+      "R": -2.53,
+      "S": -0.18,
+      "T": -0.05,
+      "V": 1.08,
+      "W": 0.81,
+      "Y": 0.26
+    },
+    "reference": "Eisenberg, D., Schwarz, E., Komarony, M., & Wall, R. (1984). Amino acid scale: Normalized consensus hydrophobicity scale. J Mol Biol, 179, 125-142.",
+    "doi": "10.1016/0022-2836(84)90309-7",
+    "source_note": "protpy's default hydrophobic_moment / PseAAC hydrophobicity table (A = 0.62), confirmed against ExPASy ProtScale. Not the same as eisenberg_arb1984 (AAindex EISD840101, A = 0.25)."
   },
   "wimley_white": {
     "name": "Free energies of transfer of AcWl-X-LL peptides from bilayer interface to water (Wimley-White, 1996)",
@@ -341,7 +369,8 @@
     },
     "reference": "Sandberg M. et al. (1998). New chemical descriptors relevant for the design of biologically active peptides. A multivariate characterization of 87 amino acids. J Med Chem, 41(14), 2481-2491.",
     "doi": "10.1021/jm9700575",
-    "source_note": "Transcribed 2026-10-12 programmatically from van Westen G.J.P. et al. (2013). Benchmarking of protein descriptor sets in proteochemometric modeling (part 1): comparative study of 13 amino acid descriptor sets. J Cheminform, 5, 41. Additional file 2 (CC-BY Pipeline Pilot component 'Protein Descriptor (Published)'), which embeds the published table; block appending properties Z1..Z5. Secondary source: the primary paper is paywalled and was not available to check. UNRESOLVED: differs from peptides.py at C Z3 (3.71 here, 3.75 in peptides.py), L Z4 (0.72 vs -0.72); check against the primary paper."
+    "source_note": "Transcribed 2026-10-12 programmatically from van Westen G.J.P. et al. (2013). Benchmarking of protein descriptor sets in proteochemometric modeling (part 1): comparative study of 13 amino acid descriptor sets. J Cheminform, 5, 41. Additional file 2 (CC-BY Pipeline Pilot component 'Protein Descriptor (Published)'), which embeds the published table; block appending properties Z1..Z5. Secondary source: the primary paper is paywalled and was not available to check. UNRESOLVED: differs from peptides.py at C Z3 (3.71 here, 3.75 in peptides.py), L Z4 (0.72 vs -0.72); check against the primary paper.",
+    "experimental": true
   },
   "vhse": {
     "name": "vhse",
@@ -549,7 +578,8 @@
     },
     "reference": "Mei H. et al. (2005). A new set of amino acid descriptors and its application in peptide QSARs. Biopolymers, 80(6), 775-786.",
     "doi": "10.1002/bip.20296",
-    "source_note": "Transcribed 2026-10-12 programmatically from van Westen G.J.P. et al. (2013). Benchmarking of protein descriptor sets in proteochemometric modeling (part 1): comparative study of 13 amino acid descriptor sets. J Cheminform, 5, 41. Additional file 2 (CC-BY Pipeline Pilot component 'Protein Descriptor (Published)'), which embeds the published table; block appending properties VHSE1..VHSE8. Secondary source: the primary paper is paywalled and was not available to check. UNRESOLVED: differs from peptides.py at L VHSE3 (0.26 here, 0.36 in peptides.py); check against the primary paper."
+    "source_note": "Transcribed 2026-10-12 programmatically from van Westen G.J.P. et al. (2013). Benchmarking of protein descriptor sets in proteochemometric modeling (part 1): comparative study of 13 amino acid descriptor sets. J Cheminform, 5, 41. Additional file 2 (CC-BY Pipeline Pilot component 'Protein Descriptor (Published)'), which embeds the published table; block appending properties VHSE1..VHSE8. Secondary source: the primary paper is paywalled and was not available to check. UNRESOLVED: differs from peptides.py at L VHSE3 (0.26 here, 0.36 in peptides.py); check against the primary paper.",
+    "experimental": true
   },
   "st_scales": {
     "name": "st_scales",
@@ -757,7 +787,8 @@
     },
     "reference": "Yang L. et al. (2010). ST-scale as a novel amino acid descriptor and its application in QSAM of peptides and analogues. Amino Acids, 38(3), 805-816.",
     "doi": "10.1007/s00726-009-0287-y",
-    "source_note": "Transcribed 2026-10-12 programmatically from van Westen G.J.P. et al. (2013). Benchmarking of protein descriptor sets in proteochemometric modeling (part 1): comparative study of 13 amino acid descriptor sets. J Cheminform, 5, 41. Additional file 2 (CC-BY Pipeline Pilot component 'Protein Descriptor (Published)'), which embeds the published table; block appending properties ST1..ST8. Secondary source: the primary paper is paywalled and was not available to check. UNRESOLVED: differs from peptides.py at Q ST1 (-0.622 here, -0.662 in peptides.py), E ST2 (0.39 vs -0.39); check against the primary paper."
+    "source_note": "Transcribed 2026-10-12 programmatically from van Westen G.J.P. et al. (2013). Benchmarking of protein descriptor sets in proteochemometric modeling (part 1): comparative study of 13 amino acid descriptor sets. J Cheminform, 5, 41. Additional file 2 (CC-BY Pipeline Pilot component 'Protein Descriptor (Published)'), which embeds the published table; block appending properties ST1..ST8. Secondary source: the primary paper is paywalled and was not available to check. UNRESOLVED: differs from peptides.py at Q ST1 (-0.622 here, -0.662 in peptides.py), E ST2 (0.39 vs -0.39); check against the primary paper.",
+    "experimental": true
   },
   "t_scales": {
     "name": "t_scales",
@@ -1181,7 +1212,8 @@
     },
     "reference": "Liang G. & Li Z. (2007). Factor analysis scale of generalized amino acid information as the source of a new set of descriptors for elucidating the structure and activity relationships of cationic antimicrobial peptides. QSAR Comb Sci, 26(6), 754-763.",
     "doi": "10.1002/qsar.200630145",
-    "source_note": "Transcribed 2026-10-12 programmatically from van Westen G.J.P. et al. (2013). Benchmarking of protein descriptor sets in proteochemometric modeling (part 1): comparative study of 13 amino acid descriptor sets. J Cheminform, 5, 41. Additional file 2 (CC-BY Pipeline Pilot component 'Protein Descriptor (Published)'), which embeds the published table; block appending properties F1..F6. Secondary source: the primary paper is paywalled and was not available to check. UNRESOLVED: differs from peptides.py at V F1 (1.332 here, -1.332 in peptides.py), P F6 (-1.008 vs -1.108); check against the primary paper."
+    "source_note": "Transcribed 2026-10-12 programmatically from van Westen G.J.P. et al. (2013). Benchmarking of protein descriptor sets in proteochemometric modeling (part 1): comparative study of 13 amino acid descriptor sets. J Cheminform, 5, 41. Additional file 2 (CC-BY Pipeline Pilot component 'Protein Descriptor (Published)'), which embeds the published table; block appending properties F1..F6. Secondary source: the primary paper is paywalled and was not available to check. UNRESOLVED: differs from peptides.py at V F1 (1.332 here, -1.332 in peptides.py), P F6 (-1.008 vs -1.108); check against the primary paper.",
+    "experimental": true
   },
   "blosum_indices": {
     "name": "blosum_indices",
@@ -1870,5 +1902,33 @@
     "reference": "Janin, J. 'Surface and inside volumes in globular proteins' Nature 277, 491-492 (1979)",
     "doi": "10.1038/277491a0",
     "source_note": "AAindex1 record JANJ790102, identical to ExPASy ProtScale 'Hphob. / Janin'; copied 2026-10-12."
+  },
+  "top_idp": {
+    "name": "TOP-IDP disorder propensity scale",
+    "values": {
+      "A": 0.06,
+      "C": 0.02,
+      "D": 0.192,
+      "E": 0.736,
+      "F": -0.697,
+      "G": 0.166,
+      "H": 0.303,
+      "I": -0.486,
+      "K": 0.586,
+      "L": -0.326,
+      "M": -0.397,
+      "N": 0.007,
+      "P": 0.987,
+      "Q": 0.318,
+      "R": 0.18,
+      "S": 0.341,
+      "T": 0.059,
+      "V": -0.121,
+      "W": -0.884,
+      "Y": -0.51
+    },
+    "reference": "Campen A. et al. (2008). TOP-IDP-scale: a new amino acid scale measuring propensity for intrinsic disorder. Protein Pept Lett, 15(9), 956-963.",
+    "doi": "10.2174/092986608785849164",
+    "source_note": "Table 2 of the paper (PMC2676888), parsed 2026-10-12."
   }
 }

@@ -18,7 +18,10 @@ References
     34(14), 2499-2502. https://doi.org/10.1093/bioinformatics/bty140
 """
 #list of amino acids
-from ._constants import amino_acids, _validate_sequence, _validate_int
+from ._constants import _validate_sequence, _validate_int
+from ._helpers import _to_df
+
+__all__ = ["conjoint_triad"]
     
 #amino acid triads
 aa_triads = {
@@ -31,7 +34,7 @@ aa_triads = {
     7: ["C"],
     }
 
-def conjoint_triad(sequence: str, gap: int = 0) -> pd.DataFrame:
+def conjoint_triad(sequence: str, gap: int = 0, normalize: bool = True) -> pd.DataFrame:
     """
     Calculate Conjoint Triad features (CTriad) for a protein sequence. The descriptor
     mainly considers neighbor relationships in protein sequences by encoding
@@ -42,8 +45,16 @@ def conjoint_triad(sequence: str, gap: int = 0) -> pd.DataFrame:
 
     With ``gap > 0`` the k-spaced conjoint triad (KSCTriad) is returned: for each
     g = 0..gap, triads (s_i, s_{i+g+1}, s_{i+2g+2}) are counted, giving an output
-    of shape 1 x 343·(gap+1) with columns suffixed ``_gap{g}`` [2]. Values are
-    raw counts, as for the default descriptor.
+    of shape 1 x 343·(gap+1) with columns suffixed ``_gap{g}`` [2].
+
+    By default the triad counts f_i are normalised as in Shen et al. [1] and
+    iFeature [2], separately for each gap:
+
+    d_i = (f_i - min(f)) / max(f)
+
+    so the values no longer grow with the sequence length (all 0 when there are
+    no triads). ``normalize=False`` returns the raw counts (the v1.0-v1.5 default),
+    which sum to L - 2.
 
     Parameters
     ==========
@@ -51,6 +62,8 @@ def conjoint_triad(sequence: str, gap: int = 0) -> pd.DataFrame:
         protein sequence.
     :gap: int (default=0)
         maximum residue spacing for KSCTriad; 0 gives the original conjoint triad.
+    :normalize: bool (default=True)
+        normalise the counts to (f - min) / max; False returns raw counts.
 
     Returns
     =======
@@ -84,13 +97,12 @@ def conjoint_triad(sequence: str, gap: int = 0) -> pd.DataFrame:
         suffix = f"_gap{g}" if gap > 0 else ""
 
         #calculate 7 triads for amino acids
-        for i in range(1, 8):
-            for j in range(1, 8):
-                for k in range(1, 8):
-                    temp = str(i) + str(j) + str(k)
-                    conjoint_triad["conj_triad_" + temp + suffix] = triad_counts[temp]
-    
-    #transform descriptor values to dataframe
-    conjoint_triad_df = pd.DataFrame([list(conjoint_triad.values())], columns=list(conjoint_triad.keys()))
+        triads = [str(i) + str(j) + str(k) for i in range(1, 8) for j in range(1, 8) for k in range(1, 8)]
+        counts = [triad_counts[triad] for triad in triads]
+        if normalize:
+            low, high = min(counts), max(counts)
+            counts = [(c - low) / high if high else 0.0 for c in counts]
+        for triad, count in zip(triads, counts):
+            conjoint_triad["conj_triad_" + triad + suffix] = count
 
-    return conjoint_triad_df
+    return _to_df(list(conjoint_triad.values()), list(conjoint_triad))

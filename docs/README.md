@@ -1,34 +1,34 @@
-# Documentation for iso3166-2
+# Documentation for protpy
 
-[![Documentation Status](https://readthedocs.org/projects/iso3166-2/badge/?version=latest)](https://iso3166-2.readthedocs.io/en/latest/?badge=latest)
+[![Documentation Status](https://readthedocs.org/projects/protpy/badge/?version=latest)](https://protpy.readthedocs.io/en/latest/?badge=latest)
 
-The documentation for `iso3166-2` is hosted on the **readthedocs** platform and is available [here](https://iso3166-2.readthedocs.io/en/latest). The documentation is automatically built and published on the platform via the repo. 
+The documentation for `protpy` is hosted on **ReadTheDocs** and is available [here](https://protpy.readthedocs.io/en/latest). It is built and published automatically from the repo.
 
-## Build documentation and test locally
+Files
+-----
+* `index.rst` - landing page.
+* `usage.rst` - installation and usage examples.
+* `descriptors.rst` - every descriptor: formulas, parameters, output columns, deprecations (v1.6.0) and references; kept in sync with `DESCRIPTORS.md`.
+* `api.rst` - API reference generated from the module docstrings.
+* `contributing.rst` - contribution guide.
+* `references.bib` - bibliography; every DOI in the descriptor registry must appear here (checked by `tests/test_helpers.py`).
+* `conf.py` - Sphinx configuration (version 1.6.0).
 
-Install *sphinx* Python package
+Build the documentation locally
+-------------------------------
+Install the requirements from the project root:
 ```bash
-pip install sphinx
+pip install -e . -r docs/requirements.txt
 ```
 
-Create a /docs directory inside the `iso3166-2` package
+Build the HTML in the /docs folder, treating warnings as errors:
 ```bash
-mkdir /docs
+cd docs && make html SPHINXOPTS="-W"
 ```
 
-Run *sphinx-quickstart* in /docs directory to create template for the documentation
-```bash
-cd /docs && sphinx-quickstart
-```
-
-After editing the documentation, build using make command in the /docs folder
-```bash
-make html 
-```
-
-Open the index.html file generated in the docs/_build/html folder
+Open the generated page:
 ```bash
 open _build/html/index.html
 ```
 
-The full tutorial for using the readthedocs platform is available [here](https://docs.readthedocs.io/en/stable/tutorial/index.html).
+The full tutorial for using the ReadTheDocs platform is available [here](https://docs.readthedocs.io/en/stable/tutorial/index.html).

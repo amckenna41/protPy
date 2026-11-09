@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import math
+
 #canonical 20 amino acids used throughout the protpy package
 amino_acids: list[str] = ["A", "C", "D", "E", "F", "G", "H", "I", "K", "L", "M", "N", "P",
     "Q", "R", "S", "T", "V", "W", "Y"]
@@ -56,6 +58,9 @@ def _validate_int(name: str, value, minimum: int = 0) -> int:
     """
     if isinstance(value, bool):
         raise ValueError(f"Invalid {name} value input: {value}.")
+    #a float must be a whole number (2.0 is accepted, 2.5 is not silently truncated)
+    if isinstance(value, float) and not value.is_integer():
+        raise ValueError(f"{name} must be an integer, got {value}.")
     try:
         value = int(value)
     except (ValueError, TypeError):
@@ -67,13 +72,13 @@ def _validate_int(name: str, value, minimum: int = 0) -> int:
 
 def _validate_weight(weight) -> float:
     """
-    Check that ``weight`` is a non-negative number.
+    Check that ``weight`` is a finite non-negative number.
 
     Raises
     ======
     ValueError
         if ``weight`` is not a number or is negative.
     """
-    if isinstance(weight, bool) or not isinstance(weight, (int, float)) or weight < 0:
-        raise ValueError(f"weight must be a non-negative number, got {weight}.")
+    if isinstance(weight, bool) or not isinstance(weight, (int, float)) or not math.isfinite(weight) or weight < 0:
+        raise ValueError(f"weight must be a finite non-negative number, got {weight}.")
     return weight

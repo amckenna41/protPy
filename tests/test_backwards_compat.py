@@ -13,23 +13,13 @@ from Bio import SeqIO
 import protpy
 
 TEST_DATA = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_data")
-GOLDEN = os.path.join(TEST_DATA, "golden_v1_4_2.json.gz")
+GOLDEN = os.path.join(TEST_DATA, "golden_v1_6_0.json.gz")
 
-#public descriptors that existed in v1.4.2; their default outputs must never change
-V1_4_2_DESCRIPTORS = [
-    "amino_acid_composition", "dipeptide_composition", "tripeptide_composition",
-    "gravy", "aromaticity", "instability_index", "isoelectric_point", "molecular_weight",
-    "charge_distribution", "hydrophobic_polar_charged_composition", "secondary_structure_propensity",
-    "kmer_composition", "reduced_alphabet_composition", "motif_composition",
-    "amino_acid_pair_composition", "aliphatic_index", "extinction_coefficient", "boman_index",
-    "aggregation_propensity", "hydrophobic_moment",
-    "moreaubroto_autocorrelation", "moran_autocorrelation", "geary_autocorrelation",
-    "pseudo_amino_acid_composition", "amphiphilic_pseudo_amino_acid_composition",
-    "conjoint_triad", "ctd_composition", "ctd_transition", "ctd_distribution", "ctd_",
-    "sequence_order_coupling_number_", "sequence_order_coupling_number",
-    "sequence_order_coupling_number_all", "quasi_sequence_order", "quasi_sequence_order_all",
-    "shannon_entropy",
-]
+#every registered descriptor's default output is pinned (the v1.4.2 snapshot was re-baselined in
+#v1.6.0, whose audit fixes deliberately change values; see CHANGELOG.md). Regenerate only for a
+#deliberate, documented change.
+DESCRIPTORS = list(protpy.utils._DESCRIPTOR_REGISTRY)
+KWARGS = {"aa_scale_descriptors": {"scale": "atchley_factors"}}
 
 
 def _sequences() -> dict:
@@ -55,14 +45,16 @@ def compute_snapshot() -> dict:
     """Compute every default output that the golden snapshot pins."""
     out = {}
     for fname, seq in _sequences().items():
-        out[f"{fname}::all_descriptors"] = _record(protpy.all_descriptors(seq, _show_descriptor_list=False))
-        for desc in V1_4_2_DESCRIPTORS:
-            out[f"{fname}::{desc}"] = _record(getattr(protpy, desc)(seq))
+        for descriptor_set in ("classic", "extended", "all"):
+            out[f"{fname}::all_descriptors::{descriptor_set}"] = _record(
+                protpy.all_descriptors(seq, descriptor_set=descriptor_set, _show_descriptor_list=False))
+        for desc in DESCRIPTORS:
+            out[f"{fname}::{desc}"] = _record(getattr(protpy, desc)(seq, **KWARGS.get(desc, {})))
     return out
 
 
 class ProtpyBackwardsCompatTests(unittest.TestCase):
-    """Default descriptor outputs must be identical to the v1.4.2 (post-audit) baseline."""
+    """Default descriptor outputs must be identical to the v1.6.0 baseline."""
 
     def test_golden_snapshot(self):
         with gzip.open(GOLDEN, "rt") as f:
@@ -71,7 +63,14 @@ class ProtpyBackwardsCompatTests(unittest.TestCase):
         self.assertEqual(sorted(golden), sorted(current))
         for key, expected in golden.items():
             with self.subTest(key=key):
-                self.assertEqual(current[key], expected)
+                #exact columns/shape; values to 1e-9 (unrounded floats can differ in the last bits across platforms)
+                self.assertEqual({k: v for k, v in current[key].items() if k != "values"},
+                                 {k: v for k, v in expected.items() if k != "values"})
+                for a, b in zip(current[key].get("values", []), expected.get("values", [])):
+                    if isinstance(b, float) and b != b:  #NaN
+                        self.assertNotEqual(a, a)
+                    else:
+                        self.assertAlmostEqual(a, b, delta=1e-9 * max(1.0, abs(b)))
 
 
 if __name__ == "__main__":

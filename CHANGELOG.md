@@ -7,6 +7,62 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.6.0] - 2026-11-08
+
+Implements `planning/protpy descriptor value audit.md`. Values change: pin `protpy<1.6` to reproduce older results.
+
+### Fixed
+- `instability_index`: DIWV table replaced with the Guruprasad/Biopython values (25 of 400 entries were wrong).
+- `quasi_sequence_order`: composition terms are fractions (were 100x too large); the values sum to 1.
+- `ctd_distribution`: quantile index clamped to the first residue (iFeature); `fold_index` assigns window scores to the centre residue.
+- `kappa`: single-sign sequences are scored (localCIDER agreement within 0.003), NaN without charges; one `Kappa` column; ~100x faster δ_max.
+- APAAC denominator guard (RuntimeWarning < 0.1, ValueError <= 0); `motif_composition` accepts lists and anchors KDEL; tryptic sites exclude a C-terminal K/R; `aggregation_propensity` counts merged regions; invalid reduced-alphabet sizes raise; `correlation_function` no longer divides by zero; `encode` resolves modules by import, not attribute.
+- One lag policy: a lag/lamda not less than the sequence length raises `ValueError` (it silently became 30).
+- Descriptors are no longer rounded; `all_descriptors`/`encode_dataset(decimals=)` rounds on request.
+- `all_descriptors`/`encode_dataset` no longer fail on sequences of 30 residues or fewer: a descriptor whose lag is not less than the sequence length is computed with lag = length - 1 and its higher-lag columns are NaN (with a `UserWarning`), so short peptides and long proteins share the same columns. Invalid parameters still raise.
+- `params` for a descriptor that is not computed now warn instead of being silently ignored; a non-dict `params` value raises `TypeError`; `include`/`exclude` accept a single name as a str (it was split into letters).
+- Input validation: integer parameters reject non-whole floats (`k=2.5` was truncated to 2), `weight` must be finite, `charge_distribution(ph=)` must be between 0 and 14 (NaN gave NaN output), an invalid `motif_composition` regex raises `ValueError`, and a non-string sequence in `encode_dataset` raises `TypeError` naming the sequence (`None` became the string "None").
+- `read_sequences_from_file`: a trailing FASTA stop codon `*` is removed, and `id_col` with a FASTA file returns the header identifiers (they were discarded).
+- `encode_dataset` CSV output: identifiers starting with `=`, `+`, `-` or `@` are written with a leading `'` so spreadsheets do not run them as formulas (CSV injection); the returned DataFrame is unchanged.
+- `_scale_values` returns a copy of the cached scale tables, and `composition.kyte_doolittle_`/`hydrophobicity_` are copies, so changing them cannot alter later results.
+- `lempel_ziv_complexity` is ~45x faster on long sequences (substring search, same counts as Kaspar-Schuster); the `extended` set on a 35,000-residue protein drops from ~7.8 s to ~1.4 s.
+
+### Changed
+- Defaults: `isoelectric_point`/`charge_distribution` use the Bjellqvist pKa set; `conjoint_triad(normalize=True)` (Shen 2007).
+- Classic `all_descriptors` set is registry-driven and 1,402 columns (was 9,957); TPC and DDE are opt-in. ~8x faster.
+- `protpy/signal.py` renamed `protpy/spectral.py`; `shannon_entropy` moved to `complexity`; scale `eisenberg` renamed `eisenberg_arb1984` (default `hydrophobic_moment` table is `eisenberg_jmb1984`); TOP-IDP is a named scale; z5/VHSE/ST/FASGAI tables flagged experimental.
+- Slimmed outputs: `aggrescan` 5 columns (`full=True`, `window="psico"`), `wootton_federhen_complexity` drops K1, `lempel_ziv_complexity` returns only the normalised value, `spectral` DCT drops X_0, `charge_fractions` adds NCPR.
+
+### Added
+- Family functions/parameters: `kmer_composition(alphabet=)`, `cksaap(alphabet=)`, `dipeptide_composition(normalize="dde")`, `autocorrelation(method=)` (numpy kernel), `ctd(parts=)`, `distance_matrix="both"` and SOCN `normalize=`, `hydrophobicity_profile(segments=)`, `motif_composition(per_100=)` with PROSITE motifs, `aa_scale_descriptors(mode="position")`, `charge_distribution(normalize=)`, `natural_vector(normalize=)`, `plaac(fill_value=)`, `thermostability_indices`, `charge_hydropathy`, `spectral_descriptors`.
+- `planning/BLOCKED.md`: won't-do items moved to a "Not planned" section with a reason each; open items reduced to the unresolved scale cells and the FoldIndex check.
+
+### Deprecated (removed in 2.0)
+- 37 functions, listed with replacements in `DESCRIPTORS.md`; internal helpers no longer exported.
+
+### Dependencies
+- The unused `varname` dependency is removed; the README requirements now match `pyproject.toml` (aaindex >= 1.3.1, numpy >= 2.0.0, pandas >= 2.0.2, tqdm >= 4.0.0).
+
+### Removed (internal clean-up; no output changes)
+- Duplicated data: the hard-coded Kyte-Doolittle, Eisenberg (JMB 1984), "protpy" pKa and Boman tables now come from `protpy/data` / AAindex (`boman_index` is `-gravy(scale="RADA880101")`); the duplicate TOP-IDP table in `structural_params.json`, the copy of the PDT default properties and of `amino_acids` in `__init__.py` are removed.
+- Dead code: the unused `normalize` branch of `autocorrelation._get_properties` and its `_std` helper, the one-use `_named_alphabet` wrapper, a deep copy of a string in `ctd.str_to_num`, three copies of the CTD property lookup (now `ctd._ctd_property`), and unused imports in `autocorrelation`, `conjoint_triad`, `ctd` and `physicochemical` (and in the tests).
+- `sequence_order_coupling_number_`, `sequence_order_correlation_factor` and `amphiphilic_sequence_order_correlation_factor` are no longer used by protpy and now raise a `DeprecationWarning` (removed in 2.0).
+
+### Documentation
+- `DESCRIPTORS.md` and `docs/descriptors.rst`: the v1.5.0 section is regenerated from the registry and docstrings as "v1.5.0 and v1.6.0 Descriptors", with a table of deprecated functions and their replacements, v1.6.0 notes on the changed v1.4 descriptors, and a registry-generated summary table.
+- Usage examples in `README.md`, `protpy/README.md` and `docs/usage.rst` are regenerated from the current outputs (several earlier example values and column names were stale) and use the family functions instead of deprecated ones; `docs/usage.rst` documents the new descriptor sets, `decimals` and the lag policy.
+- `docs/api.rst` documents each module's `__all__` (new `protpy.spectral` section); `docs/index.rst`, the README descriptor lists and `protpy/README.md` module list are generated from the registry.
+- `examples/`: the tutorial notebook is updated for v1.6.0 and re-executed; the example READMEs give the new output shapes and the correct dataset sizes (each dataset has one more sequence than the README stated: 261, 81, 152, 254).
+- `DESCRIPTORS.md` / `docs/descriptors.rst` document every public function, including a reference entry (description, example, columns, replacement) for each deprecated v1.5.0 function.
+- `protpy/data/README.md` and `tests/README.md` updated. The Sphinx build is warning-free.
+
+### Tests
+- New `tests/test_reference_values.py`: ProtParam values against Biopython, composition sums, the audit's exact identities (Moreau-Broto = auto covariance, PDT = 2 s² Geary, DPC = k-mer = CKSAAP gap 0), ordered CTD quartiles and published kappa values.
+- Instability index, pI and charge distribution tests compare with Biopython / an independent Henderson-Hasselbalch calculation instead of frozen outputs; kappa is checked against localCIDER and a brute-force δ_max; the published Das & Pappu kappa tolerance is tightened from 0.02 to 0.002.
+- The golden snapshot (`golden_v1_4_2.json.gz`) is replaced by `golden_v1_6_0.json.gz`, covering every registered descriptor and the three `all_descriptors` sets.
+- Regression tests for the final-review fixes: short sequences in every descriptor set, `params`/`include` checks, numeric validation, motif regex errors, the LZ76 parser against Kaspar-Schuster, FASTA identifiers and stop codons, CSV escaping and scale-table copies.
+- Tests of deprecated functions assert the `DeprecationWarning`; expected values written from earlier rounded outputs are compared with a tolerance (`tests/_compare.py`); `test_signal.py` is renamed `test_spectral.py`.
+
 ## [1.5.0] - 2026-10-12
 
 ### Added

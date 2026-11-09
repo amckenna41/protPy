@@ -6,18 +6,17 @@ from .sequence_order import *
 from .scales import *
 from .physicochemical import *
 from .complexity import *
-from .signal import *
+from .spectral import *
 from .structural import *
 from .utils import get_descriptor_info, list_descriptors, print_descriptor_info
 from .encode import all_descriptors, encode_dataset, read_sequences_from_file
 
 #canonical amino acids available in the package
-amino_acids = ["A", "C", "D", "E", "F", "G", "H", "I", "K", "L", "M", "N", "P",
-    "Q", "R", "S", "T", "V", "W", "Y"]
+from ._constants import amino_acids
 
 #protPy package metadata
 __name__ = 'protpy'
-__version__ = "1.5.0"
+__version__ = "1.6.0"
 __description__ = "Python package for generating various biochemical, physicochemical and structural descriptors/features of protein sequences."
 __author__ = 'AJ McKenna: https://github.com/amckenna41'
 __authorEmail__ = 'amckenna41@qub.ac.uk'
@@ -31,28 +30,8 @@ __keywords__ = ["bioinformatics", "protein engineering", "python", "pypi", "mach
                 "structural descriptors", "pySAR"]
 __test_suite__ = "tests"
 
-#list of all available descriptor names in protPy
-descriptor_names = ["amino_acid_composition", "dipeptide_composition", "tripeptide_composition",
-    "gravy", "aromaticity", "instability_index", "isoelectric_point", "molecular_weight",
-    "charge_distribution", "hydrophobic_polar_charged_composition", "secondary_structure_propensity",
-    "kmer_composition", "reduced_alphabet_composition", "motif_composition",
-    "amino_acid_pair_composition",
-    "aliphatic_index", "extinction_coefficient", "boman_index",
-    "aggregation_propensity", "hydrophobic_moment",
-    "moreaubroto_autocorrelation", "moran_autocorrelation", "geary_autocorrelation",
-    "pseudo_amino_acid_composition", "amphiphilic_pseudo_amino_acid_composition",
-    "conjoint_triad", "ctd_composition", "ctd_transition", "ctd_distribution", "ctd_",
-    "sequence_order_coupling_number_", "sequence_order_coupling_number",
-    "sequence_order_coupling_number_all", "quasi_sequence_order", "quasi_sequence_order_all",
-    "shannon_entropy",
-    #v1.5.0
-    "cksaap", "cksaagp", "dde", "asdc", "distance_pair", "natural_vector", "atomic_composition",
-    "z_scales_5", "vhse", "atchley_factors", "t_scales", "st_scales", "protfp", "fasgai",
-    "blosum_indices", "ms_whim", "auto_cross_covariance", "physicochemical_distance_transformation",
-    "charge_fractions", "ncpr", "kappa", "sequence_charge_decoration", "charge_density",
-    "hydrophobicity_profile", "hydrophobic_ratio", "half_life", "ivywrel_index", "cvp_bias", "flexibility",
-    "wootton_federhen_complexity", "linguistic_complexity", "lempel_ziv_complexity",
-    "fft_descriptors", "dct_descriptors",
-    "aggrescan", "uversky_charge_hydropathy", "fold_index", "disorder_propensity", "transmembrane_features",
-    "signal_peptide_features", "functional_site_counts", "plaac", "antigenicity_surface", "cysteine_features",
-    ]
+#list of all registered descriptor names in protPy (deprecated functions are not
+#registered; see protpy.utils._DESCRIPTOR_REGISTRY)
+from .utils import _DESCRIPTOR_REGISTRY as _registry
+descriptor_names = list(_registry)
+del _registry

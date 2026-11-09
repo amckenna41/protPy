@@ -68,70 +68,35 @@ Sequence Order Descriptors (5)
 * **Quasi Sequence Order (QSO)**
 * **Quasi Sequence Order — all matrices**
 
-v1.5.0 Composition Descriptors (7)
+v1.5.0 / v1.6.0 Descriptors (22)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-* **cksaap** (CKSAAP)
-* **cksaagp** (CKSAAGP)
-* **dde** (DDE)
-* **asdc** (ASDC)
-* **distance_pair** (DP)
-* **natural_vector** (NV)
-* **atomic_composition** (ATC)
+* **ctd** (CTD) — CTD
+* **natural_vector** (NV) — Composition
+* **atomic_composition** (ATC) — Composition
+* **cksaagp** (CKSAAGP) — Composition
+* **charge_fractions** (FCR) — Physicochemical
+* **kappa** (Kappa) — Physicochemical
+* **sequence_charge_decoration** (SCD) — Physicochemical
+* **hydrophobicity_profile** (HP) — Physicochemical
+* **thermostability_indices** (Thermo) — Physicochemical
+* **wootton_federhen_complexity** (WF) — Complexity
+* **lempel_ziv_complexity** (LZ) — Complexity
+* **spectral_descriptors** (Spectral) — Spectral
+* **aggrescan** (AGG) — Structural
+* **charge_hydropathy** (CH) — Structural
+* **plaac** (PLAAC) — Structural
+* **cksaap** (CKSAAP) — Composition
+* **asdc** (ASDC) — Composition
+* **distance_pair** (DP) — Composition
+* **auto_cross_covariance** (ACC) — Scales
+* **dde** (DDE) — Composition
+* **autocorrelation** (Auto) — Autocorrelation
+* **aa_scale_descriptors** (Scale) — Scales
 
-v1.5.0 Scales Descriptors (11)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-* **z_scales_5** (Z5)
-* **vhse** (VHSE)
-* **atchley_factors** (AF)
-* **t_scales** (T)
-* **st_scales** (ST)
-* **protfp** (ProtFP)
-* **fasgai** (FASGAI)
-* **blosum_indices** (BLOSUM)
-* **ms_whim** (MSWHIM)
-* **auto_cross_covariance** (ACC)
-* **physicochemical_distance_transformation** (PDT)
-
-v1.5.0 Physicochemical Descriptors (11)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-* **charge_fractions** (FCR)
-* **ncpr** (NCPR)
-* **kappa** (Kappa)
-* **sequence_charge_decoration** (SCD)
-* **charge_density** (ChargeDensity)
-* **hydrophobicity_profile** (HP)
-* **hydrophobic_ratio** (HydrophobicRatio)
-* **half_life** (HalfLife)
-* **ivywrel_index** (IVYWREL)
-* **cvp_bias** (CvP)
-* **flexibility** (Flex)
-
-v1.5.0 Complexity Descriptors (3)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-* **wootton_federhen_complexity** (WF)
-* **linguistic_complexity** (LC)
-* **lempel_ziv_complexity** (LZ)
-
-v1.5.0 Signal Descriptors (2)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-* **fft_descriptors** (FFT)
-* **dct_descriptors** (DCT)
-
-v1.5.0 Structural Descriptors (10)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-* **aggrescan** (AGG)
-* **uversky_charge_hydropathy** (UV)
-* **fold_index** (FI)
-* **disorder_propensity** (DP)
-* **transmembrane_features** (TM)
-* **signal_peptide_features** (SP)
-* **functional_site_counts** (FS)
-* **plaac** (PLAAC)
-* **antigenicity_surface** (Antigenicity)
-* **cysteine_features** (Cys)
-
-The v1.5.0 descriptors are added to ``all_descriptors`` with ``descriptor_set="extended"`` or ``"all"``;
-see :doc:`usage` and :doc:`descriptors`.
+v1.6.0 merged most of the v1.5.0 additions into these family functions and deprecated the rest (a
+``DeprecationWarning`` is raised; they are removed in 2.0). The classic ``all_descriptors`` set is about
+1,400 columns; ``descriptor_set="extended"`` or ``"all"`` add the descriptors above. See :doc:`usage` and
+:doc:`descriptors`, including the table of deprecated functions.
 
 .. note::
 

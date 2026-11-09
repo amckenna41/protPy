@@ -6,6 +6,7 @@ import pandas as pd
 import numpy as np
 import os
 import unittest
+from tests._compare import frames_close
 import re
 from Bio import SeqIO
 unittest.TestLoader.sortTestMethodsUsing = None
@@ -153,7 +154,7 @@ class ProtpyAutocorrelationTests(unittest.TestCase):
             'Expected output to be of type DataFrame, got {}.'.format(type(moreaubroto_nf_seq1)))
         self.assertEqual(moreaubroto_nf_seq1.shape, (1, lag),
             'Expected output shape (1, {}), got {}.'.format(lag, moreaubroto_nf_seq1.shape))
-        self.assertTrue(moreaubroto_nf_seq1.equals(moreaubroto_nf_expected),
+        self.assertTrue(frames_close(moreaubroto_nf_seq1, moreaubroto_nf_expected),
             "normalize=False output did not match expected, got\n{}." \
             .format(moreaubroto_nf_seq1))
 
@@ -264,7 +265,7 @@ class ProtpyAutocorrelationTests(unittest.TestCase):
             'Expected output to be of type DataFrame, got {}.'.format(type(moran_nf_seq1)))
         self.assertEqual(moran_nf_seq1.shape, (1, lag),
             'Expected output shape (1, {}), got {}.'.format(lag, moran_nf_seq1.shape))
-        self.assertTrue(moran_nf_seq1.equals(moran_nf_expected),
+        self.assertTrue(frames_close(moran_nf_seq1, moran_nf_expected),
             "normalize=False output did not match expected, got\n{}." \
             .format(moran_nf_seq1))
 
@@ -375,6 +376,6 @@ class ProtpyAutocorrelationTests(unittest.TestCase):
             'Expected output to be of type DataFrame, got {}.'.format(type(geary_nf_seq1)))
         self.assertEqual(geary_nf_seq1.shape, (1, lag),
             'Expected output shape (1, {}), got {}.'.format(lag, geary_nf_seq1.shape))
-        self.assertTrue(geary_nf_seq1.equals(geary_nf_expected),
+        self.assertTrue(frames_close(geary_nf_seq1, geary_nf_expected),
             "normalize=False output did not match expected, got\n{}." \
             .format(geary_nf_seq1))

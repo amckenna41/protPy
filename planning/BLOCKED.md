@@ -1,7 +1,35 @@
-# v1.5.0 blocked items
+# v1.5.0 blocked items (updated for v1.6.0)
 
 Items from IMPLEMENTATION_PLAN.md that could not be implemented without inventing data.
 Each entry names the table that is missing and where it would have to come from.
+
+## Open items
+
+| Item | What is needed |
+|---|---|
+| Factor-scale cells flagged `UNRESOLVED` in `protpy/data/aa_scales.json` (FASGAI V F1, P F6; ST Q ST1, E ST2; VHSE L VHSE3; z5 C Z3, L Z4 — three of them sign flips) | Check against the primary tables (Sandberg 1998, Mei 2005, Yang 2010, Liang & Li 2007). Until then the four tables are flagged `"experimental": true` and raise a `UserWarning` when used (v1.6.0). |
+| FoldIndex window (51) and residue assignment | Check against Prilusky 2005. v1.6.0 assigns each window score to its centre residue and reports the score profile (`charge_hydropathy(window=51)`), not a disorder call. |
+
+Resolved in v1.6.0: the kappa δ_max cost (2.6 s for a 2,485-residue protein) — each segregated arrangement is now scored in O(g) from the blobs that straddle a block boundary and the result is memoised, with identical values (to 1e-15) and agreement with localCIDER to 0.003.
+
+## Not planned
+
+Closed by the v1.6.0 descriptor value audit (`planning/protpy descriptor value audit.md`): almost every item would add another view of information protpy already has.
+
+| Item | Reason |
+|---|---|
+| `psekraac` (16 PseKRAAC types) | Reduced alphabets go through `kmer_composition(alphabet=)` and `cksaap(alphabet=)`, which accept a user-supplied grouping (list of residue strings), so any PseKRAAC table can be supplied by the user. |
+| `z_scales` (Hellberg z1-z3), `kidera_factors`, `cruciani_properties` | Averaged over a sequence every scale set is an exact linear map of the amino acid composition; reconsider only for `aa_scale_descriptors(mode="position")`. |
+| `omega` (Martin 2016) | A kappa-style patterning parameter; kappa is already one effective feature. |
+| `membrane_position` (Eisenberg moment-plot classes) | A fixed classification of (mean hydrophobicity, μH), both already outputs. |
+| `wilkinson_harrison_solubility` | Low priority: another composition-only scalar, though with a recognisable identity; revisit if λ1, λ2 and CV′ become available. |
+| `hessa`, `moon_fleming`, `aasi` scales | Optional data, not new functions: if obtained they are rows in `aa_scales.json`, used by `hydrophobicity_profile`, `gravy(scale=)` and `hydrophobic_moment(scale=)`. |
+| `chou_fasman`, `gor`, `coiled_coil`, `fold_amyloid` | Full structure predictors reimplemented from incomplete secondary sources would repeat the least trustworthy part of v1.5.0 (the heuristic predictors deprecated in v1.6.0). |
+| NLS/NES patterns in `functional_site_counts` | NLS classes are activity profiles, not regexes (Kosugi 2009). |
+| von Heijne cleavage matrix for `signal_peptide_features`; Emini / Karplus-Schulz / Kolaskar-Tongaonkar for `antigenicity_surface`; `TM_min_dGapp` for `transmembrane_features` | The functions are deprecated in v1.6.0 (or merged into `hydrophobicity_profile(segments=True)`). |
+
+<details>
+<summary>Original v1.5.0 blocked-items table (missing source data)</summary>
 
 | # | Item | Missing data | Notes |
 |---|---|---|---|
@@ -22,6 +50,9 @@ Each entry names the table that is missing and where it would have to come from.
 | 54 (partial) | `antigenicity_surface`: Emini, Karplus–Schulz, Kolaskar–Tongaonkar | Emini surface-probability values/formula; Karplus–Schulz rigid-neighbour definition; Kolaskar–Tongaonkar scale | Emini 1985 (PMC255070) is a scanned PDF behind a browser challenge; Karplus & Schulz 1985 and Kolaskar & Tongaonkar 1990 are paywalled, and none of the three is on ExPASy ProtScale. Shipped: Parker (window 7) and Janin profiles. |
 | 46 (partial) | `transmembrane_features`: `TM_min_dGapp` | Hessa 2005 position-independent ΔG_app scale | Nature 2005 is paywalled. The other four columns are shipped. |
 
+
+</details>
+
 ## Shipped with caveats
 
 - **Factor scales (Phase 2).** `z_scales_5`, `vhse`, `t_scales`, `st_scales`, `fasgai`, `blosum_indices` and `ms_whim` were transcribed from van Westen et al. 2013 Additional file 2 (CC-BY), because the primary papers are paywalled. Seven cells differ from peptides.py and are flagged `UNRESOLVED` in `protpy/data/aa_scales.json`:
@@ -32,14 +63,14 @@ Each entry names the table that is missing and where it would have to come from.
 
   Check these against the primary tables before release.
 - **`distance_pair`.** The plan specified G + G²·(rng+1) outputs over distances 0..rng. Liu 2014 (Eqs. 5–12) defines d = 1..rng, giving G + G²·rng (602 for cp14, d = 3, as the paper states), and that is what is implemented. The paper's printed cp(14) lists E twice; the stray E in the first cluster is dropped, the only 14-cluster reading.
-- **`kappa`.** δ_max is found by enumerating the segregated arrangements (positive block, negative block, neutral residues split over the three gaps), as the plan specifies, because the Das & Pappu SI is behind a browser challenge. It reproduces the published κ of the patterned (Glu-Lys)25 variants sv1, sv2, sv7, sv8, sv19 and sv30 to within 0.002. The irregular variants could not be read reliably from the Fig. 1 image and are not tested.
-- **`isoelectric_point(pka_scale="emboss")`.** Uses EMBOSS 6.6.0 `Epk.dat`, whose N-terminal pKa differs from the 8.6 that Kozlowski 2016 Table 1 attributes to EMBOSS.
+- **`kappa`.** (v1.6.0: one `Kappa` column; single-sign sequences are scored like localCIDER, no charges give NaN; δ_max is scored in O(g) per arrangement and memoised.) δ_max is found by enumerating the segregated arrangements (positive block, negative block, neutral residues split over the three gaps), as the plan specifies, because the Das & Pappu SI is behind a browser challenge. It reproduces the published κ of the patterned (Glu-Lys)25 variants sv1, sv2, sv7, sv8, sv19 and sv30 to within 0.002. The irregular variants could not be read reliably from the Fig. 1 image and are not tested.
+- **`isoelectric_point(pka_scale="emboss")`.** (v1.6.0: the default is `"bjellqvist"`, verified against Biopython.) Uses EMBOSS 6.6.0 `Epk.dat`, whose N-terminal pKa differs from the 8.6 that Kozlowski 2016 Table 1 attributes to EMBOSS.
 - **`flexibility`.** Uses Vihinen's average parameter set (AAindex VINM940101, the same table Biopython uses) with the window-9, 0.25-edge weighting. The neighbour-dependent sets (VINM940102–104) need Vihinen's definition of a rigid neighbour, which is paywalled, so they are not used.
-- **`hydrophobic_moment(scale=None)`.** Keeps protpy's existing table, so the default output is unchanged. That table is the Eisenberg, Schwarz, Komarony & Wall 1984 J Mol Biol normalised consensus scale (A = 0.62; confirmed against ExPASy ProtScale). `scale="eisenberg"` is AAindex EISD840101 (Eisenberg 1984 Annu Rev Biochem, A = 0.25), a different published consensus scale.
+- **`hydrophobic_moment(scale=None)`.** (v1.6.0: the two tables are named `eisenberg_jmb1984` (default) and `eisenberg_arb1984`; `"eisenberg"` is a deprecated name for the latter.) Keeps protpy's existing table, so the default output is unchanged. That table is the Eisenberg, Schwarz, Komarony & Wall 1984 J Mol Biol normalised consensus scale (A = 0.62; confirmed against ExPASy ProtScale). `scale="eisenberg"` is AAindex EISD840101 (Eisenberg 1984 Annu Rev Biochem, A = 0.25), a different published consensus scale.
 - **`half_life`.** The E. coli value for an N-terminal Pro is "?" in ProtParam and is returned as NaN.
-- **`linguistic_complexity`.** The Troyanskaya 2002 full text is behind a Cloudflare check. The ratio-of-sums form in the plan is used: Σ distinct k-mers / Σ min(20^k, L−k+1). This is consistent with the abstract, which says the method counts "the number of subwords present" with suffix trees. Some sources use a product-of-ratios form instead.
-- **`wootton_federhen_complexity`.** Implements the SEG trigger stage only (K2 ≤ trigger windows), not SEG's extension threshold or interval optimisation, as the plan specifies.
-- **`aggrescan`.** The a3v values and the hot-spot rules (HST −0.02, ≥5 residues, no Pro, trapezoidal areas) come from the paper's Additional files 1–2. The rule that picks the window size from sequence length, and the charge-corrected values for the two terminal residues, aren't in the published material. So `window` is a parameter (default 5) and the terminal residues take the edge-window value. Aβ42 gives the paper's two hot spots.
-- **`fold_index`.** The default window of 51 comes from the plan; Prilusky 2005 and the FoldIndex server couldn't be accessed to confirm it. The 2.785 and 1.151 constants are confirmed via Das & Pappu 2013 (PMC).
+- **`linguistic_complexity`** (deprecated in v1.6.0). The Troyanskaya 2002 full text is behind a Cloudflare check. The ratio-of-sums form in the plan is used: Σ distinct k-mers / Σ min(20^k, L−k+1). This is consistent with the abstract, which says the method counts "the number of subwords present" with suffix trees. Some sources use a product-of-ratios form instead.
+- **`wootton_federhen_complexity`.** (v1.6.0: K1 dropped; the docstring no longer calls it SEG.) Implements the SEG trigger stage only (K2 ≤ trigger windows), not SEG's extension threshold or interval optimisation, as the plan specifies.
+- **`aggrescan`.** (v1.6.0: 5 length-normalised columns by default, `full=True` for all 12; `window="psico"` applies the server's length-based window rule — 5/7/9/11 for ≤75/≤175/≤300/>300 residues — which is reverse-engineered, not published.) The a3v values and the hot-spot rules (HST −0.02, ≥5 residues, no Pro, trapezoidal areas) come from the paper's Additional files 1–2. The rule that picks the window size from sequence length, and the charge-corrected values for the two terminal residues, aren't in the published material. So `window` is a parameter (default 5) and the terminal residues take the edge-window value. Aβ42 gives the paper's two hot spots.
+- **`fold_index`** (deprecated in v1.6.0; see `charge_hydropathy`). The default window of 51 comes from the plan; Prilusky 2005 and the FoldIndex server couldn't be accessed to confirm it. The 2.785 and 1.151 constants are confirmed via Das & Pappu 2013 (PMC).
 - **`plaac`.** Ported from the MIT-licensed PLAAC Java source. It reproduces PLAAC 1.1.0's MOT3 reference output exactly (LLR 40.751, COREscore 40.751, PRDlen 296).
 - **`atomic_composition`.** By default it matches Pfeature (no water removed); `subtract_water=True` gives the true peptide formula. Pfeature's W and Y formulas each have one H too many, and protpy uses the correct formulas.

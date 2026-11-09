@@ -60,7 +60,7 @@ class ProtpyCompositionExtendedTests(unittest.TestCase):
         #hand computation of the AC cell: one AC dipeptide, A has 4 codons, C has 2
         dc, tm = 1 / 9, (4 / 61) * (2 / 61)
         expected = (dc - tm) / math.sqrt(tm * (1 - tm) / 9)
-        self.assertAlmostEqual(df["DDE_AC"].iloc[0], round(expected, 3))
+        self.assertAlmostEqual(df["DDE_AC"].iloc[0], expected)
         #an absent dipeptide is negative
         self.assertLess(df["DDE_AA"].iloc[0], 0)
         with self.assertRaises(ValueError):
@@ -71,14 +71,14 @@ class ProtpyCompositionExtendedTests(unittest.TestCase):
         df = protpy.asdc("ACA")
         self.assertEqual(df.shape, (1, 400))
         for col in ("ASDC_AC", "ASDC_AA", "ASDC_CA"):
-            self.assertEqual(df[col].iloc[0], 33.333)
+            self.assertAlmostEqual(df[col].iloc[0], 33.333, 3)
         self.assertAlmostEqual(protpy.asdc(SEQ).values.sum(), 100, delta=0.05)
         #brute force on SEQ
         counts = {}
         for i, j in itertools.combinations(range(len(SEQ)), 2):
             counts[SEQ[i] + SEQ[j]] = counts.get(SEQ[i] + SEQ[j], 0) + 1
         total = len(SEQ) * (len(SEQ) - 1) / 2
-        self.assertEqual(protpy.asdc(SEQ)["ASDC_KV"].iloc[0], round(counts["KV"] / total * 100, 3))
+        self.assertAlmostEqual(protpy.asdc(SEQ)["ASDC_KV"].iloc[0], counts["KV"] / total * 100)
         self.assertEqual(protpy.asdc("A").values.sum(), 0)
         self._check_invalid(protpy.asdc)
 
@@ -97,29 +97,29 @@ class ProtpyCompositionExtendedTests(unittest.TestCase):
         self._check_invalid(protpy.distance_pair, rng=-1, alphabet="cp15")
 
     def test_reduced_alphabets_partition(self):
-        from protpy.composition import _named_alphabet
+        from protpy.composition import _alphabet
         for name in ("ifeature5", "cp13", "cp14", "cp19", "cp20"):
-            residues = "".join(g for _, g in _named_alphabet(name))
+            residues = "".join(g for _, g in _alphabet(name)[1])
             self.assertEqual(sorted(residues), AA, name)
-        self.assertEqual(len(_named_alphabet("cp14")), 14)
+        self.assertEqual(len(_alphabet("cp14")[1]), 14)
 
     def test_natural_vector(self):
         df = protpy.natural_vector("ACA")
         self.assertEqual(df.shape, (1, 60))
         #A at positions 1 and 3: n=2, mu=2, D2 = ((1-2)^2 + (3-2)^2) / (2*3)
         self.assertEqual(df["NV_n_A"].iloc[0], 2)
-        self.assertEqual(df["NV_mu_A"].iloc[0], 2.0)
-        self.assertEqual(df["NV_D2_A"].iloc[0], round(2 / 6, 3))
-        self.assertEqual(df["NV_mu_C"].iloc[0], 2.0)
-        self.assertEqual(df["NV_D2_C"].iloc[0], 0.0)
-        self.assertEqual(df["NV_mu_W"].iloc[0], 0.0)
+        self.assertAlmostEqual(df["NV_mu_A"].iloc[0], 2.0, 3)
+        self.assertAlmostEqual(df["NV_D2_A"].iloc[0], 2 / 6)
+        self.assertAlmostEqual(df["NV_mu_C"].iloc[0], 2.0, 3)
+        self.assertAlmostEqual(df["NV_D2_C"].iloc[0], 0.0, 3)
+        self.assertAlmostEqual(df["NV_mu_W"].iloc[0], 0.0, 3)
         self._check_invalid(protpy.natural_vector)
 
     def test_atomic_composition(self):
         df = protpy.atomic_composition("GG", subtract_water=True)
         self.assertEqual(list(df.columns), ["ATC_C", "ATC_H", "ATC_N", "ATC_O", "ATC_S"])
         #C4H8N2O3 -> 17 atoms
-        np.testing.assert_allclose(df.values[0], np.round(np.array([4, 8, 2, 3, 0]) / 17 * 100, 3))
+        np.testing.assert_allclose(df.values[0], np.array([4, 8, 2, 3, 0]) / 17 * 100)
         #default: free amino acids, no water removed (Pfeature convention): 2 x C2H5NO2
         np.testing.assert_allclose(protpy.atomic_composition("GG").values[0], [20, 50, 10, 20, 0])
         self.assertGreater(protpy.atomic_composition("MC")["ATC_S"].iloc[0], 0)
@@ -146,7 +146,7 @@ class ProtpyCompositionExtendedTests(unittest.TestCase):
 
     def test_ksctriad(self):
         self.assertEqual(protpy.conjoint_triad(SEQ).shape, (1, 343))
-        df = protpy.conjoint_triad("AAAAAAA", gap=1)
+        df = protpy.conjoint_triad("AAAAAAA", gap=1, normalize=False)
         self.assertEqual(df.shape, (1, 686))
         #gap 0: 5 contiguous triads; gap 1: (i, i+2, i+4) -> 3 triads
         self.assertEqual(df["conj_triad_111_gap0"].iloc[0], 5)

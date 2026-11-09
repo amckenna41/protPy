@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "protpy"
-version = "1.5.0"
+version = "1.6.0"
 description = "Python package for generating various biochemical, physicochemical and structural descriptors/features of protein sequences."
 readme = "README.md"
 license = { text = "MIT" }
@@ -54,7 +54,6 @@ dependencies = [
     "numpy>=2.0.0",
     "pandas>=2.0.2",
     "tqdm>=4.0.0",
-    "varname>=0.15.1",
 ]
 
 [project.optional-dependencies]

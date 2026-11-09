@@ -5,10 +5,9 @@
 from __future__ import annotations
 
 """
-Sequence-based structural and functional heuristics: aggregation hot spots
-(AGGRESCAN), charge-hydropathy disorder (Uversky, FoldIndex), disorder
-propensity, transmembrane and signal-peptide features, motif counts,
-prion-like domains (PLAAC), antigenicity profiles and cysteine features.
+Sequence-based structural descriptors: aggregation hot spots (AGGRESCAN),
+the charge-hydropathy score (Uversky, FoldIndex) and prion-like domains
+(PLAAC), plus the deprecated v1.5.0 heuristics.
 
 References
 ==========
@@ -66,13 +65,15 @@ import pandas as pd
 
 from ._constants import _validate_sequence, _validate_int
 from ._helpers import (_charge_vector, _load_json_table, _property_matrix, _profile_stats, _runs,
-                       _sliding_windows, _to_df)
-from .composition import kyte_doolittle_
+                       _sliding_windows, _to_df, _warn_deprecated)
+from .composition import kyte_doolittle_, motif_composition, prosite_motifs_
+from .physicochemical import hydrophobicity_profile
 
 __all__ = [
-    "aggrescan", "uversky_charge_hydropathy", "fold_index", "disorder_propensity",
-    "transmembrane_features", "signal_peptide_features", "functional_site_counts", "plaac",
-    "antigenicity_surface", "cysteine_features",
+    "aggrescan", "charge_hydropathy", "plaac",
+    #deprecated, removed in protpy 2.0
+    "uversky_charge_hydropathy", "fold_index", "disorder_propensity", "transmembrane_features",
+    "signal_peptide_features", "functional_site_counts", "antigenicity_surface", "cysteine_features",
 ]
 
 ################################### AGGRESCAN #############################################
@@ -83,7 +84,7 @@ _trapz = getattr(np, "trapezoid", None) or np.trapz
 #hot-spot threshold: SwissProt-frequency-weighted mean a3v [1]
 _AGGRESCAN_HST = -0.02
 
-def aggrescan(sequence: str, window: int = 5) -> pd.DataFrame:
+def aggrescan(sequence: str, window: int | str = 5, full: bool = False) -> pd.DataFrame:
     """
     Calculate AGGRESCAN (AGG) aggregation descriptors of protein sequence.
     AGGRESCAN predicts aggregation "hot spots", short stretches that promote
@@ -95,40 +96,50 @@ def aggrescan(sequence: str, window: int = 5) -> pd.DataFrame:
     hot-spot threshold (HST) of -0.02 and containing no proline. Areas are
     calculated by trapezoidal integration of the profile, with HST as the zero axis.
 
-    The 12 output values are: the mean a3v of the sequence (a3vSA); the number of
-    hot spots (nHS) and the number per 100 residues (NnHS); the area of the profile
-    above HST (AAT) and per residue (AATr); the total area of the hot spots (THSA)
-    and per residue (THSAr); the total area of the profile (TA); the sum of a4v
-    (a4vSS) and per 100 residues (Na4vSS); the mean a4v in the hot spots (a4vAHS,
-    0 if there are none); and the largest single hot-spot area (HSA_max).
+    By default the 5 length-normalised outputs are returned: the mean a3v of the
+    sequence (a3vSA), the number of hot spots per 100 residues (NnHS), the area of
+    the profile above HST per residue (AATr), the total hot-spot area per residue
+    (THSAr) and the mean a4v in the hot spots (a4vAHS, 0 if there are none). The
+    other AGGRESCAN outputs are length-scaled copies of these, and are returned
+    with ``full=True``: the number of hot spots (nHS), the area above HST (AAT),
+    the total hot-spot area (THSA), the total area of the profile (TA), the sum of
+    a4v (a4vSS) and per 100 residues (Na4vSS), and the largest single hot-spot area
+    (HSA_max).
 
-    AGGRESCAN chooses a window of 5, 7, 9 or 11 residues from the sequence length
-    and gives the two extreme residues specific values; neither rule is given in
-    the published supplementary material, so the window is a parameter and the
-    extreme residues are treated like the other off-centre residues.
+    The AGGRESCAN server chooses a window of 5, 7, 9 or 11 residues from the
+    sequence length (<= 75, <= 175, <= 300, > 300 residues). This rule is not in
+    the published supplementary material; it is given by later descriptions of
+    the server and the psico reimplementation, and is available as
+    ``window="psico"``. The documented default is 5. The server's specific values
+    for the two extreme residues are not published, so they are treated like the
+    other off-centre residues.
 
     Parameters
     ==========
     :sequence: str
         protein sequence.
-    :window: int (default=5)
-        odd sliding window length (AGGRESCAN uses 5, 7, 9 or 11); reduced to the
-        largest odd length that fits a short sequence.
+    :window: int | str (default=5)
+        odd sliding window length, or "psico" for the server's length-based rule
+        (5, 7, 9 or 11); reduced to the largest odd length that fits a short
+        sequence.
+    :full: bool (default=False)
+        return all 12 AGGRESCAN outputs instead of the 5 normalised ones.
 
     Returns
     =======
     :aggrescan_df: pd.DataFrame
         pandas dataframe of AGGRESCAN descriptors for protein sequence. Dataframe
-        will be of the shape 1 x 12, where 12 is the number of features calculated
-        from the descriptor and 1 is the input sequence. Column names start
-        with AGG, e.g. AGG_nHS and AGG_THSA.
+        will be of the shape 1 x 5 (1 x 12 with ``full``). Column names start
+        with AGG, e.g. AGG_NnHS and AGG_THSAr.
     """
     #validate input protein sequence
     sequence = _validate_sequence(sequence)
+    L = len(sequence)
+    if window == "psico":
+        window = 5 if L <= 75 else 7 if L <= 175 else 9 if L <= 300 else 11
     window = _validate_int("window", window, 1)
     if window % 2 == 0:
         raise ValueError(f"window must be odd, got {window}.")
-    L = len(sequence)
     window = min(window, L if L % 2 else L - 1)
 
     a3v = _property_matrix(sequence, _load_json_table("structural_params.json", "aggrescan_a3v")["values"])[:, 0]
@@ -149,6 +160,9 @@ def aggrescan(sequence: str, window: int = 5) -> pd.DataFrame:
               max(hsa) if hsa else 0.0]
     columns = ["AGG_a3vSA", "AGG_nHS", "AGG_NnHS", "AGG_AAT", "AGG_AATr", "AGG_THSA", "AGG_THSAr",
                "AGG_TA", "AGG_a4vSS", "AGG_Na4vSS", "AGG_a4vAHS", "AGG_HSA_max"]
+    if not full:
+        keep = [0, 2, 4, 6, 10]
+        values, columns = [values[i] for i in keep], [columns[i] for i in keep]
     return _to_df(values, columns)
 
 ######################### Uversky Charge-Hydropathy / FoldIndex ###########################
@@ -171,23 +185,91 @@ def _mean_hydropathy(sequence: str) -> float:
     return sum((kyte_doolittle_[aa] + 4.5) / 9 for aa in sequence) / len(sequence)
 
 
-def uversky_charge_hydropathy(sequence: str) -> pd.DataFrame:
+def _fold_index_profile(sequence: str, window: int) -> np.ndarray:
     """
-    Calculate the Uversky Charge-Hydropathy (UV) descriptors of protein sequence.
-    Uversky et al. showed that natively unfolded proteins can be separated from
-    folded proteins by their mean net charge and mean hydropathy [2]. These are
-    calculated as:
+    Calculate the FoldIndex charge-hydropathy score of each residue: the score
+    2.785 <H> - abs(<R>) - 1.151 of the window centred on it [3], where <H> is the
+    mean rescaled Kyte-Doolittle hydropathy and <R> the mean net charge of the
+    window. Residues too close to an end for a centred window take the score of
+    the first or last window, as in AGGRESCAN. A window longer than the sequence
+    is reduced to the sequence length.
 
-    <H> = mean of (KD + 4.5) / 9
+    Parameters
+    ==========
+    :sequence: str
+        validated protein sequence.
+    :window: int
+        window length.
 
-    <R> = abs(n+ - n-) / L
+    Returns
+    =======
+    :scores: np.ndarray
+        score of each residue.
+    """
+    window = min(window, len(sequence))
+    h = _sliding_windows([(kyte_doolittle_[aa] + 4.5) / 9 for aa in sequence], window)
+    r = np.abs(_sliding_windows(_charge_vector(sequence), window))
+    fi = 2.785 * h - r - 1.151
+    left = (window - 1) // 2
+    return np.concatenate([np.full(left, fi[0]), fi, np.full(window - 1 - left, fi[-1])])
+
+
+def charge_hydropathy(sequence: str, window: int | None = None) -> pd.DataFrame:
+    """
+    Calculate the Charge-Hydropathy (CH) score of protein sequence. Uversky et al.
+    showed that natively unfolded proteins can be separated from folded proteins
+    by their mean net charge and mean hydropathy [2], with the boundary
+    <R> = 2.785 <H> - 1.151 (as restated in [15]). The score is the distance from
+    that boundary:
 
     HQ = 2.785 <H> - <R> - 1.151
 
-    where KD is the Kyte-Doolittle hydropathy of each residue, n+ and n- are the
-    numbers of positive (K, R) and negative (D, E) residues and L is the length
-    of the sequence. HQ is the distance from the boundary <R> = 2.785 <H> - 1.151
-    (as restated in [15]); the protein is predicted to be unfolded when HQ < 0.
+    <H> = mean of (KD + 4.5) / 9,  <R> = abs(n+ - n-) / n
+
+    where KD is the Kyte-Doolittle hydropathy, n+ and n- the numbers of positive
+    (K, R) and negative (D, E) residues and n the number of residues considered.
+    Negative scores are on the unfolded side of the boundary.
+
+    With window=None the score of the whole sequence is returned (the Uversky
+    plot). With a window, the score of the window centred on each residue is
+    calculated, as in FoldIndex (window=51) [3], and the profile is summarised by
+    its mean, maximum, minimum and standard deviation. This reports the score, not
+    a disorder prediction: the FoldIndex window and its residue assignment could
+    not be checked against [3].
+
+    Parameters
+    ==========
+    :sequence: str
+        protein sequence.
+    :window: int | None (default=None)
+        window length; None scores the whole sequence.
+
+    Returns
+    =======
+    :ch_df: pd.DataFrame
+        pandas dataframe of shape 1 x 1 (column CH_HQ) for window=None, or 1 x 4
+        (columns CH_w<window>_mean, _max, _min, _std) with a window.
+    """
+    #validate input protein sequence
+    sequence = _validate_sequence(sequence)
+    if window is None:
+        hq = 2.785 * _mean_hydropathy(sequence) - abs(_charge_vector(sequence).mean()) - 1.151
+        return _to_df([hq], ["CH_HQ"])
+    window = _validate_int("window", window, 1)
+    stats = _profile_stats(_fold_index_profile(sequence, window), f"CH_w{window}")
+    return _to_df(list(stats.values()), list(stats))
+
+
+def uversky_charge_hydropathy(sequence: str) -> pd.DataFrame:
+    """
+    Calculate the Uversky Charge-Hydropathy (UV) descriptors of protein sequence:
+    the mean rescaled hydropathy <H>, the absolute mean net charge <R>, the
+    distance HQ from the Uversky boundary and whether HQ < 0 [2] (see
+    charge_hydropathy).
+
+    Deprecated since v1.6.0, removed in 2.0: use ``charge_hydropathy(sequence)``
+    (column CH_HQ). UV_MeanH is (GRAVY + 4.5) / 9 and UV_MeanR is the absolute
+    NCPR of ``charge_fractions``.
 
     Parameters
     ==========
@@ -197,11 +279,10 @@ def uversky_charge_hydropathy(sequence: str) -> pd.DataFrame:
     Returns
     =======
     :uversky_df: pd.DataFrame
-        pandas dataframe of charge-hydropathy descriptors for protein sequence.
-        Dataframe will be of the shape 1 x 4, with the columns UV_MeanH, UV_MeanR,
+        pandas dataframe of shape 1 x 4, with the columns UV_MeanH, UV_MeanR,
         UV_HQ and UV_Unfolded (1 if predicted unfolded, else 0).
     """
-    #validate input protein sequence
+    _warn_deprecated("uversky_charge_hydropathy", "charge_hydropathy(sequence)")
     sequence = _validate_sequence(sequence)
     h = _mean_hydropathy(sequence)
     r = abs(_charge_vector(sequence).mean())
@@ -211,17 +292,15 @@ def uversky_charge_hydropathy(sequence: str) -> pd.DataFrame:
 
 def fold_index(sequence: str, window: int = 51) -> pd.DataFrame:
     """
-    Calculate the FoldIndex (FI) of protein sequence. FoldIndex applies the
-    Uversky charge-hydropathy boundary over a sliding window to find disordered
-    regions of a protein sequence [3]. For each window it is calculated as:
+    Calculate the FoldIndex (FI) of protein sequence: the charge-hydropathy score
+    of the window centred on each residue [3] (see charge_hydropathy), summarised
+    by its mean and minimum, the fraction of residues with a negative score and
+    the longest run of such residues.
 
-    FI = 2.785 <H> - abs(<R>) - 1.151
-
-    where <H> is the mean Kyte-Doolittle hydropathy of the window rescaled to 0-1
-    and <R> is the mean net charge of the window (K, R positive; D, E negative).
-    Residues covered by at least one window with FI < 0 are counted as disordered.
-    A window longer than the sequence uses the whole sequence, so FI then equals
-    UV_HQ from uversky_charge_hydropathy.
+    Deprecated since v1.6.0, removed in 2.0: use
+    ``charge_hydropathy(sequence, window=51)``. Since v1.6.0 each window's score is
+    assigned to its centre residue; before, every residue of a negative window
+    was counted as disordered, which inflated the disordered fraction 2.6-7 times.
 
     Parameters
     ==========
@@ -233,22 +312,14 @@ def fold_index(sequence: str, window: int = 51) -> pd.DataFrame:
     Returns
     =======
     :fold_index_df: pd.DataFrame
-        pandas dataframe of FoldIndex descriptors for protein sequence. Dataframe
-        will be of the shape 1 x 4, with the columns FI_mean, FI_min,
+        pandas dataframe of shape 1 x 4, with the columns FI_mean, FI_min,
         FI_frac_disordered and FI_longest_disordered (in residues).
     """
-    #validate input protein sequence
+    _warn_deprecated("fold_index", "charge_hydropathy(sequence, window=51)")
     sequence = _validate_sequence(sequence)
-    window = min(_validate_int("window", window, 1), len(sequence))
-
-    h = _sliding_windows([(kyte_doolittle_[aa] + 4.5) / 9 for aa in sequence], window)
-    r = np.abs(_sliding_windows(_charge_vector(sequence), window))
-    fi = 2.785 * h - r - 1.151
-    disordered = np.zeros(len(sequence), dtype=bool)
-    for start in np.flatnonzero(fi < 0):
-        disordered[start:start + window] = True
-    runs = _runs(disordered)
-    longest = max((e - s for s, e in runs), default=0)
+    fi = _fold_index_profile(sequence, _validate_int("window", window, 1))
+    disordered = fi < 0
+    longest = max((e - s for s, e in _runs(disordered)), default=0)
     return _to_df([fi.mean(), fi.min(), disordered.mean(), longest],
                   ["FI_mean", "FI_min", "FI_frac_disordered", "FI_longest_disordered"])
 
@@ -269,6 +340,11 @@ def disorder_propensity(sequence: str) -> pd.DataFrame:
     is the length of the sequence. Higher values indicate a higher propensity for
     disorder.
 
+    Deprecated since v1.6.0, removed in 2.0: all three values are fixed linear
+    maps of the amino acid composition and do not predict disorder. TOP-IDP is
+    available as a scale: ``gravy(sequence, scale="top_idp")`` or
+    ``hydrophobicity_profile(sequence, scale="top_idp")``.
+
     Parameters
     ==========
     :sequence: str
@@ -281,10 +357,11 @@ def disorder_propensity(sequence: str) -> pd.DataFrame:
         Dataframe will be of the shape 1 x 3, with the columns
         DP_frac_disorder_promoting, DP_frac_order_promoting and DP_TOP_IDP_mean.
     """
+    _warn_deprecated("disorder_propensity", 'hydrophobicity_profile(sequence, scale="top_idp")')
     #validate input protein sequence
     sequence = _validate_sequence(sequence)
     classes = _load_json_table("structural_params.json", "disorder_residue_classes")["values"]
-    top_idp = _load_json_table("structural_params.json", "top_idp")["values"]
+    top_idp = _load_json_table("aa_scales.json", "top_idp")["values"]
     L = len(sequence)
     return _to_df([sum(aa in classes["disorder_promoting"] for aa in sequence) / L,
                    sum(aa in classes["order_promoting"] for aa in sequence) / L,
@@ -307,6 +384,9 @@ def transmembrane_features(sequence: str, window: int = 19, kd_threshold: float 
     after it (0 if there is no segment). This is a hydropathy heuristic and not a
     topology predictor.
 
+    Deprecated since v1.6.0, removed in 2.0: use
+    ``hydrophobicity_profile(sequence, window=19, threshold=1.6, segments=True)``.
+
     Parameters
     ==========
     :sequence: str
@@ -323,20 +403,10 @@ def transmembrane_features(sequence: str, window: int = 19, kd_threshold: float 
         will be of the shape 1 x 4, with the columns TM_n_segments, TM_max_KD,
         TM_frac_in_TM and TM_positive_inside_bias.
     """
-    #validate input protein sequence
-    sequence = _validate_sequence(sequence)
-    window = min(_validate_int("window", window, 1), len(sequence))
-
-    profile = _sliding_windows([kyte_doolittle_[aa] for aa in sequence], window)
-    in_tm = np.zeros(len(sequence), dtype=bool)
-    for start in np.flatnonzero(profile > kd_threshold):
-        in_tm[start:start + window] = True
-    segments = _runs(in_tm)
-    bias = 0
-    if segments:
-        s, e = segments[0]
-        bias = sum(aa in "KR" for aa in sequence[max(0, s - 15):s]) - sum(aa in "KR" for aa in sequence[e:e + 15])
-    return _to_df([len(segments), profile.max(), in_tm.mean(), bias],
+    _warn_deprecated("transmembrane_features",
+                     "hydrophobicity_profile(sequence, window=19, threshold=1.6, segments=True)")
+    df = hydrophobicity_profile(sequence, window=window, threshold=kd_threshold, segments=True)
+    return _to_df([df.iloc[0, 5], df.iloc[0, 1], df.iloc[0, 6], df.iloc[0, 7]],
                   ["TM_n_segments", "TM_max_KD", "TM_frac_in_TM", "TM_positive_inside_bias"])
 
 ############################## Signal Peptide Features ####################################
@@ -349,6 +419,10 @@ def signal_peptide_features(sequence: str, n_term: int = 30) -> pd.DataFrame:
     (K and R +1, D and E -1); and the maximum mean Kyte-Doolittle hydropathy over
     8-residue windows within the first n_term residues. The von Heijne
     cleavage-site weight matrix is not included.
+
+    Deprecated since v1.6.0, removed in 2.0: two crude N-terminal features without
+    a cleavage-site model are not a signal peptide predictor (and are confused by
+    N-terminal transmembrane segments).
 
     Parameters
     ==========
@@ -364,6 +438,7 @@ def signal_peptide_features(sequence: str, n_term: int = 30) -> pd.DataFrame:
         Dataframe will be of the shape 1 x 2, with the columns SP_nregion_charge
         and SP_hregion_maxKD.
     """
+    _warn_deprecated("signal_peptide_features")
     #validate input protein sequence
     sequence = _validate_sequence(sequence)
     n_term = _validate_int("n_term", n_term, 1)
@@ -375,14 +450,6 @@ def signal_peptide_features(sequence: str, n_term: int = 30) -> pd.DataFrame:
 
 ############################## Functional Site Counts #####################################
 
-#PROSITE patterns [9] and the trypsin rule [10]; lookaheads count overlapping matches
-functional_motifs_ = {
-    "N_glycosylation": r"(?=N[^P][ST][^P])",   #PS00001 N-{P}-[ST]-{P}
-    "ER_retention": r"[KRHQSA][DENQ]EL$",      #PS00014 [KRHQSA]-[DENQ]-E-L>
-    "PTS1": r"[STAGCN][RKH][LIVMAFY]$",        #PS00342 [STAGCN]-[RKH]-[LIVMAFY]>
-    "tryptic_site": r"[KR](?!P)",              #trypsin: after K/R, not before P
-}
-
 def functional_site_counts(sequence: str) -> pd.DataFrame:
     """
     Calculate Functional Site (FS) counts of protein sequence. The number of each
@@ -391,8 +458,13 @@ def functional_site_counts(sequence: str) -> pd.DataFrame:
     endoplasmic reticulum retention signal (PS00014, [KRHQSA]-[DENQ]-E-L at the
     C-terminus), the C-terminal peroxisomal targeting signal 1 (PS00342,
     [STAGCN]-[RKH]-[LIVMAFY] at the C-terminus) [9] and tryptic cleavage sites
-    (after K or R, not before P) [10]. Overlapping matches are counted. These motifs
-    complement the default motifs of motif_composition.
+    (after K or R, not before P or at the C-terminus) [10]. Overlapping matches
+    are counted.
+
+    Deprecated since v1.6.0, removed in 2.0: the four motifs are part of the
+    motif_composition library; use
+    ``motif_composition(sequence, motifs=["N_glycosylation", "ER_retention", "PTS1", "tryptic_site"], per_100=True)``.
+    Since v1.6.0 a C-terminal K or R is not counted as a tryptic site.
 
     Parameters
     ==========
@@ -407,12 +479,10 @@ def functional_site_counts(sequence: str) -> pd.DataFrame:
         from the descriptor (4 counts and 4 densities) and 1 is the input sequence.
         Column names are FS_<motif> and FS_<motif>_per100, e.g. FS_N_glycosylation.
     """
-    #validate input protein sequence
-    sequence = _validate_sequence(sequence)
-    counts = {name: len(re.findall(pattern, sequence)) for name, pattern in functional_motifs_.items()}
-    values = list(counts.values()) + [c / len(sequence) * 100 for c in counts.values()]
-    columns = [f"FS_{n}" for n in counts] + [f"FS_{n}_per100" for n in counts]
-    return _to_df(values, columns)
+    _warn_deprecated("functional_site_counts", "motif_composition(sequence, motifs=[...], per_100=True)")
+    df = motif_composition(sequence, motifs=list(prosite_motifs_), per_100=True)
+    df.columns = [f"FS_{c}" for c in df.columns]
+    return df
 
 ###################################### PLAAC ##############################################
 
@@ -522,7 +592,7 @@ def _max_window_sum(values: np.ndarray, width: int) -> float:
     return float((csum[width:] - csum[:-width]).max())
 
 
-def plaac(sequence: str, core_length: int = 60) -> pd.DataFrame:
+def plaac(sequence: str, core_length: int = 60, fill_value: float = np.nan) -> pd.DataFrame:
     """
     Calculate the Prion-Like Amino Acid Composition (PLAAC) descriptors of protein
     sequence. PLAAC identifies prion-like domains, whose composition resembles
@@ -548,6 +618,10 @@ def plaac(sequence: str, core_length: int = 60) -> pd.DataFrame:
         protein sequence.
     :core_length: int (default=60)
         minimum length of a prion-like domain core.
+    :fill_value: float (default=nan)
+        value of PLAAC_LLR and PLAAC_COREscore where they are undefined (NaN, as
+        in PLAAC; COREscore is undefined for most proteins, so pass e.g. 0.0 for
+        machine learning).
 
     Returns
     =======
@@ -569,6 +643,7 @@ def plaac(sequence: str, core_length: int = 60) -> pd.DataFrame:
         score = _max_window_sum(llr[s:e], core_length)
         if np.isnan(core) or score > core:
             core, prd_length = score, e - s
+    window_llr, core = [fill_value if np.isnan(v) else v for v in (window_llr, core)]
     return _to_df([window_llr, core, prd_length, int(prd_length > 0)],
                   ["PLAAC_LLR", "PLAAC_COREscore", "PLAAC_PrD_length", "PLAAC_has_PrD"])
 
@@ -585,6 +660,11 @@ def antigenicity_surface(sequence: str, window: int = 7) -> pd.DataFrame:
     residues, as used by Parker et al., and the profile is summarised by its mean,
     maximum, minimum and standard deviation.
 
+    Deprecated since v1.6.0, removed in 2.0: the values are exactly
+    ``hydrophobicity_profile(sequence, scale="parker", window=7)`` and
+    ``hydrophobicity_profile(sequence, scale="janin", window=7)``, and single-scale
+    profiles are close to random as epitope predictors.
+
     Parameters
     ==========
     :sequence: str
@@ -599,6 +679,7 @@ def antigenicity_surface(sequence: str, window: int = 7) -> pd.DataFrame:
         sequence. Dataframe will be of the shape 1 x 8, with the columns
         PARKER_mean, PARKER_max, PARKER_min, PARKER_std and the same for JANIN.
     """
+    _warn_deprecated("antigenicity_surface", 'hydrophobicity_profile(sequence, scale="parker", window=7)')
     #validate input protein sequence
     sequence = _validate_sequence(sequence)
     window = _validate_int("window", window, 1)
@@ -619,6 +700,10 @@ def cysteine_features(sequence: str) -> pd.DataFrame:
     (the number of cysteines // 2); the number of overlapping C-x-x-C motifs; and
     the mean gap between consecutive cysteines (0 if there are fewer than 2).
 
+    Deprecated since v1.6.0, removed in 2.0: the count and fraction are the C
+    column of the amino acid composition, CxxC is a motif of motif_composition and
+    the mean spacing is (last - first) / (n - 1).
+
     Parameters
     ==========
     :sequence: str
@@ -631,6 +716,7 @@ def cysteine_features(sequence: str) -> pd.DataFrame:
         be of the shape 1 x 6, with the columns Cys_count, Cys_frac, Cys_even,
         Cys_max_disulfides, Cys_CxxC and Cys_mean_spacing.
     """
+    _warn_deprecated("cysteine_features", 'amino_acid_composition and motif_composition(motifs=["CxxC_zinc_finger"])')
     #validate input protein sequence
     sequence = _validate_sequence(sequence)
     positions = [i for i, aa in enumerate(sequence) if aa == "C"]
